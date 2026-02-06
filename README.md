@@ -1,6 +1,6 @@
 # 🤖 GitHub Copilot Agents Library
 
-A curated collection of specialized GitHub Copilot Chat agents designed to accelerate your development workflow. These agents provide expert-level assistance for specific domains like DevOps, CI/CD, and code quality automation.
+A curated collection of specialized agents designed to accelerate your development workflow. These agents provide expert-level assistance for specific domains like DevOps, CI/CD, and code quality automation.
 
 ## 📚 Available Agents
 
@@ -54,14 +54,14 @@ To add these agents to your own project:
 
 1. **Create the agent directory in your project:**
    ```bash
-   mkdir -p .github/copilot-agents
+   mkdir -p .github/agents
    ```
 
 2. **Copy the agent file(s) you need:**
    ```bash
    # Copy SonarArchitect agent
-   cp path/to/SonarQubeAgentLibrary/.github/copilot-agents/sonarqube-helper.agent.md \
-      .github/copilot-agents/
+   cp path/to/SonarQubeAgentLibrary/.github/agents/sonarqube-helper.agent.md \
+      .github/agents/
    ```
 
 3. **Commit to your repository:**
