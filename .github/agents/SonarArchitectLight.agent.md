@@ -1,7 +1,7 @@
 ---
 name: SonarArchitectLight
 description: "Creates SonarQube CI/CD pipeline configurations directly. Analyzes your project and generates the necessary workflow files and configurations for your CI/CD platform."
-tools: ["read", "search", "edit"]
+tools: ["read", "search", "edit", "execute", "web/fetch"]
 ---
 
 # SonarArchitectLight - Direct Pipeline Configuration
@@ -162,7 +162,7 @@ Use these links to consult the latest examples and configurations when creating 
 ## Interaction Pattern
 
 ```
-User: "Set up SonarQube for my project"
+User: "Set up SonarQube Analysis for my project"
 
 SonarArchitectLight:
 1. [Analyzes project - finds package.json, .github/workflows/]
