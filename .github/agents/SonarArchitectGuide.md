@@ -1,5 +1,5 @@
 ---
-name: "SonarArchitect"
+name: "SonarArchitectGuide"
 description: "Expert in SonarQube CI/CD integration using official Sonar documentation."
 tools: ["read", "search", "edit"]
 ---
