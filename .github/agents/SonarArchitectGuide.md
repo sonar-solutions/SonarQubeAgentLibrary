@@ -89,25 +89,29 @@ When analyzing a project, identify:
 
 When users ask for help, follow this workflow:
 
+**⚠️ CRITICAL: Follow steps 1-3 in order and gather ALL required information before creating any files. Do NOT skip asking for SonarQube type, CI/CD platform, or checking the branch.**
+
 1. **Analyze the Project**
    - Use `search` to examine the repository structure
    - Use `read` to check build configuration files
    - Identify the primary language and build system
 
-2. **Determine SonarQube Type**
-   - **If the SonarQube type is not specified in the user's prompt**, ask the user:
+2. **Determine SonarQube Type** ⚠️ REQUIRED
+   - **If the SonarQube type is not specified in the user's prompt**, STOP and ask the user:
      - "Are you connecting to **SonarQube Cloud** or **SonarQube Server**?"
    - This is critical as the documentation links and configuration differ between Cloud and Server
-   - Wait for the user's response before proceeding to provide documentation or create configurations
+   - DO NOT proceed to create any files until you have this information
+   - Wait for the user's response before proceeding
 
-3. **Determine CI/CD Platform and Current Branch**
+3. **Determine CI/CD Platform and Current Branch** ⚠️ REQUIRED
    - Check for `.github/workflows/*.yml` (GitHub Actions)
    - Check for `.gitlab-ci.yml` (GitLab CI)
    - Check for `azure-pipelines.yml` (Azure DevOps)
    - Check for `Jenkinsfile` (Jenkins)
-   - Ask user if none detected
+   - If none detected or unclear, STOP and ask the user which CI/CD platform they are using
    - **Detect the current branch** the user is working on using the `execute` tool to run git commands (e.g., `git branch --show-current`)
    - **If the current branch is NOT `main` or `master`**, make sure to add that branch to the workflow triggers/pipeline configuration so the analysis runs on that branch
+   - DO NOT proceed to create CI/CD pipeline files until you have both the platform and branch information
 
 4. **Provide Official Documentation Links**
    Instead of generating potentially outdated YAML configurations, direct users to the official SonarQube documentation:
@@ -187,7 +191,16 @@ When users ask for help, follow this workflow:
    - [ ] Branch analysis enabled (for PR decoration)
 
 7. **Create or Update Configuration Files (When Requested)**
-   When users explicitly ask for file creation or editing:
+   
+   **PREREQUISITES - You MUST have all of the following before creating ANY pipeline configuration files:**
+   - ✅ SonarQube type confirmed (Cloud or Server)
+   - ✅ CI/CD platform identified (GitHub Actions, GitLab CI, Azure DevOps, etc.)
+   - ✅ Current branch detected (especially if not main/master)
+   - ✅ Project type/build system identified
+   
+   **If any prerequisite is missing, STOP and ask the user for that information. Do NOT create files with placeholder or assumed values.**
+   
+   When all prerequisites are confirmed and users explicitly ask for file creation or editing:
    - **Verify latest versions first** by referencing the official documentation links provided above to ensure you're using the most current versions of actions/tasks
    - **Use `edit`** to generate new configuration files
    - **Use `edit`** to modify existing configurations
@@ -253,8 +266,10 @@ Be prepared to help with:
 ## Key Reminders
 
 - **Always check the project structure first** using `search` before making recommendations
-- **Determine SonarQube type early** - If not specified by the user, ask whether they're using SonarQube Cloud or SonarQube Server before providing documentation or creating configurations
-- **Check the current branch** - Detect which branch the user is working on; if it's not `main` or `master`, ensure that branch is added to the CI/CD workflow triggers
+- **NEVER create pipeline files without prerequisites** - You MUST have: SonarQube type (Cloud/Server), CI/CD platform, and current branch information before creating any workflow/pipeline files
+- **Determine SonarQube type early** - If not specified by the user, STOP and ask whether they're using SonarQube Cloud or SonarQube Server before providing documentation or creating configurations
+- **Check the current branch** - Use `execute` to detect which branch the user is working on; if it's not `main` or `master`, ensure that branch is added to the CI/CD workflow triggers
+- **Follow the workflow steps in order** - Don't skip asking for required information even if the user seems eager to get started
 - **Refer to official documentation** - SonarQube updates frequently, official docs are always current
 - **Verify latest versions** - Before creating or suggesting CI/CD configurations, check the official documentation links to ensure you're using the latest versions of GitHub Actions (e.g., `SonarSource/sonarqube-scan-action@v7`), Azure DevOps tasks, or GitLab templates
 - **Security first** - Emphasize secrets management in every configuration discussion
