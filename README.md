@@ -15,7 +15,7 @@ A curated collection of specialized GitHub Copilot Chat agents designed to accel
 - Implementing secure credential management
 - Code quality best practices
 
-**Location:** `.github/copilot-agents/sonarqube-helper.agent.md`
+**Location:** `.github/agents/sonarqube-helper.agent.md`
 
 **Quick Start:**
 ```
@@ -66,7 +66,7 @@ To add these agents to your own project:
 
 3. **Commit to your repository:**
    ```bash
-   git add .github/copilot-agents/
+   git add .github/agents/
    git commit -m "Add GitHub Copilot agents"
    git push
    ```
