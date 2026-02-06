@@ -1,7 +1,5 @@
 ---
 name: SonarArchitectLight
-description: Describe what this custom agent does and when to use it.
-argument-hint: The inputs this agent expects, e.g., "a task to implement" or "a question to answer".
-# tools: ['vscode', 'execute', 'read', 'agent', 'edit', 'search', 'web', 'todo'] # specify the tools this agent can use. If not set, all enabled tools are allowed.
+description: "Expert in SonarQube CI/CD integration using official Sonar documentation and will create/update your SonarQube pipeline configuration files based on your specific requirements."
+tools: ["read", "search", "edit"]
 ---
-Define what this custom agent does, including its behavior, capabilities, and any specific instructions for its operation.
