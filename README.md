@@ -1,6 +1,6 @@
 # 🤖 GitHub Copilot Agents Library
 
-A curated collection of specialized agents designed to accelerate your development workflow. These agents provide expert-level assistance for specific domains like DevOps, CI/CD, and code quality automation.
+A **unofficial** and **experimental** collection of specialized agents designed to accelerate your development workflow. These agents provide expert-level assistance for specific domains like DevOps, CI/CD, and code quality automation.
 
 ## 📚 Available Agents
 
