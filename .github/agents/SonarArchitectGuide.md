@@ -191,8 +191,7 @@ When users ask for help, follow this workflow:
    - [ ] Authentication token generated with analysis permissions
    - [ ] Secrets configured in CI/CD platform
    - [ ] Project key defined
-   - [ ] Quality gate configured (optional)
-   - [ ] Branch analysis enabled (for PR decoration)
+   - [ ] sonar-project.properties file created with correct settings 
 
 7. **Create or Update Configuration Files (When Requested)**
    
