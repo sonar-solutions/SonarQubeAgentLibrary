@@ -87,25 +87,61 @@ Before creating pipeline configuration files:
 - Configure sonarqube block with properties
 - No need for separate sonar-project.properties
 
+### Scanner Selection Rules
+
+**By Build System/Project Type:**
+
+1. **Maven Projects**
+   - Use Maven SonarQube plugin
+   - Run `mvn sonar:sonar` command
+   - Configuration in `pom.xml` or command line parameters
+   - No separate `sonar-project.properties` needed
+   - See: scanner-maven skill
+
+2. **Gradle Projects**
+   - Use Gradle SonarQube plugin
+   - Run `./gradlew sonar` command
+   - Configuration in `build.gradle` or `build.gradle.kts`
+   - No separate `sonar-project.properties` needed
+   - See: scanner-gradle skill
+
+3. **.NET Projects**
+   - Use SonarScanner for .NET
+   - Run begin/build/end pattern
+   - Configuration via command line parameters
+   - See: scanner-dotnet skill
+
+4. **CLI Scanner Projects** (JavaScript/TypeScript/Python/PHP/Go/Ruby/Other)
+   - Use SonarScanner CLI
+   - Requires `sonar-project.properties` file
+   - Platform-specific execution:
+     - GitHub Actions: Use `sonarsource/sonarqube-scan-action`
+     - GitLab CI: Use `sonarsource/sonar-scanner-cli` Docker image
+     - Azure DevOps: Use SonarQube extension tasks
+     - Bitbucket: Use SonarCloud/SonarQube pipes
+   - See: scanner-cli skill
+
+**Platform Implementation Details:**
+- Each platform has specific ways to execute scanners
+- Maven/Gradle/.NET: Run build tool commands directly in pipeline
+- CLI Scanner: Use platform-specific actions/images/tasks/pipes
+- See platform-specific skills for implementation
+
 ### Configuration Best Practices
 
 **Always:**
 - Add comments explaining configuration options
-- Use environment variables/secrets for sensitive values
+- Use environment variables/secrets for sensitive values (see: security-practices skill)
 - Never hardcode tokens or URLs
 - Preserve existing file structure when editing
 - Include current branch in triggers if not main/master
+- Fetch full git history for accurate blame information
 - Validate YAML/properties syntax after creation
-
-**Scanner Selection:**
-- Maven project → Use Maven plugin
-- Gradle project → Use Gradle plugin
-- JavaScript/TypeScript/Python/Other → Use SonarScanner CLI
 
 **Coverage Configuration:**
 - JavaScript/TypeScript: Include `sonar.javascript.lcov.reportPaths`
 - Python: Include `sonar.python.coverage.reportPaths`
-- Java: Coverage handled by Maven/Gradle plugins
+- Java: Coverage handled by Maven/Gradle plugins automatically
 
 ### Editing Workflow
 

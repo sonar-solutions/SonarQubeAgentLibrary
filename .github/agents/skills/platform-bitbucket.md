@@ -19,36 +19,39 @@ This skill provides Bitbucket Pipelines-specific documentation and guidance for 
 - **Scan Pipe Repository**: https://bitbucket.org/sonarsource/sonarqube-scan/src/master/
 - **Quality Gate Pipe**: https://bitbucket.org/sonarsource/sonarqube-quality-gate/src/master/
 
-## Scanner Selection by Language
+## Bitbucket Pipelines Implementation
 
-**Use `web/fetch` to get current examples from official documentation and pipe repositories.**
+**Use `web/fetch` to get current examples and versions from official documentation and pipe repositories.**
+
+### Scanner Implementation
+
+**Scanner selection is defined in pipeline-creation skill. This section covers Bitbucket-specific implementation.**
 
 ### When to Use SonarQube Pipes
 
-**ONLY use SonarQube/SonarCloud pipes for CLI scanner projects:**
-- **JavaScript/TypeScript**: Projects without Maven/Gradle/.NET
-- **Python**: Projects without Maven/Gradle/.NET
-- **PHP, Go, Ruby, etc.**: Projects using CLI scanner
+Use official SonarCloud/SonarQube pipes for **CLI scanner projects only**:
+- JavaScript/TypeScript/Python/PHP/Go/Ruby (without Maven/Gradle/.NET)
+- Projects that require `sonar-project.properties`
 - **Pipes available**:
   - SonarQube Cloud: `sonarsource/sonarcloud-scan` and `sonarsource/sonarcloud-quality-gate`
   - SonarQube Server: `sonarsource/sonarqube-scan` and `sonarsource/sonarqube-quality-gate`
 - See: scanner-cli skill
 
-**DO NOT use pipes for Maven/Gradle/.NET projects:**
-- These use their own build tools to run analysis
-- Pipes are not needed and should not be used
+**Example:**
+```yaml
+- pipe: sonarsource/sonarcloud-scan:1.0.0
+  variables:
+    SONAR_TOKEN: $SONAR_TOKEN
+```
 
-### Scanner-Specific Setup
+### Build Tool Integration
 
-**Build Tool Projects (run commands directly):**
-- **Java (Maven)**: Use Maven within Bitbucket step with `mvn sonar:sonar`. See: scanner-maven skill
-- **Java (Gradle)**: Use Gradle within Bitbucket step with `./gradlew sonar`. See: scanner-gradle skill
-- **.NET**: Use dotnet-sonarscanner within Bitbucket step. See: scanner-dotnet skill
+**For Maven/Gradle/.NET projects, run scanner commands directly in Bitbucket steps:**
+- **Maven**: Run `mvn sonar:sonar` in step (see: scanner-maven skill)
+- **Gradle**: Run `./gradlew sonar` in step (see: scanner-gradle skill)
+- **.NET**: Run `dotnet sonarscanner begin/build/end` in step (see: scanner-dotnet skill)
 
-**CLI Scanner Projects (use pipes):**
-- **JavaScript/TypeScript/Python/Other**: Use official SonarCloud/SonarQube pipes. See: scanner-cli skill
-
-**Check pipe repositories above for latest versions.**
+Check pipe repositories for latest versions.
 
 ## Platform-Specific Configuration
 

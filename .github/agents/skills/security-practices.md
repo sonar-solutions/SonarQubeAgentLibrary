@@ -29,61 +29,16 @@ This skill defines security requirements and best practices for SonarQube integr
 
 ## Platform-Specific Secret Management
 
-### GitHub Actions
+**Each CI/CD platform has its own syntax for referencing secrets/variables:**
+- Use the appropriate platform-specific syntax (see platform skills for details)
+- All platforms support environment variable injection
+- Platform files contain specific syntax examples and configuration locations
 
-**Secret Reference Syntax:**
-```yaml
-env:
-  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-  SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-```
-
-**Always remind users:**
-- Secrets are configured in: Settings → Secrets and variables → Actions
-- Repository secrets vs Organization secrets
-- Secrets are not visible in logs
-
-### GitLab CI
-
-**Variable Reference Syntax:**
-```yaml
-variables:
-  SONAR_TOKEN: $SONAR_TOKEN
-  SONAR_HOST_URL: $SONAR_HOST_URL
-```
-
-**Always remind users:**
-- Variables are configured in: Settings → CI/CD → Variables
-- Mark variables as "Masked" and "Protected"
-- Use project variables or group variables
-
-### Azure DevOps
-
-**Variable Reference Syntax:**
-```yaml
-env:
-  SONAR_TOKEN: $(SONAR_TOKEN)
-  SONAR_HOST_URL: $(SONAR_HOST_URL)
-```
-
-**Always remind users:**
-- Variables are configured in: Pipelines → Library → Variable groups
-- Mark variables as "Secret"
-- Link variable group to pipeline
-
-### Bitbucket Pipelines
-
-**Variable Reference Syntax:**
-```yaml
-- pipe: sonarsource/sonarcloud-scan:1.0.0
-  variables:
-    SONAR_TOKEN: $SONAR_TOKEN
-```
-
-**Always remind users:**
-- Variables are configured in: Repository settings → Pipelines → Repository variables
-- Mark variables as "Secured"
-- Repository variables vs Workspace variables
+**Key requirements across all platforms:**
+- ✅ Store tokens as encrypted/secured secrets
+- ✅ Mark sensitive variables as protected/masked
+- ✅ Use platform's secret management UI (never hardcode)
+- ✅ Reference secrets using platform-specific variable syntax
 
 ## Token Best Practices
 

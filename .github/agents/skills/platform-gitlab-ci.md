@@ -15,30 +15,39 @@ This skill provides GitLab CI-specific documentation and guidance for SonarQube 
 ### SonarQube Server
 - **Main Documentation**: https://docs.sonarsource.com/sonarqube-server/devops-platform-integration/gitlab-integration/adding-analysis-to-gitlab-ci-cd
 
-## Scanner Selection by Language
+## GitLab CI Implementation
 
-**Use `web/fetch` to get current examples from official documentation.**
+**Use `web/fetch` to get current examples and versions from official documentation.**
+
+### Scanner Implementation
+
+**Scanner selection is defined in pipeline-creation skill. This section covers GitLab CI-specific implementation.**
 
 ### When to Use sonar-scanner-cli Docker Image
 
-**ONLY use `sonarsource/sonar-scanner-cli` Docker image for CLI scanner projects:**
-- **JavaScript/TypeScript**: Projects without Maven/Gradle/.NET
-- **Python**: Projects without Maven/Gradle/.NET
-- **PHP, Go, Ruby, etc.**: Projects using CLI scanner
+Use `sonarsource/sonar-scanner-cli` Docker image for **CLI scanner projects only**:
+- JavaScript/TypeScript/Python/PHP/Go/Ruby (without Maven/Gradle/.NET)
+- Projects that require `sonar-project.properties`
 - See: scanner-cli skill for configuration
 
-**DO NOT use sonar-scanner-cli Docker image for:**
-- **Java (Maven)**: Use Maven commands directly with maven Docker image
-- **Java (Gradle)**: Use Gradle commands directly with gradle Docker image
-- **.NET**: Use dotnet sonarscanner commands directly with dotnet SDK image
+**Example:**
+```yaml
+sonarqube-check:
+  image: sonarsource/sonar-scanner-cli:latest
+  variables:
+    SONAR_TOKEN: $SONAR_TOKEN
+  script:
+    - sonar-scanner
+```
 
-### Scanner-Specific Setup
-- **Java (Maven)**: Use Maven within GitLab CI job. See: scanner-maven skill
-- **Java (Gradle)**: Use Gradle within GitLab CI job. See: scanner-gradle skill
-- **.NET**: Use dotnet-sonarscanner within GitLab CI job. See: scanner-dotnet skill
-- **JavaScript/TypeScript/Python/Other**: Use sonar-scanner-cli Docker image. See: scanner-cli skill
+### Build Tool Integration
 
-Fetch examples from official documentation above to get latest versions and configuration.
+**For Maven/Gradle/.NET projects, use appropriate Docker images and run scanner commands:**
+- **Maven**: Use `maven` image with `mvn sonar:sonar` (see: scanner-maven skill)
+- **Gradle**: Use `gradle` image with `./gradlew sonar` (see: scanner-gradle skill)
+- **.NET**: Use `mcr.microsoft.com/dotnet/sdk` image with `dotnet sonarscanner` (see: scanner-dotnet skill)
+
+Fetch examples from official documentation to get latest versions and configuration.
 
 ## Platform-Specific Configuration
 

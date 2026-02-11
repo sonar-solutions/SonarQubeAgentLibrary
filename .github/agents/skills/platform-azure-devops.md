@@ -21,34 +21,39 @@ This skill provides Azure DevOps-specific documentation and guidance for SonarQu
 - Install **SonarQube** extension from Azure DevOps Marketplace
 - Extension provides tasks: `SonarQubePrepare`, `SonarQubeAnalyze`, `SonarQubePublish`
 
-## Scanner Selection by Language
+## Azure DevOps Implementation
 
-**Use `web/fetch` to get current examples from official documentation.**
+**Use `web/fetch` to get current examples and versions from official documentation.**
+
+### Scanner Implementation
+
+**Scanner selection is defined in pipeline-creation skill. This section covers Azure DevOps-specific implementation.**
 
 **IMPORTANT: Azure DevOps uses SonarQube extension tasks for ALL project types.**
 The extension tasks adapt based on the scanner mode selected:
 
-### Maven Projects
-- Use `SonarQubePrepare` (scanner mode: Maven) + Maven task + `SonarQubePublish`
-- See: scanner-maven skill
-- **Do NOT** run `mvn sonar:sonar` manually
+### Extension Task Pattern
 
-### Gradle Projects
-- Use `SonarQubePrepare` (scanner mode: Gradle) + Gradle task + `SonarQubePublish`
-- See: scanner-gradle skill
-- **Do NOT** run `./gradlew sonar` manually
+All scanners use the same task pattern with different modes:
 
-### .NET Projects
-- Use `SonarQubePrepare` (scanner mode: MSBuild) + build task + `SonarQubeAnalyze` + `SonarQubePublish`
-- See: scanner-dotnet skill
-- Extension wraps dotnet sonarscanner begin/end
+1. **Maven Projects**
+   - `SonarQubePrepare` (scanner mode: Maven) + Maven task + `SonarQubePublish`
+   - See: scanner-maven skill
 
-### CLI Scanner Projects (JavaScript/TypeScript/Python/Other)
-- Use `SonarQubePrepare` (scanner mode: CLI) + `SonarQubeAnalyze` + `SonarQubePublish`
-- See: scanner-cli skill
-- Extension handles scanner installation and execution
+2. **Gradle Projects**
+   - `SonarQubePrepare` (scanner mode: Gradle) + Gradle task + `SonarQubePublish`
+   - See: scanner-gradle skill
 
-Fetch examples from official documentation above to get latest task versions and configuration.
+3. **.NET Projects**
+   - `SonarQubePrepare` (scanner mode: MSBuild) + build task + `SonarQubeAnalyze` + `SonarQubePublish`
+   - See: scanner-dotnet skill
+
+4. **CLI Scanner Projects** (JavaScript/TypeScript/Python/Other)
+   - `SonarQubePrepare` (scanner mode: CLI) + `SonarQubeAnalyze` + `SonarQubePublish`
+   - Extension handles scanner installation and execution
+   - See: scanner-cli skill
+
+Fetch examples from official documentation to get latest task versions and configuration.
 
 ## Platform-Specific Configuration
 
