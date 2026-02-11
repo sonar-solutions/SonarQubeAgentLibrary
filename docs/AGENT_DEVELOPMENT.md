@@ -1,40 +1,356 @@
 # 🏗️ SonarQube Agent Development Guide
 
-This guide helps you create high-quality GitHub Copilot Chat agents for this library.
+This guide helps you create, customize, and maintain skill-based GitHub Copilot Chat agents for this library.
 
-## Agent Architecture
+## Prerequisites
 
-### File Structure
+Before developing or using these agents, ensure you have:
 
-GitHub Copilot agents are markdown files with a specific structure:
+### Required
+- ✅ **VS Code** (version 1.85.0 or later)
+- ✅ **GitHub Copilot** subscription (Individual, Business, or Enterprise)
+- ✅ **GitHub Copilot Chat** extension installed and enabled
 
+### Recommended VS Code Extensions
+- `GitHub.copilot` - GitHub Copilot core functionality
+- `GitHub.copilot-chat` - GitHub Copilot Chat interface  
+- `sonarsource.sonarlint-vscode` - SonarLint for real-time code quality feedback
+- `yzhang.markdown-all-in-one` - For editing agent markdown files
+
+Install recommended extensions:
+```bash
+code --install-extension GitHub.copilot
+code --install-extension GitHub.copilot-chat
+code --install-extension sonarsource.sonarlint-vscode
+code --install-extension yzhang.markdown-all-in-one
+```
+
+## Quick Start - Using Agents
+
+### Basic Usage
+
+1. **Open GitHub Copilot Chat:**
+   - Click chat icon in Activity Bar OR
+   - Press `Cmd+Shift+I` (macOS) / `Ctrl+Shift+I` (Windows/Linux)
+
+2. **Interact with an agent:**
+   ```
+   @SonarArchitectLight Set up SonarQube for my project
+   # or
+   @SonarArchitectGuide Explain SonarQube setup for GitHub Actions
+   ```
+
+3. **Common prompts:**
+   - **Action-oriented** (Light): "Set up SonarQube", "Add analysis to my workflow", "Configure for Gradle"
+   - **Learning-focused** (Guide): "Explain setup", "Show documentation", "Help me understand"
+
+## Skill-Based Agent Architecture
+
+This library uses a **modular skill-based architecture** where:
+- **Agents** define workflow and personality
+- **Skills** contain reusable domain knowledge
+- Multiple agents can share the same skills
+- Skills can be updated independently
+
+### Benefits
+- ✅ **Maintainability**: Update once in a skill, applies to all agents
+- ✅ **Consistency**: Same information across different agent personalities
+- ✅ **Accuracy**: Specialized skills contain verified, up-to-date information
+- ✅ **Modularity**: Easy to add new platforms or scanners without duplicating code
+
+### Architecture Diagram
+```
+Agent (Persona + Workflow)
+    ↓ references
+Skills (Domain Knowledge)
+    ├── Core Skills (detection, prerequisites, documentation)
+    ├── Platform Skills (GitHub Actions, GitLab CI, Azure DevOps, Bitbucket)
+    └── Scanner Skills (Gradle, Maven, .NET, CLI)
+```
+
+## Customizing Agents
+
+You can customize agents to fit your organization's specific needs without modifying the shared skills.
+
+### Option 1: Customize Agent Personality
+
+**Use Case**: Same underlying logic, but different tone/workflow for your team
+
+1. **Clone an existing agent:**
+   ```bash
+   cp .github/agents/SonarArchitectLight.agent.md \
+      .github/agents/MyCompanySonarSetup.agent.md
+   ```
+
+2. **Edit the agent file to customize:**
+   - **Persona**: Change tone, communication style, and expertise level
+   - **Core Workflow**: Adjust steps, add company-specific checks
+   - **Key Reminders**: Add internal guidelines or processes
+   - **Examples**: Show company-specific use cases
+   - **Documentation links**: Add internal wiki or docs
+
+3. **The agent still uses shared skills:**
+   - Skills remain unchanged, ensuring consistency with upstream updates
+   - Agent personality is customized to your needs
+   - Knowledge stays accurate and up-to-date
+
+**Example Customization:**
 ```markdown
-# Agent Name - Tagline
+# CompanyName SonarQube Setup
 
 ## Persona
-Defines who the agent is and how it communicates
+You are **CompanyName's SonarQube Expert**, implementing our internal 
+standards for code quality. You follow our company's specific conventions:
+- All projects must use quality gate "CompanyName-Standard"
+- Naming convention: {team}-{project}-{env}
+- Required plugins: sonar-css, sonar-typescript
 
-## Welcome Message
-First message users see
+## Core Workflow
+[Keep same structure but add company-specific steps]
+### 1. Analyze Project
+[Use project-detection skill as normal]
 
-## Capabilities
-What the agent can do and how
+### 1.5 Apply Company Standards
+Check for:
+- Company naming conventions
+- Required quality gate configuration
+- Mandatory coverage thresholds (80% minimum)
+```
 
-## Suggested Prompts
-Example prompts to guide users
+### Option 2: Extend with Custom Skills
 
-## Additional Sections
-Examples, troubleshooting, etc.
+**Use Case**: Add organization-specific knowledge while keeping shared skills
+
+1. **Create organization-specific skills:**
+   ```bash
+   # Create custom skills directory
+   mkdir -p .github/agents/skills/custom
+   
+   # Create custom skill
+   cat > .github/agents/skills/custom/company-standards.md << 'EOF'
+   # Company Standards Skill
+   
+   ## Purpose
+   Enforce CompanyName's SonarQube configuration standards
+   
+   ## Quality Gate Requirements
+   - Minimum coverage: 80%
+   - Maximum code smells: 50
+   - No critical or blocker issues
+   
+   ## Naming Conventions
+   Project Key Format: {team}-{project}-{environment}
+   Examples:
+   - platform-authservice-prod
+   - mobile-ios-dev
+   
+   ## Required Properties
+   All projects must include:
+   - sonar.projectKey (following naming convention)
+   - sonar.qualitygate (CompanyName-Standard)
+   - sonar.coverage.exclusions (test/**, mock/**)
+   EOF
+   ```
+
+2. **Reference custom skill in your agent:**
+   ```markdown
+   ### 5. Apply Company Standards
+   Use the **custom/company-standards** skill to:
+   - Validate project key naming convention
+   - Set quality gate to "CompanyName-Standard"
+   - Configure mandatory coverage thresholds
+   - Add required exclusion patterns
+   ```
+
+3. **Benefits:**
+   - Shared skills get community updates automatically
+   - Custom skills maintain your organization's specific requirements
+   - Clear separation between universal and company-specific knowledge
+   - Easy to merge upstream changes without conflicts
+
+## Creating New Skill-Based Agents
+
+Want to create agents for other tools or domains? Follow this modular approach.
+
+### Step 1: Design Your Skills
+
+1. **Identify discrete knowledge domains:**
+   
+   **Questions to ask:**
+   - What specific expertise does your agent need?
+   - Can expertise be broken into reusable skills?
+   - Which skills might be shared across agents?
+   - What's universal vs. what's specific to your agent?
+   
+   **Example for Kubernetes agent:**
+   - ✅ Universal: "kubernetes-deployment" skill
+   - ✅ Universal: "security-scanning" skill  
+   - ✅ Universal: "aws-configuration" skill
+   - ❌ Too broad: "devops" skill (break it down)
+
+2. **Create skill files in `.github/agents/skills/`:**
+   ```bash
+   touch .github/agents/skills/kubernetes-deployment.md
+   touch .github/agents/skills/security-scanning.md
+   touch .github/agents/skills/aws-configuration.md
+   ```
+
+3. **Structure each skill with this template:**
+   ```markdown
+   # Skill Name
+   
+   ## Purpose
+   What this skill provides and why it exists.
+   
+   ## When to Use This Skill
+   Specific conditions or scenarios that trigger using this skill.
+   
+   ## Key Information
+   
+   ### Best Practices
+   - Best practice 1
+   - Best practice 2
+   
+   ### Common Patterns
+   - Pattern description
+   - When to use each pattern
+   
+   ### Platform-Specific Guidance
+   **GitHub Actions:**
+   - Specific guidance
+   
+   **GitLab CI:**
+   - Specific guidance
+   
+   ## Important Links
+   - [Official Documentation](https://example.com)
+   - [Best Practices Guide](https://example.com)
+   
+   ## Example Usage
+   Show how this skill applies in practice with a realistic scenario.
+   ```
+
+### Step 2: Create Your Agent
+
+1. **Create agent file in `.github/agents/`:**
+   ```bash
+   touch .github/agents/MyAgent.agent.md
+   ```
+
+2. **Define the agent structure:**
+   ```markdown
+   # Agent Name - Short Tagline
+   
+   ## Persona
+   You are **AgentName**, a [role] specializing in [domain].
+   
+   You have expertise in:
+   - Expertise area 1
+   - Expertise area 2
+   - Expertise area 3
+   
+   Your communication style:
+   - **Direct**: Get to solutions quickly
+   - **Educational**: Explain the "why" behind recommendations
+   - **Security-focused**: Always consider security implications
+   
+   ## Core Workflow
+   
+   ### 1. Analyze the Project
+   Use the **skill-name** skill to:
+   - Detect specific elements
+   - Identify configuration files
+   - Check for existing setup
+   
+   ### 2. Gather Information
+   Use the **another-skill** skill to:
+   - Ask for required details
+   - Validate prerequisites
+   
+   ### 3. Provide Solution
+   Use the **action-skill** skill to:
+   - Create configuration
+   - Apply best practices
+   
+   ## Key Reminders
+   - Important guideline 1
+   - Critical check 2
+   - Security practice 3
+   
+   ## Example Interaction Flow
+   [Show realistic conversation]
+   ```
+
+3. **Test your agent:**
+   ```bash
+   # Reload VS Code
+   # Cmd+Shift+P → "Developer: Reload Window"
+   
+   # Test in Copilot Chat:
+   # @MyAgent help me set up X
+   ```
+
+### Step 3: Maintain and Evolve
+
+**Update skills independently:**
+```bash
+# Update a skill with new information
+vim .github/agents/skills/my-skill.md
+
+# All agents using this skill benefit immediately
+# No need to update multiple agent files
+```
+
+**Track what changed:**
+```bash
+git log -p .github/agents/skills/my-skill.md
+# See exactly what information was updated and when
+```
+
+**Share successful patterns:**
+- Contribute useful skills back to this library
+- Help the community benefit from your experience
+- Get feedback and improvements from others
+
+**Create agent variants:**
+```
+Same Skills → Different Personalities
+├── ActionAgent (creates files immediately)
+├── GuideAgent (explains first, creates on request)
+└── AuditAgent (reviews existing setup only)
+```
+
+## File Structure and Naming
+
+### Directory Structure
+```
+.github/agents/
+├── AgentName.agent.md              # Agent definition
+├── AnotherAgent.agent.md           # Another agent
+└── skills/                         # Shared skills
+    ├── core-skill.md
+    ├── platform-specific.md
+    └── custom/                     # Organization-specific skills
+        └── company-standards.md
 ```
 
 ### File Naming Convention
 
-- **Location**: `.github/copilot-agents/`
-- **Pattern**: `descriptive-name.agent.md`
+**Agents:**
+- **Location**: `.github/agents/`
+- **Pattern**: `AgentName.agent.md` or `AgentName.md`
 - **Examples**:
-  - `sonarqube-helper.agent.md` → `@sonarqube-helper`
-  - `docker-expert.agent.md` → `@docker-expert`
-  - `terraform-guide.agent.md` → `@terraform-guide`
+  - `SonarArchitectLight.agent.md` → `@SonarArchitectLight`
+  - `DockerExpert.agent.md` → `@DockerExpert`
+  - `TerraformGuide.agent.md` → `@TerraformGuide`
+
+**Skills:**
+- **Location**: `.github/agents/skills/`
+- **Pattern**: `descriptive-name.md`
+- **Examples**:
+  - `project-detection.md`
+  - `platform-github-actions.md`
+  - `scanner-gradle.md`
 
 ## Key Principles
 
