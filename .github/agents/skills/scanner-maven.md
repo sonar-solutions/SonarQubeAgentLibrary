@@ -113,10 +113,16 @@ See platform-specific skills for CI/CD integration:
    - If plugin exists: Use `web/fetch` to get latest version, compare and UPDATE if needed
    - If plugin missing: Maven uses default version, but explicit version recommended
 4. **Check for existing properties**: Look for `<sonar.*>` properties in `<properties>` section
-5. **Update, don't duplicate**: 
-   - If properties exist: Only add missing properties
+5. **Verify configuration is complete and correct**:
+   - Check if `sonar.projectKey` is set (required)
+   - For Cloud: Check if `sonar.organization` is set (required)
+   - Verify all parameters match user requirements
+   - **Don't just check plugin version and skip properties verification**
+6. **Update, don't duplicate**: 
+   - If properties exist but incomplete: Add missing properties
+   - If properties exist but incorrect: Fix incorrect values
    - If properties missing: Add complete properties block
-6. **Note POM location**: Commands must run from directory containing pom.xml
+7. **Note POM location**: Commands must run from directory containing pom.xml
    - Example: If pom.xml is in `backend/`, CI/CD must use `working-directory: backend`
 
 ## Usage Instructions

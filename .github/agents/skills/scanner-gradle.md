@@ -124,11 +124,17 @@ See platform-specific skills for CI/CD integration:
 3. **Verify plugin version**: 
    - If plugin exists: Use `web/fetch` to get latest version, compare and UPDATE if needed
    - If plugin missing: Use `web/fetch` to get latest version before adding
-4. **Check for existing configuration**: Look for `sonarqube {}` or `sonar {}` configuration blocks
-5. **Update, don't duplicate**: 
-   - If configuration exists: Only add missing properties
+4. **Check for existing sonarqube configuration block**: Look for `sonarqube {}` or `sonar {}` configuration blocks
+5. **Verify configuration is complete and correct**:
+   - Check if `projectKey` is set (required)
+   - For Cloud: Check if `organization` is set (required)
+   - Verify all parameters match user requirements
+   - **Don't just add plugin and skip configuration verification**
+6. **Update, don't duplicate**: 
+   - If configuration exists but incomplete: Add missing properties
+   - If configuration exists but incorrect: Fix incorrect values
    - If configuration missing: Add complete configuration block
-6. **Note build file location**: Commands must run from directory containing build.gradle
+7. **Note build file location**: Commands must run from directory containing build.gradle
    - Example: If build.gradle is in `backend/`, CI/CD must use `working-directory: backend`
 
 ## Usage Instructions

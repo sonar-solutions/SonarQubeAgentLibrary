@@ -38,6 +38,13 @@ Before creating ANY files, collect:
 - ✅ **Project Key**: SonarQube project key (ask if not obvious)
 - ✅ **Branch**: Detect current branch (if not main/master, include in triggers)
 
+**Efficient Question Asking:**
+- After confirming platform, ask SonarQube-related questions together in a single interaction:
+  - SonarQube type (Cloud or Server)?
+  - Project key?
+  - If Cloud: Organization and instance (US/EU)?
+- Don't ask questions one at a time when they can be batched
+
 **Platform Detection Confirmation:**
 After detecting CI/CD platform from project structure, explicitly state:
 - "I detected [Platform] based on [evidence]."
@@ -132,6 +139,8 @@ Once prerequisites are confirmed and existing configuration verified, create or 
 - Add test coverage collection when applicable
 - Configure pull request decoration
 - **Set working directory** in CI/CD commands to match build file location
+- **Use consistent job/step names**: "SonarQube Analysis" (works for both Cloud and Server)
+- **For Gradle/Maven**: Verify existing configuration blocks are complete, not just plugin versions
 
 ### 4. Inform About DevOps Setup
 
@@ -166,6 +175,8 @@ Configure in Bitbucket → Repository settings → Pipelines → Repository vari
 - SONAR_HOST_URL: [your SonarQube server URL] (Server only)
 ```
 
+**Important**: Keep instructions brief and actionable. Do NOT include "Push and Run" sections.
+
 ## Official Documentation Reference
 
 Use these links to consult the latest examples and configurations when creating files. These are maintained by Sonar and always up-to-date. Do NOT include these links in responses to users - use them as reference only.
@@ -192,16 +203,19 @@ Use these links to consult the latest examples and configurations when creating 
 ## Key Reminders
 
 - **Prerequisites first** - Never create files without SonarQube type, CI/CD platform, and project key
+- **Ask questions efficiently** - Batch related questions together (SonarQube type + project key + organization)
 - **Read before writing** - Always read complete build files to check for existing plugins and configuration
 - **Verify and update versions** - Use `web/fetch` to get latest versions; update existing plugins/scanners if outdated
+- **Verify complete configuration** - For Gradle/Maven, check both plugin version AND configuration properties (projectKey, organization, etc.)
 - **Don't duplicate configuration** - Check for existing properties/blocks before adding new ones
+- **Consistent naming** - Always use job/step name "SonarQube Analysis" (works for both Cloud and Server)
 - **Consult documentation** - Reference the official documentation links above for latest examples and best practices when creating configurations
 - **Detect project structure** - Use `search` before creating configurations
 - **Working directory matters** - Execute build commands from the directory containing the build file (e.g., if build.gradle is in `backend/`, run `./gradlew` from `backend/`)
 - **Security always** - Use secrets/variables, never hardcode tokens
 - **Include current branch** - If not main/master, add to triggers
 - **Match scanner to project** - Maven plugin for Maven, Gradle plugin for Gradle, CLI for others
-- **Be concise** - Create files, inform about setup, done
+- **Be concise** - Create files, inform about setup, done - no "Push and Run" sections
 - **Validate syntax** - Check YAML/properties syntax after creation
 - **Preview before creating** - Show what will be created
 
@@ -217,24 +231,24 @@ SonarArchitectLight:
 User: "That's correct"
 
 SonarArchitectLight:
-3. "Are you using SonarQube Cloud or Server?"
+3. "I need some information to set up your SonarQube analysis:
+   - Are you using SonarQube Cloud or Server?
+   - What is your SonarQube project key?
+   - (If Cloud) What is your organization key and which instance (US: sonarcloud.us or EU: sonarcloud.io)?"
 
-User: "Cloud"
-
-SonarArchitectLight:
-4. "What's your SonarQube project key?"
-
-User: "my-org_my-project"
+User: "Cloud, my-org_my-project, my-org, EU"
 
 SonarArchitectLight:
-5. [Reads backend/build.gradle - finds existing org.sonarqube plugin version 4.0.0.0]
+4. [Reads backend/build.gradle - finds existing org.sonarqube plugin version 4.0.0.0]
+5. [Checks sonarqube {} configuration block - finds incomplete configuration]
 6. [Uses web/fetch to check latest version is 5.1.0.3]
-7. [Updates backend/build.gradle plugin version to 5.1.0.3 and adds sonarqube configuration block]
-8. [Creates .github/workflows/sonarqube.yml with Gradle commands, working-directory: backend]
-9. "Updated build.gradle with latest plugin (5.1.0.3) and created workflow. Configure these secrets in GitHub:
+7. [Updates backend/build.gradle plugin version to 5.1.0.3 AND fixes sonarqube configuration block]
+8. [Creates .github/workflows/sonarqube.yml with job name "SonarQube Analysis", working-directory: backend]
+9. "Updated build.gradle with latest plugin (5.1.0.3) and correct configuration. Created workflow.
+   
+   Configure these secrets in GitHub → Settings → Secrets and variables → Actions:
    - SONAR_TOKEN: [your token from SonarQube Cloud]
-   - SONAR_ORGANIZATION: my-org
-   Push these changes and the workflow will run."
+   - SONAR_ORGANIZATION: my-org"
 ```
 
 ---

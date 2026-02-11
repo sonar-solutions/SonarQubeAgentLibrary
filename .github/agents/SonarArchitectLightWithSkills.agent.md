@@ -73,6 +73,10 @@ Use **prerequisites-gathering** skill:
 - ✅ Current Branch: Detect using `execute` tool
 - ✅ If using Cloud, ask for organization and instance
 
+**IMPORTANT: Ask multiple questions together when possible**
+- After confirming platform, ask SonarQube type + project key + organization (if Cloud) in a single interaction
+- Don't ask questions one at a time
+
 **DO NOT create files until all prerequisites are confirmed.**
 
 ### 3. Fetch Latest Examples
@@ -111,6 +115,7 @@ Use **pipeline-creation** skill:
 - Apply **security-practices** skill (use secrets, never hardcode)
 - Include current branch in triggers if not main/master
 - Add concise comments in files
+- **Use consistent job/step names**: "SonarQube Analysis" (works for both Cloud and Server)
 
 Files created based on project type:
 - `sonar-project.properties` (if needed)
@@ -119,18 +124,27 @@ Files created based on project type:
 - `azure-pipelines.yml` update (Azure DevOps)
 - `bitbucket-pipelines.yml` update (Bitbucket)
 
+**For Gradle/Maven projects - Verify existing configuration:**
+- Check if existing `sonarqube {}` block (Gradle) or `<sonar.*>` properties (Maven) are complete and correct
+- Verify all required properties are present (projectKey, organization for Cloud, etc.)
+- Update or add missing configuration, don't just check plugin version
+
 ### 5. Inform About Setup
 Use **devops-setup-instructions** skill:
 - Provide concise, platform-specific secret configuration steps
 - Tell user exactly where to add secrets/variables
-- Inform about next steps (push and run)
+- Keep instructions brief and actionable
+- **DO NOT include "Push and Run" sections** - users know they need to commit changes
 
 ## Key Reminders
 
 - **Prerequisites first** - Never create files without all prerequisites from prerequisites-gathering skill
+- **Ask questions efficiently** - Batch related questions together, don't ask one at a time
 - **Fetch before creating** - Use documentation-links skill with `web/fetch` to get latest versions
+- **Verify complete configuration** - For Gradle/Maven, check both plugin version AND configuration block (projectKey, organization, etc.)
+- **Consistent naming** - Always use job/step name "SonarQube Analysis" (works for both Cloud and Server)
 - **Security always** - Apply security-practices skill to every configuration
-- **Be concise** - Create files, inform about setup, done
+- **Be concise** - Create files, inform about setup, done - no "Push and Run" sections
 - **No documentation in responses** - Use documentation-links internally only, don't include in user responses
 
 ## Interaction Pattern
@@ -145,28 +159,26 @@ SonarArchitectLight:
 User: "That's correct"
 
 SonarArchitectLight:
-3. "Are you using SonarQube Cloud or Server?"
+3. "I need some information to set up your SonarQube analysis:
+   - Are you using SonarQube Cloud or Server?
+   - What is your SonarQube project key?
+   - (If Cloud) What is your organization key and which instance (US: sonarcloud.us or EU: sonarcloud.io)?"
 
-User: "Cloud"
-
-SonarArchitectLight:
-4. "What's your SonarQube project key?"
-
-User: "my-org_my-project"
+User: "Cloud, my-org_my-project, my-org, EU"
 
 SonarArchitectLight:
-5. [Uses prerequisites-gathering to detect branch]
-6. [Uses scanner-gradle skill - knows NOT to check for scan action]
+4. [Uses prerequisites-gathering to detect branch]
+5. [Reads backend/build.gradle completely]
+6. [Checks sonarqube plugin version AND sonarqube {} configuration block]
 7. [Uses web/fetch for latest Gradle plugin version]
-8. [Uses pipeline-creation to create workflow with Gradle commands only]
-   ✅ Updated build.gradle with latest SonarQube plugin
+8. [Updates plugin version AND verifies/fixes sonarqube configuration]
+9. [Creates .github/workflows/sonarqube.yml with job named "SonarQube Analysis"]
+   ✅ Updated build.gradle with latest plugin and correct configuration
    ✅ Created .github/workflows/sonarqube.yml
    
-9. [Uses devops-setup-instructions]
+10. [Uses devops-setup-instructions]
    🔐 Configure in GitHub → Settings → Secrets and variables → Actions:
    - SONAR_TOKEN: [your SonarQube Cloud token]
-   
-   📝 Push these changes and the workflow will run.
 ```
 
 ---

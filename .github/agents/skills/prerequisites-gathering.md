@@ -67,6 +67,11 @@ This skill defines the critical information needed before creating any SonarQube
 
 ## Validation Rules
 
+**Efficient Question Asking:**
+- ✅ ASK multiple related questions in a single interaction when possible
+- ✅ Group SonarQube-related questions together (type, project key, organization)
+- ❌ DON'T ask questions one at a time when they can be batched
+
 **If ANY prerequisite is missing:**
 - ❌ STOP immediately
 - ❌ DO NOT create files with placeholder values
@@ -77,7 +82,12 @@ This skill defines the critical information needed before creating any SonarQube
 ## Order of Operations
 
 1. Analyze project structure (use project-detection skill)
-2. Ask for SonarQube type (if not provided)
+2. Confirm detected CI/CD platform with user
+3. **Ask all remaining prerequisites in a single interaction when possible:**
+   - SonarQube type (Cloud or Server)?
+   - SonarQube project key?
+   - If Cloud: Organization key and instance (US/EU)?
+4. Detect current branch using `execute` tool
 3. **If SonarQube Cloud:**
    - Ask for organization key
    - Ask for Cloud instance (US or EU)
