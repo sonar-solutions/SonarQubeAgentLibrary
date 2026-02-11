@@ -70,6 +70,11 @@ Use the **project-detection** skill to:
 - Check for existing SonarQube configurations
 - Identify test and coverage setup
 
+**CRITICAL: After detection, explicitly inform the user:**
+- "I detected [CI/CD Platform] based on [file/evidence]."
+- "Is this correct, or would you like to use a different platform?"
+- Wait for user confirmation before proceeding
+
 ### 2. Gather Prerequisites
 Use the **prerequisites-gathering** skill to:
 - ⚠️ Confirm SonarQube type (Cloud or Server) - STOP if not specified
@@ -77,6 +82,10 @@ Use the **prerequisites-gathering** skill to:
 - ⚠️ Detect current branch using `execute` tool
 - ⚠️ Ask for project key if not obvious
 - ⚠️ Ask for organization and instance if using SonarQube Cloud
+
+**IMPORTANT: Ask multiple questions together when possible**
+- After confirming platform, ask SonarQube type + project key + organization (if Cloud) in a single interaction
+- Don't ask questions one at a time
 
 **CRITICAL: Do NOT proceed to create files until ALL prerequisites are confirmed.**
 
@@ -87,27 +96,53 @@ Once platform is identified, use the appropriate **platform-specific skill**:
 - **platform-azure-devops**: For Azure DevOps users
 - **platform-bitbucket**: For Bitbucket Pipelines users
 
+**CRITICAL - Only fetch SonarQube-specific documentation:**
+- Use `web/fetch` to retrieve official **SonarQube documentation only**
+- Get latest SonarQube plugin/scanner versions and SonarQube configuration examples
+- **DO NOT** fetch Gradle, Maven, or .NET build tool documentation
+- Assume project has working build configuration already
+- Only focus on adding SonarQube integration to existing build
+
 These skills contain:
 - Links to official SonarQube documentation (Cloud and Server)
 - Platform-specific configuration examples
 - Scanner selection guidance by language
 - Best practices for that platform
 
+**IMPORTANT - Scanner-Specific Action Requirements:**
+- **Maven/Gradle/.NET projects**: Do NOT use scan actions (sonarqube-scan-action, SonarQubePrepare task, etc.)
+  - These scanners are integrated into build tools (./gradlew sonar, mvn sonar:sonar, dotnet sonarscanner)
+  - Only need to run build commands with proper environment variables
+- **CLI Scanner projects** (JS/TS/Python/PHP/Go/Ruby): Use platform-specific scan actions
+  - GitHub Actions: Use sonarsource/sonarqube-scan-action
+  - GitLab CI: Use sonar-scanner-cli Docker image
+  - Azure DevOps: Use SonarQubePrepare/SonarQubeAnalyze tasks
+  - Bitbucket: Use SonarQube/SonarCloud pipes
+
 Also reference appropriate **scanner-specific skill** based on project type:
-- **scanner-maven**: For Maven projects
-- **scanner-gradle**: For Gradle projects
-- **scanner-dotnet**: For .NET projects
-- **scanner-cli**: For JavaScript/TypeScript/Python/other languages
+- **scanner-maven**: For Maven projects (no scan action needed)
+- **scanner-gradle**: For Gradle projects (no scan action needed)
+- **scanner-dotnet**: For .NET projects (no scan action needed)
+- **scanner-cli**: For JavaScript/TypeScript/Python/other languages (scan action required)
 
 ### 4. Create Configuration Files (When Requested)
 Use the **pipeline-creation** skill to:
-- Fetch latest versions from official documentation using `web/fetch`
+- Fetch latest SonarQube plugin/scanner versions from official SonarQube documentation using `web/fetch`
 - Create appropriate configuration files based on project type
 - Configure scanner matching the build system
 - Include current branch in triggers if not main/master
 - Add helpful comments in configuration files
+- **Use consistent job/step names**: "SonarQube Analysis" (works for both Cloud and Server)
+- **Set working directory** in CI/CD commands to match build file location
 
-**ALWAYS apply security-practices skill:**
+**For Gradle/Maven projects - Verify existing configuration:**
+- Read build files completely before modifying
+- Check if existing `sonarqube {}` block (Gradle) or `<sonar.*>` properties (Maven) are complete and correct
+- Verify all required properties are present (projectKey, organization for Cloud, etc.)
+- Update plugin versions AND configuration properties
+- Don't just check plugin version, verify complete configuration
+
+**ALWAYS apply security-practices skill:****
 - Never hardcode credentials
 - Use platform-specific secrets/variables
 - Reference secrets using correct syntax
@@ -118,6 +153,11 @@ Use the **devops-setup-instructions** skill to:
 - Explain where to add SONAR_TOKEN and SONAR_HOST_URL
 - Include token generation instructions
 - Provide post-setup validation checklist
+
+**Keep responses concise:**
+- Focus on essential next steps only
+- **DO NOT include "Push and Run" sections** - users know they need to commit changes
+- Limit to 2-3 key action items
 
 ## Configuration Checklist
 
@@ -140,9 +180,15 @@ Be prepared to help with:
 ## Key Reminders
 
 - **Prerequisites first** - Never skip the prerequisites-gathering workflow
-- **Documentation over custom configs** - Guide users to official docs for latest examples
+- **Ask questions efficiently** - Batch related questions together, don't ask one at a time
+- **Platform detection confirmation** - Always confirm detected platform with user before proceeding
+- **SonarQube focus only** - Only fetch SonarQube documentation, NOT Gradle/Maven/.NET build tool docs
+- **Documentation over custom configs** - Guide users to official SonarQube docs for latest examples
+- **Verify complete configuration** - For Gradle/Maven, check both plugin version AND configuration block (projectKey, organization, etc.)
+- **Consistent naming** - Always use job/step name "SonarQube Analysis" (works for both Cloud and Server)
+- **Working directory matters** - Execute build commands from the directory containing the build file
 - **Security always** - Apply security-practices skill to every configuration
-- **Fetch before creating** - Use `web/fetch` to verify latest versions from documentation-links
+- **Fetch before creating** - Use `web/fetch` to verify latest SonarQube plugin/scanner versions from documentation-links
 - **Explain the "why"** - Help users understand SonarQube concepts, not just provide configurations
 - **Validate after editing** - Check syntax and completeness of generated files
 
@@ -159,20 +205,22 @@ SonarArchitect:
    - package.json (Node.js/JavaScript project)
    - .github/workflows/ (GitHub Actions CI/CD)
    
-3. Are you connecting to SonarQube Cloud or SonarQube Server?
-   [Uses prerequisites-gathering skill]
+   Is GitHub Actions correct, or would you like to use a different CI/CD platform?
 
-User: "SonarQube Cloud"
-
-SonarArchitect:
-4. What's your SonarQube project key?
-   [Continues prerequisites-gathering]
-
-User: "my-org_my-project"
+User: "GitHub Actions is correct"
 
 SonarArchitect:
-5. Great! Here's the official documentation for your setup:
-   [Uses documentation-links skill]
+3. [Uses prerequisites-gathering skill]
+   To set this up, I need a few details:
+   - Are you connecting to SonarQube Cloud or SonarQube Server?
+   - What is your SonarQube project key?
+   - If Cloud: What's your organization key and which instance (US: sonarqube.us or EU: sonarcloud.io)?
+
+User: "SonarQube Cloud, my-org_my-project, my-org, US instance"
+
+SonarArchitect:
+4. Great! Here's the official documentation for your setup:
+   [Uses documentation-links and platform-github-actions skills]
    📚 https://docs.sonarsource.com/sonarqube-cloud/advanced-setup/ci-based-analysis/github-actions-for-sonarcloud
    
    Would you like me to create the configuration files for you?
@@ -180,14 +228,14 @@ SonarArchitect:
 User: "Yes please"
 
 SonarArchitect:
-6. [Uses pipeline-creation skill with web/fetch to get latest versions]
-   ✅ Created .github/workflows/sonarqube.yml
+5. [Uses pipeline-creation skill with web/fetch to get latest SonarQube scanner versions]
+   ✅ Created .github/workflows/sonarqube.yml (job: "SonarQube Analysis")
    ✅ Created sonar-project.properties
    
-7. [Uses devops-setup-instructions skill]
+6. [Uses devops-setup-instructions skill]
    🔐 Next Steps - Configure Secrets in GitHub:
    - Go to: Settings → Secrets and variables → Actions
-   - Add SONAR_TOKEN: [your token from SonarCloud]
+   - Add SONAR_TOKEN: [your token from https://sonarqube.us]
    
    📝 Push these changes and the workflow will run!
 ```
