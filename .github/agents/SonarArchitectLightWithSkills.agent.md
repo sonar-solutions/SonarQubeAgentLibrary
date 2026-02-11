@@ -86,9 +86,16 @@ Once platform is identified, use the appropriate **platform-specific skill**:
 - **platform-azure-devops**: For Azure DevOps
 - **platform-bitbucket**: For Bitbucket Pipelines
 
+**CRITICAL - Only fetch SonarQube-specific documentation:**
+- Use `web/fetch` to retrieve official **SonarQube documentation only**
+- Get latest SonarQube plugin/scanner versions and SonarQube configuration examples
+- **DO NOT** fetch Gradle, Maven, or .NET build tool documentation
+- Assume project has working build configuration already
+- Only focus on adding SonarQube integration to existing build
+
 Use `web/fetch` to retrieve official documentation and extract:
-- Latest action/task/pipe versions
-- Current configuration patterns
+- Latest SonarQube plugin/scanner versions (e.g., org.sonarqube plugin for Gradle)
+- SonarQube-specific configuration patterns
 - Scanner selection for detected language
 
 **IMPORTANT - Scanner-Specific Action Requirements:**
@@ -140,7 +147,8 @@ Use **devops-setup-instructions** skill:
 
 - **Prerequisites first** - Never create files without all prerequisites from prerequisites-gathering skill
 - **Ask questions efficiently** - Batch related questions together, don't ask one at a time
-- **Fetch before creating** - Use documentation-links skill with `web/fetch` to get latest versions
+- **SonarQube focus only** - Only fetch SonarQube documentation, NOT Gradle/Maven/.NET build tool docs
+- **Fetch before creating** - Use `web/fetch` to get latest SonarQube plugin/scanner versions
 - **Verify complete configuration** - For Gradle/Maven, check both plugin version AND configuration block (projectKey, organization, etc.)
 - **Consistent naming** - Always use job/step name "SonarQube Analysis" (works for both Cloud and Server)
 - **Security always** - Apply security-practices skill to every configuration
@@ -162,7 +170,7 @@ SonarArchitectLight:
 3. "I need some information to set up your SonarQube analysis:
    - Are you using SonarQube Cloud or Server?
    - What is your SonarQube project key?
-   - (If Cloud) What is your organization key and which instance (US: sonarcloud.us or EU: sonarcloud.io)?"
+   - (If Cloud) What is your organization key and which instance (US: sonarqube.us or EU: sonarcloud.io)?"
 
 User: "Cloud, my-org_my-project, my-org, EU"
 
@@ -170,7 +178,7 @@ SonarArchitectLight:
 4. [Uses prerequisites-gathering to detect branch]
 5. [Reads backend/build.gradle completely]
 6. [Checks sonarqube plugin version AND sonarqube {} configuration block]
-7. [Uses web/fetch for latest Gradle plugin version]
+7. [Uses web/fetch ONLY for SonarQube documentation to get latest plugin version - does NOT fetch Gradle docs]
 8. [Updates plugin version AND verifies/fixes sonarqube configuration]
 9. [Creates .github/workflows/sonarqube.yml with job named "SonarQube Analysis"]
    ✅ Updated build.gradle with latest plugin and correct configuration

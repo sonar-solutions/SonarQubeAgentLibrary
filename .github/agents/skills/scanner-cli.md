@@ -49,7 +49,7 @@ The SonarScanner CLI is a standalone scanner for JavaScript, TypeScript, Python,
 ### Key Configuration Properties
 - **Project identification**: `sonar.projectKey`, `sonar.projectName`, `sonar.projectVersion`
 - **Organization** (Cloud only): `sonar.organization`
-- **Host URL**: `sonar.host.url` (e.g., https://sonarcloud.io)
+- **Host URL**: `sonar.host.url` (e.g., https://sonarcloud.io for EU, https://sonarqube.us for US, or your Server URL)
 - **Source paths**: `sonar.sources` (comma-separated directories)
 - **Test paths**: `sonar.tests` (comma-separated test directories)
 - **Exclusions**: `sonar.exclusions`, `sonar.test.exclusions`

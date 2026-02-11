@@ -7,6 +7,13 @@ description: .NET scanner configuration for SonarQube. Use this for C#, VB.NET, 
 
 This skill provides .NET-specific scanner documentation and configuration guidance.
 
+**IMPORTANT - Scope of This Skill:**
+- This skill is ONLY for SonarQube integration with .NET projects
+- Assumes the project already has a working .NET build configuration
+- DO NOT use this skill to troubleshoot .NET build or compilation issues
+- DO NOT fetch .NET SDK documentation for general build problems
+- Focus exclusively on dotnet-sonarscanner installation and usage
+
 ## Official Documentation
 
 ### SonarQube Server
@@ -169,7 +176,8 @@ See platform-specific skills for CI/CD integration:
 - **Step 1**: Search for .sln, .csproj files to locate solution/project
 - **Step 2**: Note directory containing solution file (working directory for commands)
 - **Step 3**: Check for .config/dotnet-tools.json
-- **Step 4**: Use `web/fetch` to get latest scanner version
+- **Step 4**: Use `web/fetch` to get latest scanner version from official SonarQube documentation
 - **Step 5**: Search for test projects (*Test.csproj, *.Tests.csproj)
 - **Step 6**: Create CI/CD with begin/build/end pattern, all from same working directory
 - **Step 7**: Include coverage collection if test projects found
+- **IMPORTANT**: Only fetch SonarQube documentation, do NOT fetch .NET SDK documentation

@@ -46,7 +46,7 @@ This skill defines the critical information needed before creating any SonarQube
 
 **4b. SonarQube Cloud Instance (REQUIRED for Cloud)**
 - Ask user: "Which SonarQube Cloud instance are you using?"
-  - **US**: `sonarcloud.us`
+  - **US**: `sonarqube.us`
   - **EU**: `sonarcloud.io`
 - Default is EU (`sonarcloud.io`) if user is unsure
 - This determines the SONAR_HOST_URL value

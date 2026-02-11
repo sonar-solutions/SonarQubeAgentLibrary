@@ -7,6 +7,13 @@ description: Maven scanner configuration for SonarQube. Use this for Java projec
 
 This skill provides Maven-specific scanner documentation and configuration guidance.
 
+**IMPORTANT - Scope of This Skill:**
+- This skill is ONLY for SonarQube integration with Maven projects
+- Assumes the project already has a working Maven build configuration
+- DO NOT use this skill to troubleshoot Maven build issues
+- DO NOT fetch Maven documentation for general build problems
+- Focus exclusively on adding/updating SonarQube plugin and properties
+
 ## Official Documentation
 
 ### SonarQube Cloud
@@ -134,8 +141,9 @@ See platform-specific skills for CI/CD integration:
 **For SonarArchitectLight:**
 - **Step 1**: Read complete pom.xml file
 - **Step 2**: Check if `sonar-maven-plugin` exists and note its version
-- **Step 3**: Use `web/fetch` to get latest plugin version from official documentation
+- **Step 3**: Use `web/fetch` to get latest SonarQube plugin version from official SonarQube documentation
 - **Step 4**: Check if `<sonar.*>` properties exist in `<properties>` section
 - **Step 5**: Update plugin version if needed, add if best practice
 - **Step 6**: Add or update SonarQube properties (don't duplicate existing ones)
 - **Step 7**: In CI/CD workflow, set working-directory to match pom.xml location
+- **IMPORTANT**: Only fetch SonarQube documentation, do NOT fetch Maven build tool documentation

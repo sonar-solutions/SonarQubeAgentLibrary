@@ -56,7 +56,7 @@ Fetch examples from official documentation above to get latest task versions and
 1. **Location**: Project Settings → Service connections
 2. Create new service connection → SonarQube
 3. **Configure**:
-   - Server URL: Your SonarQube URL or `https://sonarcloud.io`
+   - Server URL: Your SonarQube URL or `https://sonarcloud.io` (EU) / `https://sonarqube.us` (US)
    - Token: Your SonarQube token
    - Connection name: e.g., `SonarQube-Connection`
 - See: devops-setup-instructions skill

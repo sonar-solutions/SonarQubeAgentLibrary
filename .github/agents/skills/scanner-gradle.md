@@ -7,6 +7,13 @@ description: Gradle scanner configuration for SonarQube. Use this for Java/Kotli
 
 This skill provides Gradle-specific scanner documentation and configuration guidance.
 
+**IMPORTANT - Scope of This Skill:**
+- This skill is ONLY for SonarQube integration with Gradle projects
+- Assumes the project already has a working Gradle build configuration
+- DO NOT use this skill to troubleshoot Gradle build issues
+- DO NOT fetch Gradle documentation for general build problems
+- Focus exclusively on adding/updating SonarQube plugin and configuration
+
 ## Official Documentation
 
 ### SonarQube Cloud
@@ -146,11 +153,12 @@ See platform-specific skills for CI/CD integration:
 **For SonarArchitectLightWithSkills:**
 - **Step 1**: Read complete build.gradle/build.gradle.kts file
 - **Step 2**: Check if `org.sonarqube` plugin exists and note its version
-- **Step 3**: Use `web/fetch` to get latest plugin version from official documentation
+- **Step 3**: Use `web/fetch` to get latest SonarQube plugin version from official SonarQube documentation
 - **Step 4**: Check if `sonarqube {}` configuration block exists
 - **Step 5**: Update plugin version if outdated, add if missing (use latest version)
-- **Step 6**: Add or update configuration properties (don't duplicate existing ones)
+- **Step 6**: Add or update SonarQube configuration properties (don't duplicate existing ones)
 - **Step 7**: In CI/CD workflow, set working-directory to match build.gradle location
+- **IMPORTANT**: Only fetch SonarQube documentation, do NOT fetch Gradle build tool documentation
 - Add or update plugin declaration with latest version in build.gradle or build.gradle.kts
 - Use `web/fetch` to check latest JaCoCo version if adding coverage
 - Configure sonarqube block with project properties
