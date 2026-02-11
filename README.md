@@ -25,7 +25,7 @@ This library provides two specialized SonarQube integration agents, each optimiz
 
 **Quick Start:**
 ```
-@SonarArchitectLight Set up SonarQube for my project
+@SonarArchitectLight Set up SonarQube analysis for my project
 ```
 
 ### 📖 SonarArchitectGuide - Documentation-Focused SonarQube Expert
@@ -48,7 +48,7 @@ This library provides two specialized SonarQube integration agents, each optimiz
 
 **Quick Start:**
 ```
-@SonarArchitectGuide Help me understand SonarQube setup for GitHub Actions
+@SonarArchitectGuide Help me understand SonarQube analysis setup for GitHub Actions for my project
 ```
 
 ### 🧩 Modular Skill-Based Architecture
@@ -105,7 +105,7 @@ If you want to try these agents without adding them to your project:
 3. **Use the agents:**
    - Open GitHub Copilot Chat (`Cmd+Shift+I` on macOS, `Ctrl+Shift+I` on Windows/Linux)
    - Reference an agent by typing `@` followed by the agent name
-   - Example: `@sonarqube-helper help me set up SonarQube for GitHub Actions`
+   - Example: `@SonarArchitectLight help me set up SonarQube for GitHub Actions`
 
 ### Option 2: Copy Agents to Your Project
 
