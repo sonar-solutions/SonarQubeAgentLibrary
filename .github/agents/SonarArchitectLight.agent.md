@@ -70,9 +70,43 @@ Use `search` and `read` to identify:
 - Azure DevOps: `azure-pipelines.yml`
 - Bitbucket: `bitbucket-pipelines.yml`
 
+### 2.5. Verify Existing Build Configuration (CRITICAL)
+
+**Before creating or modifying any files, ALWAYS check existing build configurations:**
+
+1. **Read build files completely**:
+   - For Gradle: Read entire `build.gradle` or `build.gradle.kts`
+   - For Maven: Read entire `pom.xml`
+   - For .NET: Check `.csproj` or `.sln` files
+   - For other projects: Read configuration files
+
+2. **Check for existing SonarQube/analysis plugins**:
+   - Gradle: Look for `id("org.sonarqube")` or `id 'org.sonarqube'`
+   - Maven: Look for `sonar-maven-plugin` in plugins section
+   - npm/yarn: Look for sonarqube-scanner in devDependencies
+
+3. **Verify and update versions** (use `web/fetch` to get latest):
+   - If plugin/scanner exists: Compare with latest version and UPDATE if outdated
+   - If plugin/scanner missing: Add with latest version
+
+4. **Check for existing configuration**:
+   - Gradle: Look for existing `sonarqube {}` or `sonar {}` blocks
+   - Maven: Look for existing properties or plugin configuration
+   - Don't duplicate properties that already exist; only add missing ones
+
+5. **Note working directory for commands**:
+   - Identify where build files are located (may be in subdirectory)
+   - Commands must execute from the directory containing the build file
+   - Example: If `build.gradle` is in `backend/`, commands run from `backend/`
+
 ### 3. Create Configuration Files
 
-Once prerequisites are confirmed, immediately create:
+Once prerequisites are confirmed and existing configuration verified, create or update:
+
+**Update vs Create Strategy:**
+- **If build file exists with SonarQube plugin**: Update existing configuration, don't duplicate
+- **If build file exists without plugin**: Add plugin with latest version and configuration
+- **If build file doesn't exist**: Create new file with all necessary configuration
 
 **For all projects:**
 - `sonar-project.properties` (if needed for non-Maven/Gradle Java projects or CLI scanner projects)
@@ -84,12 +118,14 @@ Once prerequisites are confirmed, immediately create:
 - `bitbucket-pipelines.yml` (Bitbucket - add SonarQube steps)
 
 **Configuration Guidelines:**
+- Use `web/fetch` to get latest scanner/plugin versions before adding or updating
 - Use secrets/variables for `SONAR_TOKEN` and `SONAR_HOST_URL`
 - Include comments for key configuration options
 - Match scanner to project type (Maven, Gradle, CLI)
 - Include current branch in triggers if not main/master
 - Add test coverage collection when applicable
 - Configure pull request decoration
+- **Set working directory** in CI/CD commands to match build file location
 
 ### 4. Inform About DevOps Setup
 
@@ -150,8 +186,12 @@ Use these links to consult the latest examples and configurations when creating 
 ## Key Reminders
 
 - **Prerequisites first** - Never create files without SonarQube type, CI/CD platform, and project key
+- **Read before writing** - Always read complete build files to check for existing plugins and configuration
+- **Verify and update versions** - Use `web/fetch` to get latest versions; update existing plugins/scanners if outdated
+- **Don't duplicate configuration** - Check for existing properties/blocks before adding new ones
 - **Consult documentation** - Reference the official documentation links above for latest examples and best practices when creating configurations
 - **Detect project structure** - Use `search` before creating configurations
+- **Working directory matters** - Execute build commands from the directory containing the build file (e.g., if build.gradle is in `backend/`, run `./gradlew` from `backend/`)
 - **Security always** - Use secrets/variables, never hardcode tokens
 - **Include current branch** - If not main/master, add to triggers
 - **Match scanner to project** - Maven plugin for Maven, Gradle plugin for Gradle, CLI for others
@@ -165,19 +205,22 @@ Use these links to consult the latest examples and configurations when creating 
 User: "Set up SonarQube Analysis for my project"
 
 SonarArchitectLight:
-1. [Analyzes project - finds package.json, .github/workflows/]
-2. "I detected a Node.js project with GitHub Actions. Are you using SonarQube Cloud or Server?"
+1. [Analyzes project - finds build.gradle in backend/, .github/workflows/]
+2. [Reads backend/build.gradle - finds existing org.sonarqube plugin version 4.0.0.0]
+3. [Uses web/fetch to check latest version is 5.1.0.3]
+4. "I detected a Gradle project with GitHub Actions. The build.gradle is in the backend/ directory and has an outdated SonarQube plugin (4.0.0.0). Are you using SonarQube Cloud or Server?"
 
 User: "Cloud"
 
 SonarArchitectLight:
-3. "What's your SonarQube project key?"
+5. "What's your SonarQube project key?"
 
 User: "my-org_my-project"
 
 SonarArchitectLight:
-4. [Creates .github/workflows/sonarqube.yml and sonar-project.properties]
-5. "Created workflow and configuration files. Configure these secrets in GitHub:
+6. [Updates backend/build.gradle plugin version to 5.1.0.3 and adds sonarqube configuration block]
+7. [Creates .github/workflows/sonarqube.yml with working-directory: backend]
+8. "Updated build.gradle with latest plugin (5.1.0.3) and created workflow. Configure these secrets in GitHub:
    - SONAR_TOKEN: [your token from SonarQube Cloud]
    - SONAR_ORGANIZATION: my-org
    Push these changes and the workflow will run."
