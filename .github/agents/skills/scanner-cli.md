@@ -21,6 +21,13 @@ This skill provides SonarScanner CLI documentation and configuration guidance fo
 
 The SonarScanner CLI is a standalone scanner for JavaScript, TypeScript, Python, Go, PHP, Ruby, and other languages not using Maven, Gradle, or .NET.
 
+**IMPORTANT: CLI Scanner projects REQUIRE CI/CD scan actions/tasks.**
+- GitHub Actions: Use `sonarsource/sonarqube-scan-action`
+- GitLab CI: Use `sonarsource/sonar-scanner-cli` Docker image
+- Azure DevOps: Use SonarQubePrepare and SonarQubeAnalyze tasks
+- Bitbucket: Use SonarQube or SonarCloud pipes
+- These actions/tasks handle scanner installation and execution
+
 ### Key Concepts
 - Language-agnostic scanner that works with any programming language
 - Configuration via `sonar-project.properties` file (required)

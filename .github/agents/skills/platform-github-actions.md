@@ -20,8 +20,20 @@ This skill provides GitHub Actions-specific documentation and guidance for Sonar
 ## Scanner Selection by Language
 
 **Use `web/fetch` to get current examples from official documentation.**
+### When to Use SonarQube Scan Action
 
-- **Java (Maven)**: Use Maven plugin within workflow. See: scanner-maven skill
+**ONLY use `sonarsource/sonarqube-scan-action` for CLI scanner projects:**
+- **JavaScript/TypeScript**: Projects without Maven/Gradle/.NET
+- **Python**: Projects without Maven/Gradle/.NET
+- **PHP, Go, Ruby, etc.**: Projects using CLI scanner
+- See: scanner-cli skill for configuration
+
+**DO NOT use scan action for:**
+- **Java (Maven)**: Use `mvn sonar:sonar` command directly
+- **Java (Gradle)**: Use `./gradlew sonar` command directly
+- **.NET**: Use `dotnet sonarscanner` begin/build/end commands directly
+
+### Scanner-Specific Setup- **Java (Maven)**: Use Maven plugin within workflow. See: scanner-maven skill
 - **Java (Gradle)**: Use Gradle plugin within workflow. See: scanner-gradle skill
 - **.NET**: Use dotnet-sonarscanner begin/build/end pattern. See: scanner-dotnet` skill
 - **JavaScript/TypeScript/Python/Other**: Use `sonarsource/sonarqube-scan-action`. See: scanner-cli skill

@@ -21,6 +21,12 @@ This skill provides Maven-specific scanner documentation and configuration guida
 
 The Maven SonarQube scanner is a Maven plugin that integrates SonarQube analysis into the Maven build lifecycle.
 
+**CRITICAL: Maven projects do NOT use CI/CD scan actions/tasks (except Azure DevOps).**
+- GitHub Actions: Do NOT use `sonarsource/sonarqube-scan-action` - run `mvn sonar:sonar` directly
+- GitLab CI: Do NOT use sonar-scanner-cli Docker image - run `mvn sonar:sonar` directly
+- Azure DevOps: Use SonarQubePrepare task in Maven mode (special case - wraps Maven integration)
+- Bitbucket: Do NOT use SonarQube/SonarCloud pipes - run `mvn sonar:sonar` directly
+
 ### Key Concepts
 - Scanner runs as part of Maven build using `mvn sonar:sonar` goal
 - Properties can be configured in `pom.xml` or passed via command line

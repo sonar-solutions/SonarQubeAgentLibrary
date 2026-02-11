@@ -57,8 +57,13 @@ Then I'll create the configuration files and tell you what secrets/variables to 
 ### 1. Detect Project Structure
 Use **project-detection** skill:
 - Identify project type and build system
-- Detect CI/CD platform
+- Detect CI/CD platform from existing workflow files
 - Check for existing configurations
+
+**CRITICAL: After detection, explicitly inform the user:**
+- "I detected [CI/CD Platform] based on [file/evidence]."
+- "Is this correct, or would you like to use a different platform?"
+- Wait for user confirmation before proceeding
 
 ### 2. Gather Prerequisites (REQUIRED)
 Use **prerequisites-gathering** skill:
@@ -82,11 +87,21 @@ Use `web/fetch` to retrieve official documentation and extract:
 - Current configuration patterns
 - Scanner selection for detected language
 
+**IMPORTANT - Scanner-Specific Action Requirements:**
+- **Maven/Gradle/.NET projects**: Do NOT use scan actions (sonarqube-scan-action, SonarQubePrepare task, etc.)
+  - These scanners are integrated into build tools (./gradlew sonar, mvn sonar:sonar, dotnet sonarscanner)
+  - Only need to run build commands with proper environment variables
+- **CLI Scanner projects** (JS/TS/Python/PHP/Go/Ruby): Use platform-specific scan actions
+  - GitHub Actions: Use sonarsource/sonarqube-scan-action
+  - GitLab CI: Use sonar-scanner-cli Docker image
+  - Azure DevOps: Use SonarQubePrepare/SonarQubeAnalyze tasks
+  - Bitbucket: Use SonarQube/SonarCloud pipes
+
 Also reference appropriate **scanner-specific skill**:
-- **scanner-maven**: For Maven projects
-- **scanner-gradle**: For Gradle projects
-- **scanner-dotnet**: For .NET projects
-- **scanner-cli**: For JavaScript/TypeScript/Python/other languages
+- **scanner-maven**: For Maven projects (no scan action needed)
+- **scanner-gradle**: For Gradle projects (no scan action needed)
+- **scanner-dotnet**: For .NET projects (no scan action needed)
+- **scanner-cli**: For JavaScript/TypeScript/Python/other languages (scan action required)
 
 DO NOT include documentation links in user responses.
 
@@ -124,24 +139,30 @@ Use **devops-setup-instructions** skill:
 User: "Set up SonarQube for my project"
 
 SonarArchitectLight:
-1. [Uses project-detection skill - finds package.json, .github/workflows/]
-2. "Detected Node.js project with GitHub Actions. Are you using SonarQube Cloud or Server?"
+1. [Uses project-detection skill - finds build.gradle, .github/workflows/ci.yml]
+2. "I detected a Gradle project with GitHub Actions (found .github/workflows/ directory). Is this correct, or would you like to use a different CI/CD platform?"
+
+User: "That's correct"
+
+SonarArchitectLight:
+3. "Are you using SonarQube Cloud or Server?"
 
 User: "Cloud"
 
 SonarArchitectLight:
-3. "What's your SonarQube project key?"
+4. "What's your SonarQube project key?"
 
 User: "my-org_my-project"
 
 SonarArchitectLight:
-4. [Uses prerequisites-gathering to detect branch]
-5. [Uses documentation-links + web/fetch for latest versions]
-6. [Uses pipeline-creation to create files with security-practices applied]
+5. [Uses prerequisites-gathering to detect branch]
+6. [Uses scanner-gradle skill - knows NOT to check for scan action]
+7. [Uses web/fetch for latest Gradle plugin version]
+8. [Uses pipeline-creation to create workflow with Gradle commands only]
+   ✅ Updated build.gradle with latest SonarQube plugin
    ✅ Created .github/workflows/sonarqube.yml
-   ✅ Created sonar-project.properties
    
-7. [Uses devops-setup-instructions]
+9. [Uses devops-setup-instructions]
    🔐 Configure in GitHub → Settings → Secrets and variables → Actions:
    - SONAR_TOKEN: [your SonarQube Cloud token]
    

@@ -21,6 +21,12 @@ This skill provides .NET-specific scanner documentation and configuration guidan
 
 The .NET scanner is a command-line tool that integrates SonarQube analysis for C#, VB.NET, and F# projects.
 
+**CRITICAL: .NET projects do NOT use CI/CD scan actions/tasks (Azure DevOps is special case).**
+- GitHub Actions: Do NOT use `sonarsource/sonarqube-scan-action` - run dotnet sonarscanner begin/build/end directly
+- GitLab CI: Do NOT use sonar-scanner-cli Docker image - run dotnet sonarscanner begin/build/end directly
+- Azure DevOps: Use SonarQubePrepare task in MSBuild mode (special case - wraps dotnet sonarscanner)
+- Bitbucket: Do NOT use SonarQube/SonarCloud pipes - run dotnet sonarscanner begin/build/end directly
+
 ### Key Concepts
 - Three-step process: begin analysis → build project → end analysis
 - Must be installed as .NET global or local tool

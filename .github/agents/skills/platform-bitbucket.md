@@ -23,16 +23,30 @@ This skill provides Bitbucket Pipelines-specific documentation and guidance for 
 
 **Use `web/fetch` to get current examples from official documentation and pipe repositories.**
 
-### Using Build Tools (Maven/Gradle/DotNet)
-- **Java (Maven)**: Use Maven within Bitbucket step. See: scanner-maven skill
-- **Java (Gradle)**: Use Gradle within Bitbucket step. See: scanner-gradle skill
+### When to Use SonarQube Pipes
+
+**ONLY use SonarQube/SonarCloud pipes for CLI scanner projects:**
+- **JavaScript/TypeScript**: Projects without Maven/Gradle/.NET
+- **Python**: Projects without Maven/Gradle/.NET
+- **PHP, Go, Ruby, etc.**: Projects using CLI scanner
+- **Pipes available**:
+  - SonarQube Cloud: `sonarsource/sonarcloud-scan` and `sonarsource/sonarcloud-quality-gate`
+  - SonarQube Server: `sonarsource/sonarqube-scan` and `sonarsource/sonarqube-quality-gate`
+- See: scanner-cli skill
+
+**DO NOT use pipes for Maven/Gradle/.NET projects:**
+- These use their own build tools to run analysis
+- Pipes are not needed and should not be used
+
+### Scanner-Specific Setup
+
+**Build Tool Projects (run commands directly):**
+- **Java (Maven)**: Use Maven within Bitbucket step with `mvn sonar:sonar`. See: scanner-maven skill
+- **Java (Gradle)**: Use Gradle within Bitbucket step with `./gradlew sonar`. See: scanner-gradle skill
 - **.NET**: Use dotnet-sonarscanner within Bitbucket step. See: scanner-dotnet skill
 
-### Using Pipes (CLI Scanner)
-- **JavaScript/TypeScript/Python/Other**: Use official SonarCloud/SonarQube pipes
-- **SonarQube Cloud**: `sonarsource/sonarcloud-scan` and `sonarsource/sonarcloud-quality-gate`
-- **SonarQube Server**: `sonarsource/sonarqube-scan` and `sonarsource/sonarqube-quality-gate`
-- See: scanner-cli skill
+**CLI Scanner Projects (use pipes):**
+- **JavaScript/TypeScript/Python/Other**: Use official SonarCloud/SonarQube pipes. See: scanner-cli skill
 
 **Check pipe repositories above for latest versions.**
 

@@ -21,6 +21,12 @@ This skill provides Gradle-specific scanner documentation and configuration guid
 
 The Gradle SonarQube scanner is a Gradle plugin that integrates SonarQube analysis into the Gradle build lifecycle.
 
+**CRITICAL: Gradle projects do NOT use CI/CD scan actions/tasks (except Azure DevOps).**
+- GitHub Actions: Do NOT use `sonarsource/sonarqube-scan-action` - run `./gradlew sonar` directly
+- GitLab CI: Do NOT use sonar-scanner-cli Docker image - run `./gradlew sonar` directly
+- Azure DevOps: Use SonarQubePrepare task in Gradle mode (special case - wraps Gradle integration)
+- Bitbucket: Do NOT use SonarQube/SonarCloud pipes - run `./gradlew sonar` directly
+
 ### Plugin Version Management
 - **Always check latest version**: Use `web/fetch` to get the current plugin version from official documentation
 - **Update existing versions**: If a project already has the plugin configured, compare with latest and update if outdated

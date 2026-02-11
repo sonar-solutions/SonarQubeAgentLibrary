@@ -25,10 +25,28 @@ This skill provides Azure DevOps-specific documentation and guidance for SonarQu
 
 **Use `web/fetch` to get current examples from official documentation.**
 
-- **Java (Maven)**: Use SonarQubePrepare + Maven task + SonarQubePublish. See: scanner-maven skill
-- **Java (Gradle)**: Use SonarQubePrepare + Gradle task + SonarQubePublish. See: scanner-gradle skill
-- **.NET**: Use SonarQubePrepare (MSBuild mode) + build + SonarQubeAnalyze + SonarQubePublish. See: scanner-dotnet skill
-- **JavaScript/TypeScript/Python/Other**: Use SonarQubePrepare (CLI mode) + SonarQubeAnalyze + SonarQubePublish. See: scanner-cli skill
+**IMPORTANT: Azure DevOps uses SonarQube extension tasks for ALL project types.**
+The extension tasks adapt based on the scanner mode selected:
+
+### Maven Projects
+- Use `SonarQubePrepare` (scanner mode: Maven) + Maven task + `SonarQubePublish`
+- See: scanner-maven skill
+- **Do NOT** run `mvn sonar:sonar` manually
+
+### Gradle Projects
+- Use `SonarQubePrepare` (scanner mode: Gradle) + Gradle task + `SonarQubePublish`
+- See: scanner-gradle skill
+- **Do NOT** run `./gradlew sonar` manually
+
+### .NET Projects
+- Use `SonarQubePrepare` (scanner mode: MSBuild) + build task + `SonarQubeAnalyze` + `SonarQubePublish`
+- See: scanner-dotnet skill
+- Extension wraps dotnet sonarscanner begin/end
+
+### CLI Scanner Projects (JavaScript/TypeScript/Python/Other)
+- Use `SonarQubePrepare` (scanner mode: CLI) + `SonarQubeAnalyze` + `SonarQubePublish`
+- See: scanner-cli skill
+- Extension handles scanner installation and execution
 
 Fetch examples from official documentation above to get latest task versions and configuration.
 

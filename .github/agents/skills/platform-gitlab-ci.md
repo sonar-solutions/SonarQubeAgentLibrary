@@ -19,6 +19,20 @@ This skill provides GitLab CI-specific documentation and guidance for SonarQube 
 
 **Use `web/fetch` to get current examples from official documentation.**
 
+### When to Use sonar-scanner-cli Docker Image
+
+**ONLY use `sonarsource/sonar-scanner-cli` Docker image for CLI scanner projects:**
+- **JavaScript/TypeScript**: Projects without Maven/Gradle/.NET
+- **Python**: Projects without Maven/Gradle/.NET
+- **PHP, Go, Ruby, etc.**: Projects using CLI scanner
+- See: scanner-cli skill for configuration
+
+**DO NOT use sonar-scanner-cli Docker image for:**
+- **Java (Maven)**: Use Maven commands directly with maven Docker image
+- **Java (Gradle)**: Use Gradle commands directly with gradle Docker image
+- **.NET**: Use dotnet sonarscanner commands directly with dotnet SDK image
+
+### Scanner-Specific Setup
 - **Java (Maven)**: Use Maven within GitLab CI job. See: scanner-maven skill
 - **Java (Gradle)**: Use Gradle within GitLab CI job. See: scanner-gradle skill
 - **.NET**: Use dotnet-sonarscanner within GitLab CI job. See: scanner-dotnet skill
