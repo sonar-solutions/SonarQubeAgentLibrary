@@ -24,7 +24,7 @@ This skill defines how to create and edit SonarQube configuration files.
 ### Fetch Latest Versions
 
 Before creating pipeline configuration files:
-1. Use `web/fetch` to retrieve official documentation
+1. Use `web/fetch` to retrieve official SonarQube documentation from the docs.sonarsource.com domain (any page under this domain)
 2. Check for latest action/task versions:
    - GitHub Actions: Check version in examples (e.g., `@v7`)
    - Azure DevOps: Check task versions
