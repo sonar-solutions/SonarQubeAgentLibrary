@@ -1,5 +1,5 @@
 ---
-name: SonarArchitectLightWithSkills
+name: SonarArchitectLight
 description: "Creates SonarQube CI/CD pipeline configurations directly. Analyzes your project and generates the necessary workflow files and configurations for your CI/CD platform."
 tools: ["read", "search", "edit", "execute", "web/fetch"]
 ---
