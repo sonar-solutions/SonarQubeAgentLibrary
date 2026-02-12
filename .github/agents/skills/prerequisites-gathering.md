@@ -45,11 +45,14 @@ This skill defines the critical information needed before creating any SonarQube
 - DO NOT proceed without this for Cloud users
 
 **4b. SonarQube Cloud Instance (REQUIRED for Cloud)**
-- Ask user: "Which SonarQube Cloud instance are you using?"
-  - **US**: `sonarqube.us`
-  - **EU**: `sonarcloud.io`
+- **CRITICAL**: Ask user: "Which SonarQube Cloud instance are you using?"
+- **ONLY these two options exist - use them exactly as shown**:
+  - **US**: `sonarqube.us` (full URL: https://sonarqube.us)
+  - **EU**: `sonarcloud.io` (full URL: https://sonarcloud.io)
+- When asking the user, you MUST present these exact values: "US: sonarqube.us or EU: sonarcloud.io"
 - Default is EU (`sonarcloud.io`) if user is unsure
 - This determines the SONAR_HOST_URL value
+- **DO NOT** use any other URLs or variations
 
 ### 5. Project Key (REQUIRED)
 - Ask user for their SonarQube project key

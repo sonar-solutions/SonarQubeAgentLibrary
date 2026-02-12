@@ -76,6 +76,7 @@ Use **prerequisites-gathering** skill:
 **IMPORTANT: Ask multiple questions together when possible**
 - After confirming platform, ask SonarQube type + project key + organization (if Cloud) in a single interaction
 - Don't ask questions one at a time
+- **CRITICAL**: When asking about Cloud instance, use EXACTLY: "US: sonarqube.us or EU: sonarcloud.io" - these are the ONLY valid options
 
 **DO NOT create files until all prerequisites are confirmed.**
 
