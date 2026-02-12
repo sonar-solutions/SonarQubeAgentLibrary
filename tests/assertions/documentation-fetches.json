@@ -1,0 +1,182 @@
+{
+  "description": "Validation rules for documentation fetch behavior during agent execution",
+  "purpose": "Ensures agent actually uses web/fetch to get current documentation rather than relying on outdated training data",
+  "rules": [
+    {
+      "id": "minimum-fetches",
+      "name": "Minimum Documentation Fetches Required",
+      "severity": "high",
+      "description": "Agent should fetch at least minimum amount of documentation",
+      "default_min": 2,
+      "score_if_met": 3,
+      "score_if_not_met": -5,
+      "failure_message": "Agent fetched too few documentation pages - may be relying on training data"
+    },
+    {
+      "id": "maximum-fetches",
+      "name": "Maximum Documentation Fetches Threshold",
+      "severity": "medium",
+      "description": "Agent should not over-fetch documentation",
+      "default_max": 10,
+      "score_if_exceeded": -2,
+      "warning_message": "Agent fetched excessive documentation - inefficient"
+    },
+    {
+      "id": "official-sources",
+      "name": "Fetches from Official Documentation Sources",
+      "severity": "high",
+      "description": "Agent should fetch from official documentation domains",
+      "required_domains": {
+        "all_scenarios": ["docs.sonarsource.com"],
+        "github-actions": ["github.com"],
+        "gitlab-ci": ["docs.gitlab.com"],
+        "azure-devops": ["learn.microsoft.com"],
+        "bitbucket": ["support.atlassian.com"]
+      },
+      "score_per_domain": 2,
+      "failure_message": "Missing fetches from official documentation sources"
+    },
+    {
+      "id": "relevant-pages",
+      "name": "Fetches Relevant Documentation Pages",
+      "severity": "medium",
+      "description": "Agent should fetch pages relevant to the scenario",
+      "score_per_match": 1,
+      "expected_patterns_by_language": {
+        "maven": [
+          {
+            "pattern": "docs\\.sonarsource\\.com.*maven",
+            "description": "Maven scanner documentation",
+            "score": 2
+          }
+        ],
+        "gradle": [
+          {
+            "pattern": "docs\\.sonarsource\\.com.*gradle",
+            "description": "Gradle scanner documentation",
+            "score": 2
+          }
+        ],
+        "dotnet": [
+          {
+            "pattern": "docs\\.sonarsource\\.com.*(dotnet|scanner-dotnet)",
+            "description": ".NET scanner documentation",
+            "score": 2
+          }
+        ],
+        "javascript": [
+          {
+            "pattern": "docs\\.sonarsource\\.com.*scanner-cli",
+            "description": "CLI scanner documentation",
+            "score": 2
+          },
+          {
+            "pattern": "docs\\.sonarsource\\.com.*sonar-project-properties",
+            "description": "sonar-project.properties documentation",
+            "score": 1
+          }
+        ],
+        "python": [
+          {
+            "pattern": "docs\\.sonarsource\\.com.*(scanner-cli|python)",
+            "description": "CLI scanner or Python documentation",
+            "score": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "fetch-timing",
+      "name": "Documentation Fetched at Appropriate Time",
+      "severity": "low",
+      "description": "Documentation should be fetched before file creation",
+      "validation": "timestamp_order",
+      "score_if_correct": 2,
+      "warning_message": "Documentation fetched after file creation - may not have informed decisions"
+    },
+    {
+      "id": "no-duplicate-fetches",
+      "name": "Minimal Duplicate Fetches",
+      "severity": "low",
+      "description": "Agent should not repeatedly fetch the same page",
+      "max_duplicate_ratio": 0.3,
+      "score_if_met": 1,
+      "warning_message": "High duplicate fetch rate - inefficient"
+    }
+  ],
+  "scoring": {
+    "max_points": 15,
+    "min_fetches_points": 3,
+    "official_sources_points": 6,
+    "relevant_pages_points": 4,
+    "timing_points": 2,
+    "categories": {
+      "efficiency": {
+        "rules": ["minimum-fetches", "maximum-fetches", "no-duplicate-fetches"],
+        "max_points": 7
+      },
+      "accuracy": {
+        "rules": ["official-sources", "relevant-pages"],
+        "max_points": 6
+      },
+      "quality": {
+        "rules": ["fetch-timing"],
+        "max_points": 2
+      }
+    }
+  },
+  "platform_specific": {
+    "github-actions": {
+      "additional_expected_domains": ["github.com"],
+      "additional_patterns": [
+        {
+          "pattern": "github\\.com/actions/(checkout|setup-java|setup-node)",
+          "description": "GitHub Actions marketplace",
+          "score": 1
+        }
+      ]
+    },
+    "gitlab-ci": {
+      "additional_expected_domains": ["docs.gitlab.com"],
+      "additional_patterns": [
+        {
+          "pattern": "docs\\.gitlab\\.com.*ci.*yaml",
+          "description": "GitLab CI YAML reference",
+          "score": 1
+        }
+      ]
+    },
+    "azure-devops": {
+      "additional_expected_domains": ["learn.microsoft.com"],
+      "additional_patterns": [
+        {
+          "pattern": "learn\\.microsoft\\.com.*azure.*pipelines",
+          "description": "Azure Pipelines documentation",
+          "score": 1
+        }
+      ]
+    },
+    "bitbucket": {
+      "additional_expected_domains": ["support.atlassian.com"],
+      "additional_patterns": [
+        {
+          "pattern": "support\\.atlassian\\.com.*bitbucket.*pipelines",
+          "description": "Bitbucket Pipelines documentation",
+          "score": 1
+        }
+      ]
+    }
+  },
+  "recommendations": {
+    "optimal_range": {
+      "min": 3,
+      "max": 7,
+      "description": "Optimal documentation fetch count for most scenarios"
+    },
+    "critical_pages": [
+      "Scanner-specific documentation (Maven, Gradle, .NET, CLI)",
+      "Platform-specific CI/CD documentation",
+      "SonarQube/SonarCloud setup guides"
+    ]
+  }
+}

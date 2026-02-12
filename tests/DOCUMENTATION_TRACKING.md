@@ -4,11 +4,33 @@ This guide explains how to capture and track which documentation pages the Sonar
 
 ## Why Track Documentation Fetches?
 
-Tracking documentation fetches helps validate that the agent:
-1. **Actually uses web/fetch** - Not relying on outdated or hardcoded knowledge
+Tracking documentation fetches validates that the agent:
+1. **Uses current documentation** - Not relying on outdated training data
 2. **Fetches appropriate sources** - Gets information from official documentation
 3. **Fetches efficiently** - Not over-fetching or under-fetching
-4. **Uses current versions** - Accessing latest documentation pages
+4. **Accesses relevant pages** - Reads documentation specific to the scenario
+
+**This is now a first-class assertion** in the testing framework, treated identically to security compliance, version currency, and other validation categories.
+
+## Assertion Definition
+
+Documentation fetch validation is defined in `tests/assertions/documentation-fetches.json`:
+
+- **Scoring**: 15 points maximum (Efficiency: 7pts, Accuracy: 6pts, Quality: 2pts)
+- **Rules**: minimum-fetches, maximum-fetches, official-sources, relevant-pages, fetch-timing, no-duplicate-fetches
+- **Configuration**: Platform-specific expectations (GitHub Actions, GitLab CI, Azure DevOps, Bitbucket)
+
+## Integration in Test Scenarios
+
+Test scenarios reference documentation tracking in their validation section:
+
+```yaml
+validation:
+  - type: "documentation_fetches"
+    rules: ["minimum-fetches", "official-sources", "relevant-pages"]
+```
+
+This ensures documentation fetch validation runs automatically during test execution.
 
 ## Documentation Fetch Data Structure
 

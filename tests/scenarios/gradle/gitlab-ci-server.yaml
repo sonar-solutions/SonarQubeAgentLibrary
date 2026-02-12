@@ -79,6 +79,8 @@ expected:
       check: "GitLab CI image versions"
     - type: "security_compliance"
       rules: ["security-practices"]
+    - type: "documentation_fetches"
+      rules: ["minimum-fetches", "official-sources", "relevant-pages"]
 
 assertions:
   - "All prerequisites gathered before file creation"

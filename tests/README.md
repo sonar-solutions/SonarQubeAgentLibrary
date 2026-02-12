@@ -32,7 +32,8 @@ tests/
 │   ├── scanner-selection.json
 │   ├── version-currency.json
 │   ├── file-creation.json
-│   └── skill-invocation.json
+│   ├── skill-invocation.json
+│   └── documentation-fetches.json
 │
 ├── scripts/                # Automation scripts
 │   ├── run-scenario.sh          # Run single scenario
@@ -136,12 +137,12 @@ Each test execution creates a JSON result file:
 |----------|------------|-----------|
 | **Accuracy** | 40 | Skill invocation, scanner selection, file creation |
 | **Security** | 20 | No hardcoded credentials, proper secret usage |
-| **Efficiency** | 15 | Batched questions, web fetch usage, documentation fetches |
+| **Efficiency** | 15 | Batched questions, web fetch usage, **documentation fetches (15pts)** |
 | **Currency** | 15 | Latest action/task/image versions |
 | **Usability** | 10 | Clear instructions, complete setup guide |
 | **Total** | **100** | |
 
-**Documentation Tracking:** The framework also tracks which documentation pages are fetched during execution, helping validate that agents use current information rather than outdated training data. See [DOCUMENTATION_TRACKING.md](DOCUMENTATION_TRACKING.md) for details.
+**Documentation Tracking:** The framework validates documentation fetches as a **first-class assertion** (15 points maximum), ensuring agents use current information rather than outdated training data. This validates minimum/maximum fetches, access to official sources, relevant page selection, and fetch efficiency. See [DOCUMENTATION_TRACKING.md](DOCUMENTATION_TRACKING.md) and [assertions/documentation-fetches.json](assertions/documentation-fetches.json) for details.
 
 ### Summary Report Example
 
@@ -268,6 +269,14 @@ Validation is driven by JSON assertion files in `tests/assertions/`:
 - Correct file paths per platform
 - Required content elements present
 - Branch handling (include current branch if not main)
+
+### Documentation Fetches (`documentation-fetches.json`)
+- Minimum documentation fetches (default: 2, score: 3pts)
+- Official sources accessed (docs.sonarsource.com, platform-specific docs, score: 2pts per domain)
+- Relevant pages for language/platform (score varies by page importance)
+- No excessive fetching (>10 penalized)
+- No duplicate page fetches (<30% duplicate ratio, score: 1pt)
+- **Total: 15 points maximum** (contributes to Efficiency score)
 
 ## 📈 Model Comparison
 
