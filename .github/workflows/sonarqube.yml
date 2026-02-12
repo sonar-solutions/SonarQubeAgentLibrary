@@ -1,0 +1,28 @@
+name: SonarQube Analysis
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - develop
+      - feature/agents-with-skills
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  sonarqube:
+    name: SonarQube Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # Disable shallow clone for better analysis relevancy
+          fetch-depth: 0
+      
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v7.0.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
