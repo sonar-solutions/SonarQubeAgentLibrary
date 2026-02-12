@@ -79,7 +79,7 @@ def get_summary(file_path: Path) -> Dict[str, Any]:
             pass
     
     unique_domains = list(set(domains))
-    unique_urls = list(set(f['url'] for f in fetches))
+    unique_urls = {f['url'] for f in fetches}
     
     return {
         'total_count': len(fetches),

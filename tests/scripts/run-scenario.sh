@@ -22,6 +22,10 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
+# Constants
+TIME_FORMAT='%H:%M:%S'
+SEPARATOR='━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+
 # Parse arguments
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -95,18 +99,16 @@ echo -e "${BLUE}Timestamp:${NC} $TIMESTAMP"
 echo ""
 
 # Start test execution
-echo -e "${YELLOW}[$(date +'%H:%M:%S')]${NC} Starting test scenario..."
+echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Starting test scenario..."
 
-# TODO: This is where actual agent invocation would happen
-# For now, we'll create a placeholder result structure
-
-echo -e "${YELLOW}[$(date +'%H:%M:%S')]${NC} Preparing test environment..."
-echo -e "${YELLOW}[$(date +'%H:%M:%S')]${NC} Loading scenario definition..."
-echo -e "${YELLOW}[$(date +'%H:%M:%S')]${NC} Creating project fixture..."
-echo -e "${YELLOW}[$(date +'%H:%M:%S')]${NC} Initializing agent session..."
+# Agent invocation placeholder
+echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Preparing test environment..."
+echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Loading scenario definition..."
+echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Creating project fixture..."
+echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Initializing agent session..."
 
 # Call validation script
-echo -e "${YELLOW}[$(date +'%H:%M:%S')]${NC} Running validation checks..."
+echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Running validation checks..."
 
 # For now, create a template result file
 cat > "$RESULT_FILE" <<EOF
@@ -145,9 +147,9 @@ echo ""
 echo -e "${GREEN}✓${NC} Test framework ready"
 echo -e "${BLUE}Result file:${NC} $RESULT_FILE"
 echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "$SEPARATOR"
 echo -e "${YELLOW}NOTE:${NC} This is the test framework skeleton."
 echo -e "      Agent invocation logic needs to be implemented."
 echo -e "      See tests/scripts/validate-result.py for validation logic."
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "$SEPARATOR"
 echo ""

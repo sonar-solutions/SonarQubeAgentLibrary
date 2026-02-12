@@ -90,12 +90,6 @@ class TestValidator:
         expected_skills = self.scenario.get('expected', {}).get('skills_invoked', [])
         actual_skills = self.result.get('skills_invoked', [])
         
-        # Load skill invocation assertions
-        assertion_file = self.assertions_dir / 'skill-invocation.json'
-        if assertion_file.exists():
-            with open(assertion_file, 'r') as f:
-                skill_assertions = json.load(f)
-        
         # Check if all expected skills are present
         missing_skills = set(expected_skills) - set(actual_skills)
         extra_skills = set(actual_skills) - set(expected_skills)
