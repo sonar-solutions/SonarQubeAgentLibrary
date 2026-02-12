@@ -1,0 +1,110 @@
+{
+  "description": "Validation rules for checking if latest versions are used",
+  "last_updated": "2026-02-12",
+  "platforms": {
+    "github-actions": {
+      "actions": [
+        {
+          "name": "actions/checkout",
+          "min_version": "v4",
+          "current_version": "v4",
+          "deprecated_versions": ["v1", "v2", "v3"],
+          "pattern": "actions/checkout@v(\\d+)",
+          "score_current": 5,
+          "score_deprecated": 0
+        },
+        {
+          "name": "actions/setup-java",
+          "min_version": "v4",
+          "current_version": "v4",
+          "deprecated_versions": ["v1", "v2", "v3"],
+          "pattern": "actions/setup-java@v(\\d+)",
+          "score_current": 5,
+          "score_deprecated": 0
+        },
+        {
+          "name": "actions/setup-node",
+          "min_version": "v4",
+          "current_version": "v4",
+          "deprecated_versions": ["v1", "v2", "v3"],
+          "pattern": "actions/setup-node@v(\\d+)",
+          "score_current": 5,
+          "score_deprecated": 0
+        },
+        {
+          "name": "sonarsource/sonarqube-scan-action",
+          "min_version": "v2",
+          "current_version": "v3",
+          "deprecated_versions": ["v1"],
+          "pattern": "sonarsource/sonarqube-scan-action@v(\\d+)",
+          "score_current": 5,
+          "score_deprecated": 0
+        }
+      ]
+    },
+    "gitlab-ci": {
+      "images": [
+        {
+          "name": "maven",
+          "min_version": "3.9",
+          "current_version": "3.9",
+          "pattern": "maven:(\\d+\\.\\d+)",
+          "score_current": 5,
+          "score_old": 2
+        },
+        {
+          "name": "gradle",
+          "min_version": "8.5",
+          "current_version": "8.5",
+          "pattern": "gradle:(\\d+\\.\\d+)",
+          "score_current": 5,
+          "score_old": 2
+        },
+        {
+          "name": "sonarsource/sonar-scanner-cli",
+          "expects_latest": true,
+          "pattern": "sonarsource/sonar-scanner-cli:latest",
+          "score_latest": 5,
+          "score_specific": 2
+        }
+      ]
+    },
+    "azure-devops": {
+      "tasks": [
+        {
+          "name": "DotNetCoreCLI",
+          "min_version": "2",
+          "current_version": "2",
+          "pattern": "DotNetCoreCLI@(\\d+)",
+          "score_current": 5,
+          "score_old": 0
+        }
+      ]
+    },
+    "bitbucket": {
+      "images": [
+        {
+          "name": "node",
+          "min_version": "18",
+          "current_version": "20",
+          "pattern": "node:(\\d+)",
+          "score_current": 5,
+          "score_old": 2
+        },
+        {
+          "name": "sonarsource/sonar-scanner-cli",
+          "expects_latest": true,
+          "pattern": "sonarsource/sonar-scanner-cli:latest",
+          "score_latest": 5,
+          "score_specific": 2
+        }
+      ]
+    }
+  },
+  "scoring": {
+    "max_points": 15,
+    "per_current_version": 5,
+    "per_acceptable_version": 2,
+    "per_deprecated_version": 0
+  }
+}

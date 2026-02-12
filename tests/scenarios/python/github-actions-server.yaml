@@ -1,0 +1,112 @@
+name: python-github-actions-server
+description: Python Flask project with GitHub Actions targeting SonarQube Server
+category: priority
+language: python
+platform: github-actions
+sonarqube: server
+
+input:
+  project_structure:
+    - requirements.txt
+    - setup.py
+    - .github/workflows/test.yml
+    - app.py
+    - tests/test_app.py
+    - models/user.py
+  git_branch: feature/api-improvements
+  
+  user_responses:
+    - question: "CI/CD platform confirmation"
+      answer: "Yes, that's right"
+    - question: "SonarQube information"
+      answer: "Server, https://sonarqube.internal.company.com, python-flask-api"
+
+expected:
+  skills_invoked:
+    - project-detection
+    - prerequisites-gathering
+    - platform-github-actions
+    - scanner-python
+    - pipeline-creation
+    - security-practices
+    - devops-setup-instructions
+  
+  decisions:
+    - checkpoint: "Scanner selection"
+      expected: "Use sonar-scanner-cli (CLI scanner, NOT build integration)"
+      reason: "Python project without build tool integration"
+    
+    - checkpoint: "Branch trigger"
+      expected: "Include feature/api-improvements"
+      reason: "Current branch not main/master"
+    
+    - checkpoint: "SonarQube URL"
+      expected: "https://sonarqube.internal.company.com"
+      reason: "Server URL provided"
+  
+  documentation_fetches:
+    expected_domains:
+      - "docs.sonarsource.com"
+      - "github.com"
+    expected_pages:
+      - pattern: "docs.sonarsource.com.*(scanner-cli|python)"
+        description: "CLI scanner or Python documentation"
+      - pattern: "docs.sonarsource.com.*sonar-project-properties"
+        description: "sonar-project.properties documentation"
+      - pattern: "github.com.*sonarqube-scan-action"
+        description: "SonarQube scan action documentation"
+      - pattern: "github.com/actions.*checkout"
+        description: "GitHub Actions checkout documentation"
+    min_fetches: 2
+    max_fetches: 10
+  
+  files_created:
+    - path: ".github/workflows/sonarqube.yml"
+      must_contain:
+        - "actions/checkout@v4"
+        - "fetch-depth: 0"
+        - "sonarsource/sonarqube-scan-action@v"
+        - "${{ secrets.SONAR_TOKEN }}"
+        - "${{ secrets.SONAR_HOST_URL }}"
+        - "feature/api-improvements"
+      must_not_contain:
+        - "actions/checkout@v3"  # outdated
+        - "squ_"  # hardcoded token
+        - "sqp_"  # hardcoded token
+  
+    - path: "sonar-project.properties"
+      must_contain:
+        - "sonar.projectKey=python-flask-api"
+        - "sonar.sources=."
+        - "sonar.python.version=3"
+      must_not_contain:
+        - "sonar.login="  # token should be in workflow
+        - "sonar.host.url="  # should be in workflow as secret
+  
+  validation:
+    - type: "yaml_syntax"
+      file: ".github/workflows/sonarqube.yml"
+    - type: "properties_syntax"
+      file: "sonar-project.properties"
+    - type: "no_hardcoded_credentials"
+      files: ["**/*.yml", "**/*.yaml", "**/*.properties"]
+    - type: "version_currency"
+      check: "GitHub Actions versions"
+    - type: "security_compliance"
+      rules: ["security-practices"]
+
+assertions:
+  - "All prerequisites gathered before file creation"
+  - "web/fetch used to get latest versions"
+  - "Correct scanner selection (CLI scanner for Python)"
+  - "Security practices applied (secrets, not hardcoded)"
+  - "Current branch included in triggers"
+  - "Secrets setup instructions provided (including SONAR_HOST_URL)"
+  - "sonar-project.properties created without credentials"
+
+scoring:
+  accuracy: 40
+  security: 20
+  efficiency: 15
+  currency: 15
+  usability: 10

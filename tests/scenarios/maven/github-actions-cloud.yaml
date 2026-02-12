@@ -1,0 +1,101 @@
+name: maven-github-actions-cloud-us
+description: Maven project with GitHub Actions targeting SonarQube Cloud US instance
+category: priority
+language: maven
+platform: github-actions
+sonarqube: cloud-us
+
+input:
+  project_structure:
+    - pom.xml
+    - .github/workflows/ci.yml
+    - src/main/java/com/example/Main.java
+    - src/test/java/com/example/MainTest.java
+  git_branch: feature/user-auth
+  
+  user_responses:
+    - question: "CI/CD platform confirmation"
+      answer: "That's correct"
+    - question: "SonarQube information"
+      answer: "Cloud, my-org_my-project, my-org, US"
+
+expected:
+  skills_invoked:
+    - project-detection
+    - prerequisites-gathering
+    - platform-github-actions
+    - scanner-maven
+    - pipeline-creation
+    - security-practices
+    - devops-setup-instructions
+  
+  decisions:
+    - checkpoint: "Scanner selection"
+      expected: "Use mvn sonar:sonar command (NO scan action)"
+      reason: "Maven build tool integration"
+    
+    - checkpoint: "Branch trigger"
+      expected: "Include feature/user-auth"
+      reason: "Current branch not main/master"
+    
+    - checkpoint: "SonarQube URL"
+      expected: "https://sonarcloud.io"
+      reason: "US instance specified"
+  
+  documentation_fetches:
+    expected_domains:
+      - "docs.sonarsource.com"
+      - "github.com"
+    expected_pages:
+      - pattern: "docs.sonarsource.com.*maven"
+        description: "Maven scanner documentation"
+      - pattern: "github.com/actions.*checkout"
+        description: "GitHub Actions checkout documentation"
+      - pattern: "github.com/actions.*setup-java"
+        description: "GitHub Actions setup-java documentation"
+    min_fetches: 2
+    max_fetches: 10
+  
+  files_created:
+    - path: ".github/workflows/sonarqube.yml"
+      must_contain:
+        - "actions/checkout@v4"
+        - "fetch-depth: 0"
+        - "actions/setup-java@v4"
+        - "${{ secrets.SONAR_TOKEN }}"
+        - "mvn -B verify sonar:sonar"
+        - "-Dsonar.projectKey=my-org_my-project"
+        - "-Dsonar.organization=my-org"
+        - "-Dsonar.host.url=https://sonarcloud.io"
+        - "feature/user-auth"
+      must_not_contain:
+        - "sonarqube-scan-action"
+        - "squ_"  # hardcoded token
+        - "sqp_"  # hardcoded token
+        - "actions/checkout@v3"  # outdated version
+        - "actions/setup-java@v3"  # outdated version
+  
+  validation:
+    - type: "yaml_syntax"
+      file: ".github/workflows/sonarqube.yml"
+    - type: "no_hardcoded_credentials"
+      files: ["**/*.yml", "**/*.yaml"]
+    - type: "version_currency"
+      check: "GitHub Actions versions"
+    - type: "security_compliance"
+      rules: ["security-practices"]
+
+assertions:
+  - "All prerequisites gathered before file creation"
+  - "web/fetch used to get latest versions"
+  - "Correct scanner selection (command vs action)"
+  - "Security practices applied (secrets, not hardcoded)"
+  - "Current branch included in triggers"
+  - "Secrets setup instructions provided"
+
+scoring:
+  accuracy: 40  # out of 40
+  security: 20  # out of 20
+  efficiency: 15  # out of 15
+  currency: 15  # out of 15
+  usability: 10  # out of 10

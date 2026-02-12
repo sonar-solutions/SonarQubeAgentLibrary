@@ -1,0 +1,92 @@
+{
+  "description": "Expected skill invocation sequence for SonarArchitectLight scenarios",
+  "standard_sequence": [
+    {
+      "order": 1,
+      "skill": "project-detection",
+      "required": true,
+      "description": "Detect project type and CI/CD platform",
+      "score": 5
+    },
+    {
+      "order": 2,
+      "skill": "prerequisites-gathering",
+      "required": true,
+      "description": "Gather SonarQube configuration details",
+      "score": 5
+    },
+    {
+      "order": 3,
+      "skill": "platform-*",
+      "required": true,
+      "description": "Platform-specific skill (github-actions, gitlab-ci, azure-devops, bitbucket)",
+      "variants": [
+        "platform-github-actions",
+        "platform-gitlab-ci",
+        "platform-azure-devops",
+        "platform-bitbucket"
+      ],
+      "score": 5
+    },
+    {
+      "order": 4,
+      "skill": "scanner-*",
+      "required": true,
+      "description": "Scanner-specific skill based on language",
+      "variants": [
+        "scanner-maven",
+        "scanner-gradle",
+        "scanner-dotnet",
+        "scanner-javascript-typescript",
+        "scanner-python"
+      ],
+      "score": 5
+    },
+    {
+      "order": 5,
+      "skill": "pipeline-creation",
+      "required": true,
+      "description": "Create pipeline configuration files",
+      "score": 5
+    },
+    {
+      "order": 6,
+      "skill": "security-practices",
+      "required": true,
+      "description": "Apply security best practices",
+      "score": 5
+    },
+    {
+      "order": 7,
+      "skill": "devops-setup-instructions",
+      "required": true,
+      "description": "Provide setup instructions for secrets/variables",
+      "score": 5
+    }
+  ],
+  "efficiency_metrics": {
+    "prerequisite_gathering": {
+      "ideal": "batched_questions",
+      "description": "Questions should be batched, not asked one-by-one",
+      "score_batched": 5,
+      "score_sequential": 2
+    },
+    "web_fetch_usage": {
+      "required": true,
+      "description": "Should fetch documentation for latest versions",
+      "expected_fetches": [
+        "docs.sonarsource.com",
+        "github.com/actions",
+        "gitlab.com/docs"
+      ],
+      "score_used": 5,
+      "score_not_used": 0
+    }
+  },
+  "scoring": {
+    "all_skills_correct_order": 40,
+    "missing_skill": -10,
+    "incorrect_order": -5,
+    "correct_efficiency": 15
+  }
+}

@@ -1,0 +1,96 @@
+name: gradle-gitlab-ci-server
+description: Gradle Kotlin project with GitLab CI targeting SonarQube Server
+category: priority
+language: gradle
+platform: gitlab-ci
+sonarqube: server
+
+input:
+  project_structure:
+    - build.gradle.kts
+    - settings.gradle.kts
+    - .gitlab-ci.yml
+    - src/main/kotlin/com/example/Application.kt
+    - src/test/kotlin/com/example/ApplicationTest.kt
+  git_branch: develop
+  
+  user_responses:
+    - question: "CI/CD platform confirmation"
+      answer: "Yes, GitLab CI"
+    - question: "SonarQube information"
+      answer: "Server, https://sonarqube.mycompany.com, my-project-key"
+
+expected:
+  skills_invoked:
+    - project-detection
+    - prerequisites-gathering
+    - platform-gitlab-ci
+    - scanner-gradle
+    - pipeline-creation
+    - security-practices
+    - devops-setup-instructions
+  
+  decisions:
+    - checkpoint: "Scanner selection"
+      expected: "Use gradle sonar command (NO scan action)"
+      reason: "Gradle build tool integration"
+    
+    - checkpoint: "Branch trigger"
+      expected: "Include develop"
+      reason: "Current branch not main/master"
+    
+    - checkpoint: "SonarQube URL"
+      expected: "https://sonarqube.mycompany.com"
+      reason: "Server URL provided"
+  
+  documentation_fetches:
+    expected_domains:
+      - "docs.sonarsource.com"
+      - "docs.gitlab.com"
+    expected_pages:
+      - pattern: "docs.sonarsource.com.*gradle"
+        description: "Gradle scanner documentation"
+      - pattern: "docs.gitlab.com.*ci.*yaml"
+        description: "GitLab CI YAML reference"
+    min_fetches: 2
+    max_fetches: 10
+  
+  files_created:
+    - path: ".gitlab-ci.yml"
+      must_contain:
+        - "sonarqube-check:"
+        - "GIT_DEPTH: 0"
+        - "$SONAR_TOKEN"
+        - "./gradlew sonar"
+        - "-Dsonar.projectKey=my-project-key"
+        - "-Dsonar.host.url=https://sonarqube.mycompany.com"
+        - "develop"
+      must_not_contain:
+        - "sonar-scanner-cli"  # shouldn't use CLI scanner for Gradle
+        - "squ_"  # hardcoded token
+        - "sqp_"  # hardcoded token
+  
+  validation:
+    - type: "yaml_syntax"
+      file: ".gitlab-ci.yml"
+    - type: "no_hardcoded_credentials"
+      files: ["**/*.yml", "**/*.yaml"]
+    - type: "version_currency"
+      check: "GitLab CI image versions"
+    - type: "security_compliance"
+      rules: ["security-practices"]
+
+assertions:
+  - "All prerequisites gathered before file creation"
+  - "web/fetch used to get latest documentation"
+  - "Correct scanner selection (Gradle command)"
+  - "Security practices applied (CI/CD variables, not hardcoded)"
+  - "Current branch included in triggers"
+  - "Variable setup instructions provided"
+
+scoring:
+  accuracy: 40
+  security: 20
+  efficiency: 15
+  currency: 15
+  usability: 10

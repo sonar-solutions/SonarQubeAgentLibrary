@@ -1,0 +1,98 @@
+{
+  "description": "Validation rules for scanner selection based on project type",
+  "rules": [
+    {
+      "language": "maven",
+      "expected_scanner": "maven-plugin",
+      "correct_patterns": [
+        "mvn.*sonar:sonar",
+        "maven.*sonar:sonar"
+      ],
+      "incorrect_patterns": [
+        {
+          "pattern": "sonarqube-scan-action",
+          "reason": "Maven projects should use mvn sonar:sonar, not scan action"
+        },
+        {
+          "pattern": "sonar-scanner-cli",
+          "reason": "Maven projects should use mvn sonar:sonar, not CLI scanner"
+        }
+      ],
+      "score_correct": 10,
+      "score_incorrect": 0
+    },
+    {
+      "language": "gradle",
+      "expected_scanner": "gradle-plugin",
+      "correct_patterns": [
+        "gradle.*sonar",
+        "gradlew.*sonar",
+        "./gradlew.*sonar"
+      ],
+      "incorrect_patterns": [
+        {
+          "pattern": "sonarqube-scan-action",
+          "reason": "Gradle projects should use gradle sonar, not scan action"
+        },
+        {
+          "pattern": "sonar-scanner-cli",
+          "reason": "Gradle projects should use gradle sonar, not CLI scanner"
+        }
+      ],
+      "score_correct": 10,
+      "score_incorrect": 0
+    },
+    {
+      "language": "dotnet",
+      "expected_scanner": "dotnet-scanner",
+      "correct_patterns": [
+        "dotnet.*sonarscanner.*begin",
+        "dotnet.*sonarscanner.*end"
+      ],
+      "incorrect_patterns": [
+        {
+          "pattern": "SonarCloudPrepare@",
+          "reason": ".NET projects should use dotnet sonarscanner CLI, deprecated task"
+        },
+        {
+          "pattern": "sonarqube-scan-action",
+          "reason": ".NET projects should use dotnet sonarscanner, not scan action"
+        }
+      ],
+      "score_correct": 10,
+      "score_incorrect": 0
+    },
+    {
+      "language": "javascript",
+      "expected_scanner": "sonar-scanner-cli",
+      "correct_patterns": [
+        "sonar-scanner-cli",
+        "sonar-scanner"
+      ],
+      "incorrect_patterns": [
+        {
+          "pattern": "npm.*run.*sonar",
+          "reason": "JavaScript projects should use CLI scanner, not npm script"
+        }
+      ],
+      "score_correct": 10,
+      "score_incorrect": 0
+    },
+    {
+      "language": "python",
+      "expected_scanner": "sonar-scanner-cli",
+      "correct_patterns": [
+        "sonar-scanner-cli",
+        "sonar-scanner",
+        "sonarqube-scan-action"
+      ],
+      "incorrect_patterns": [],
+      "score_correct": 10,
+      "score_incorrect": 0
+    }
+  ],
+  "scoring": {
+    "correct_scanner": 10,
+    "incorrect_scanner": 0
+  }
+}
