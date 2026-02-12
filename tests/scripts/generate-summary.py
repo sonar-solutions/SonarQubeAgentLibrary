@@ -64,17 +64,14 @@ def categorize_results(results: List[Dict[str, Any]]) -> Dict[str, Any]:
     return categorized
 
 
-def generate_markdown_report(model: str, categorized: Dict[str, Any], output_file: Path):
-    """Generate markdown summary report"""
-    
+def _calculate_summary_stats(categorized: Dict[str, Any]) -> Dict[str, Any]:
+    """Helper to calculate summary statistics"""
     total_scenarios = len(categorized['all_results'])
     passed = categorized['by_status']['passed']
     failed = categorized['by_status']['failed']
     pending = categorized['by_status']['pending']
-    
     pass_rate = (passed / total_scenarios * 100) if total_scenarios > 0 else 0
     
-    # Calculate average scores
     total_score = 0
     score_count = 0
     total_doc_fetches = 0
@@ -94,24 +91,71 @@ def generate_markdown_report(model: str, categorized: Dict[str, Any], output_fil
     avg_score = (total_score / score_count) if score_count > 0 else 0
     avg_doc_fetches = (total_doc_fetches / doc_fetch_count) if doc_fetch_count > 0 else 0
     
+    return {
+        'total_scenarios': total_scenarios,
+        'passed': passed,
+        'failed': failed,
+        'pending': pending,
+        'pass_rate': pass_rate,
+        'avg_score': avg_score,
+        'avg_doc_fetches': avg_doc_fetches
+    }
+
+
+def _generate_failed_scenarios_section(model: str, categorized: Dict[str, Any]) -> List[str]:
+    """Helper to generate failed scenarios section"""
+    section = []
+    section.append("## Failed Scenarios")
+    section.append("")
+    
+    for result in categorized['all_results']:
+        if result.get('status') == 'failed':
+            scenario_name = result.get('scenario', 'Unknown')
+            language = result.get('language', 'unknown')
+            score = result.get('scores', {}).get('total', 0)
+            
+            section.append(f"### {language}/{scenario_name}")
+            section.append(f"**Score:** {score}/100")
+            section.append("")
+            
+            # List failures
+            validation = result.get('validation', {})
+            failures = validation.get('failures', [])
+            if failures:
+                section.append("**Issues:**")
+                for failure in failures:
+                    section.append(f"- {failure}")
+                section.append("")
+            
+            section.append(f"**Details:** `results/{model}/{result['file']}`")
+            section.append("")
+    
+    return section
+
+
+def generate_markdown_report(model: str, categorized: Dict[str, Any], output_file: Path):
+    """Generate markdown summary report"""
+    
+    stats = _calculate_summary_stats(categorized)
+    
     # Start building report
     report = []
     report.append("# SonarArchitectLight Test Suite Summary")
     report.append("")
     report.append(f"**Model:** {model}")
     report.append(f"**Date:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    report.append(f"**Total Scenarios:** {total_scenarios}")
+    report.append(f"**Total Scenarios:** {stats['total_scenarios']}")
     report.append("")
     
     report.append("## Overall Results")
     report.append("")
-    report.append(f"- ✅ **Passed:** {passed} ({pass_rate:.1f}%)")
-    report.append(f"- ❌ **Failed:** {failed} ({(failed/total_scenarios*100) if total_scenarios > 0 else 0:.1f}%)")
-    if pending > 0:
-        report.append(f"- ⏳ **Pending:** {pending}")
-    report.append(f"- 📊 **Average Score:** {avg_score:.1f}/100")
-    if avg_doc_fetches > 0:
-        report.append(f"- 📚 **Avg Documentation Fetches:** {avg_doc_fetches:.1f} pages/scenario")
+    report.append(f"- ✅ **Passed:** {stats['passed']} ({stats['pass_rate']:.1f}%)")
+    report.append(f"- ❌ **Failed:** {stats['failed']} ({(stats['failed']/stats['total_scenarios']*100) if stats['total_scenarios'] > 0 else 0:.1f}%)")
+    if stats['pending'] > 0:
+        report.append(f"- ⏳ **Pending:** {stats['pending']}")
+    report.append(f"- 📊 **Average Score:** {stats['avg_score']:.1f}/100")
+    if stats['avg_doc_fetches'] > 0:
+        report.append(f"- 📚 **Avg Documentation Fetches:** {stats['avg_doc_fetches']:.1f} pages/scenario")
     report.append("")
     
     report.append("---")
@@ -133,31 +177,8 @@ def generate_markdown_report(model: str, categorized: Dict[str, Any], output_fil
     report.append("")
     
     # Failed scenarios detail
-    if failed > 0:
-        report.append("## Failed Scenarios")
-        report.append("")
-        
-        for result in categorized['all_results']:
-            if result.get('status') == 'failed':
-                scenario_name = result.get('scenario', 'Unknown')
-                language = result.get('language', 'unknown')
-                score = result.get('scores', {}).get('total', 0)
-                
-                report.append(f"### {language}/{scenario_name}")
-                report.append(f"**Score:** {score}/100")
-                report.append("")
-                
-                # List failures
-                validation = result.get('validation', {})
-                failures = validation.get('failures', [])
-                if failures:
-                    report.append("**Issues:**")
-                    for failure in failures:
-                        report.append(f"- {failure}")
-                    report.append("")
-                
-                report.append(f"**Details:** `results/{model}/{result['file']}`")
-                report.append("")
+    if stats['failed'] > 0:
+        report.extend(_generate_failed_scenarios_section(model, categorized))
     
     report.append("---")
     report.append("")
@@ -166,8 +187,7 @@ def generate_markdown_report(model: str, categorized: Dict[str, Any], output_fil
     report.append("## Score Breakdown")
     report.append("")
     report.append("| Scenario | Accuracy | Security | Efficiency | Currency | Usability | Total | Doc Fetches |")
-    report.append("|---------|---------|---------|-----------|---------|-----------|
-------|-------------|")
+    report.append("|---------|---------|---------|-----------|---------|-----------|------|-------------|")
     
     for result in sorted(categorized['all_results'], key=lambda x: x.get('scores', {}).get('total', 0), reverse=True):
         scenario = f"{result.get('language', 'unknown')}/{result.get('scenario', 'unknown')}"
@@ -193,11 +213,11 @@ def generate_markdown_report(model: str, categorized: Dict[str, Any], output_fil
     report.append("## Recommendations")
     report.append("")
     
-    if pass_rate >= 95:
+    if stats['pass_rate'] >= 95:
         report.append("✅ **Excellent:** Model performs very well across all scenarios.")
-    elif pass_rate >= 80:
+    elif stats['pass_rate'] >= 80:
         report.append("⚠️ **Good:** Model performs well but has some areas for improvement.")
-    elif pass_rate >= 60:
+    elif stats['pass_rate'] >= 60:
         report.append("⚠️ **Fair:** Model needs improvement in several areas.")
     else:
         report.append("❌ **Poor:** Model requires significant improvements.")

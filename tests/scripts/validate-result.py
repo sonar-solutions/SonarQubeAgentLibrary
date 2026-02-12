@@ -121,6 +121,30 @@ class TestValidator:
                 'message': f"Missing: {missing_skills}, Extra: {extra_skills}"
             })
     
+    def _check_scanner_patterns(self, files_created, lang_rules):
+        """Helper to check scanner patterns in files"""
+        correct_scanner = False
+        
+        for file_info in files_created:
+            content = file_info.get('content', '')
+            
+            # Check for correct patterns
+            for pattern in lang_rules.get('correct_patterns', []):
+                if re.search(pattern, content):
+                    correct_scanner = True
+                    break
+            
+            # Check for incorrect patterns
+            for incorrect in lang_rules.get('incorrect_patterns', []):
+                pattern = incorrect.get('pattern')
+                if re.search(pattern, content):
+                    reason = incorrect.get('reason')
+                    self.failures.append(f"Incorrect scanner: {reason}")
+                    print(f"  {RED}✗{NC} {reason}")
+                    correct_scanner = False
+        
+        return correct_scanner
+    
     def validate_scanner_selection(self):
         """Validate that the correct scanner was selected"""
         print(f"{YELLOW}[Checkpoint]{NC} Validating scanner selection...")
@@ -149,25 +173,7 @@ class TestValidator:
         
         # Check files created for correct scanner usage
         files_created = self.result.get('files_created', [])
-        correct_scanner = False
-        
-        for file_info in files_created:
-            content = file_info.get('content', '')
-            
-            # Check for correct patterns
-            for pattern in lang_rules.get('correct_patterns', []):
-                if re.search(pattern, content):
-                    correct_scanner = True
-                    break
-            
-            # Check for incorrect patterns
-            for incorrect in lang_rules.get('incorrect_patterns', []):
-                pattern = incorrect.get('pattern')
-                if re.search(pattern, content):
-                    reason = incorrect.get('reason')
-                    self.failures.append(f"Incorrect scanner: {reason}")
-                    print(f"  {RED}✗{NC} {reason}")
-                    correct_scanner = False
+        correct_scanner = self._check_scanner_patterns(files_created, lang_rules)
         
         if correct_scanner:
             self.scores['accuracy'] += 10
@@ -184,6 +190,46 @@ class TestValidator:
                 'message': 'Incorrect scanner selection'
             })
     
+    def _validate_single_file(self, expected_file, actual_files):
+        """Helper to validate a single file's content"""
+        expected_path = expected_file.get('path')
+        must_contain = expected_file.get('must_contain', [])
+        must_not_contain = expected_file.get('must_not_contain', [])
+        
+        # Find matching file
+        actual_file = None
+        for af in actual_files:
+            if af.get('path') == expected_path:
+                actual_file = af
+                break
+        
+        if not actual_file:
+            self.failures.append(f"File not created: {expected_path}")
+            print(f"  {RED}✗{NC} File not created: {expected_path}")
+            return False
+        
+        content = actual_file.get('content', '')
+        all_present = True
+        
+        # Check must_contain
+        for item in must_contain:
+            if item not in content:
+                self.failures.append(f"Missing content in {expected_path}: {item}")
+                print(f"  {RED}✗{NC} Missing: {item}")
+                all_present = False
+        
+        # Check must_not_contain
+        for item in must_not_contain:
+            if item in content:
+                self.failures.append(f"Forbidden content in {expected_path}: {item}")
+                print(f"  {RED}✗{NC} Contains forbidden: {item}")
+                all_present = False
+        
+        if all_present:
+            print(f"  {GREEN}✓{NC} File {expected_path} validated")
+        
+        return all_present
+    
     def validate_files_created(self):
         """Validate that required files were created with correct content"""
         print(f"{YELLOW}[Checkpoint]{NC} Validating file creation...")
@@ -192,42 +238,28 @@ class TestValidator:
         actual_files = self.result.get('files_created', [])
         
         for expected_file in expected_files:
-            expected_path = expected_file.get('path')
-            must_contain = expected_file.get('must_contain', [])
-            must_not_contain = expected_file.get('must_not_contain', [])
-            
-            # Find matching file
-            actual_file = None
-            for af in actual_files:
-                if af.get('path') == expected_path:
-                    actual_file = af
-                    break
-            
-            if not actual_file:
-                self.failures.append(f"File not created: {expected_path}")
-                print(f"  {RED}✗{NC} File not created: {expected_path}")
-                continue
-            
-            content = actual_file.get('content', '')
-            
-            # Check must_contain
-            all_present = True
-            for item in must_contain:
-                if item not in content:
-                    self.failures.append(f"Missing content in {expected_path}: {item}")
-                    print(f"  {RED}✗{NC} Missing: {item}")
-                    all_present = False
-            
-            # Check must_not_contain
-            for item in must_not_contain:
-                if item in content:
-                    self.failures.append(f"Forbidden content in {expected_path}: {item}")
-                    print(f"  {RED}✗{NC} Contains forbidden: {item}")
-                    all_present = False
-            
-            if all_present:
+            if self._validate_single_file(expected_file, actual_files):
                 self.scores['accuracy'] += 5
-                print(f"  {GREEN}✓{NC} File {expected_path} validated")
+    
+    def _check_security_violations(self, files_created, security_rules):
+        """Helper to check for security violations in files"""
+        security_pass = True
+        
+        for file_info in files_created:
+            content = file_info.get('content', '')
+            
+            # Check for hardcoded tokens
+            for rule in security_rules:
+                if rule['id'] == 'no-hardcoded-tokens':
+                    for pattern_info in rule.get('patterns', []):
+                        pattern = pattern_info.get('regex')
+                        if re.search(pattern, content):
+                            self.failures.append(pattern_info.get('failure_message'))
+                            print(f"  {RED}✗{NC} {pattern_info.get('failure_message')}")
+                            security_pass = False
+                            self.scores['security'] -= 20
+        
+        return security_pass
     
     def validate_security_compliance(self):
         """Validate security best practices"""
@@ -243,22 +275,7 @@ class TestValidator:
             security_assertions = json.load(f)
         
         files_created = self.result.get('files_created', [])
-        security_pass = True
-        
-        for file_info in files_created:
-            content = file_info.get('content', '')
-            path = file_info.get('path', '')
-            
-            # Check for hardcoded tokens
-            for rule in security_assertions.get('rules', []):
-                if rule['id'] == 'no-hardcoded-tokens':
-                    for pattern_info in rule.get('patterns', []):
-                        pattern = pattern_info.get('regex')
-                        if re.search(pattern, content):
-                            self.failures.append(pattern_info.get('failure_message'))
-                            print(f"  {RED}✗{NC} {pattern_info.get('failure_message')}")
-                            security_pass = False
-                            self.scores['security'] -= 20
+        security_pass = self._check_security_violations(files_created, security_assertions.get('rules', []))
         
         if security_pass:
             self.scores['security'] += 20
@@ -314,6 +331,61 @@ class TestValidator:
         else:
             print(f"  {YELLOW}!{NC} No version checks applicable")
     
+    def _check_fetch_count(self, total_fetches, min_fetches, max_fetches):
+        """Helper to validate fetch count"""
+        if total_fetches < min_fetches:
+            self.failures.append(f"Too few documentation fetches: {total_fetches} < {min_fetches}")
+            print(f"  {RED}✗{NC} Too few fetches ({total_fetches} < {min_fetches})")
+            return False
+        elif total_fetches > max_fetches:
+            print(f"  {YELLOW}!{NC} Many fetches ({total_fetches} > {max_fetches})")
+        else:
+            self.scores['efficiency'] += 3
+            print(f"  {GREEN}✓{NC} Appropriate number of fetches ({total_fetches})")
+        return True
+    
+    def _check_expected_domains(self, expected_domains, fetched_domains):
+        """Helper to check if expected domains were accessed"""
+        fetched_domain_set = set(fetched_domains)
+        
+        for domain in expected_domains:
+            if any(domain in fd for fd in fetched_domain_set):
+                print(f"  {GREEN}✓{NC} Fetched from {domain}")
+                self.scores['efficiency'] += 2
+            else:
+                print(f"  {YELLOW}!{NC} No fetches from {domain}")
+    
+    def _check_expected_pages(self, expected_pages, fetched_pages):
+        """Helper to check if expected pages were fetched"""
+        for expected_page in expected_pages:
+            pattern = expected_page.get('pattern')
+            description = expected_page.get('description')
+            
+            matched = False
+            for page in fetched_pages:
+                if re.search(pattern, page.get('url', '')):
+                    matched = True
+                    print(f"  {GREEN}✓{NC} Fetched: {description}")
+                    break
+            
+            if not matched:
+                print(f"  {YELLOW}!{NC} Missing: {description}")
+    
+    def _print_fetched_pages(self, fetched_pages):
+        """Helper to print fetched pages summary"""
+        if fetched_pages:
+            print(f"\n  📚 Documentation pages fetched:")
+            for i, page in enumerate(fetched_pages[:10], 1):  # Show first 10
+                url = page.get('url', 'unknown')
+                title = page.get('title', '')
+                if title:
+                    print(f"     {i}. {url} - {title[:50]}")
+                else:
+                    print(f"     {i}. {url}")
+            
+            if len(fetched_pages) > 10:
+                print(f"     ... and {len(fetched_pages) - 10} more")
+    
     def validate_documentation_fetches(self):
         """Validate that proper documentation was fetched"""
         print(f"{YELLOW}[Checkpoint]{NC} Validating documentation fetches...")
@@ -334,59 +406,21 @@ class TestValidator:
         if fetched_domains:
             print(f"  🌐 Domains accessed: {', '.join(set(fetched_domains))}")
         
-        # Check minimum fetches
+        # Check minimum and maximum fetches
         min_fetches = expected_doc_fetch.get('min_fetches', 0)
         max_fetches = expected_doc_fetch.get('max_fetches', 100)
-        
-        if total_fetches < min_fetches:
-            self.failures.append(f"Too few documentation fetches: {total_fetches} < {min_fetches}")
-            print(f"  {RED}✗{NC} Too few fetches ({total_fetches} < {min_fetches})")
-        elif total_fetches > max_fetches:
-            print(f"  {YELLOW}!{NC} Many fetches ({total_fetches} > {max_fetches})")
-        else:
-            self.scores['efficiency'] += 3
-            print(f"  {GREEN}✓{NC} Appropriate number of fetches ({total_fetches})")
+        self._check_fetch_count(total_fetches, min_fetches, max_fetches)
         
         # Check expected domains
         expected_domains = expected_doc_fetch.get('expected_domains', [])
-        fetched_domain_set = set(fetched_domains)
-        
-        for domain in expected_domains:
-            if any(domain in fd for fd in fetched_domain_set):
-                print(f"  {GREEN}✓{NC} Fetched from {domain}")
-                self.scores['efficiency'] += 2
-            else:
-                print(f"  {YELLOW}!{NC} No fetches from {domain}")
+        self._check_expected_domains(expected_domains, fetched_domains)
         
         # Check expected page patterns
         expected_pages = expected_doc_fetch.get('expected_pages', [])
-        for expected_page in expected_pages:
-            pattern = expected_page.get('pattern')
-            description = expected_page.get('description')
-            
-            matched = False
-            for page in fetched_pages:
-                if re.search(pattern, page.get('url', '')):
-                    matched = True
-                    print(f"  {GREEN}✓{NC} Fetched: {description}")
-                    break
-            
-            if not matched:
-                print(f"  {YELLOW}!{NC} Missing: {description}")
+        self._check_expected_pages(expected_pages, fetched_pages)
         
         # Log all fetched pages for review
-        if fetched_pages:
-            print(f"\n  📚 Documentation pages fetched:")
-            for i, page in enumerate(fetched_pages[:10], 1):  # Show first 10
-                url = page.get('url', 'unknown')
-                title = page.get('title', '')
-                if title:
-                    print(f"     {i}. {url} - {title[:50]}")
-                else:
-                    print(f"     {i}. {url}")
-            
-            if len(fetched_pages) > 10:
-                print(f"     ... and {len(fetched_pages) - 10} more")
+        self._print_fetched_pages(fetched_pages)
         
         self.checkpoints.append({
             'name': 'documentation_fetches',

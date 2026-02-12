@@ -119,6 +119,107 @@ def generate_comparison_table(models_data: List[Dict[str, Any]]) -> str:
     return '\n'.join(lines)
 
 
+def _generate_best_in_category_section(all_stats: List[tuple]) -> List[str]:
+    """Helper to generate best in category section"""
+    section = []
+    section.append("---")
+    section.append("")
+    section.append("## Best in Category")
+    section.append("")
+    
+    best_pass_rate = max(all_stats, key=lambda x: x[1]['pass_rate'])
+    best_score = max(all_stats, key=lambda x: x[1]['avg_score'])
+    best_security = max(all_stats, key=lambda x: x[1]['avg_security'])
+    best_efficiency = max(all_stats, key=lambda x: x[1]['avg_efficiency'])
+    
+    section.append(f"- 🏆 **Best Pass Rate:** {best_pass_rate[0]} ({best_pass_rate[1]['pass_rate']:.1f}%)")
+    section.append(f"- 🏆 **Best Average Score:** {best_score[0]} ({best_score[1]['avg_score']:.1f}/100)")
+    section.append(f"- 🔒 **Best Security:** {best_security[0]} ({best_security[1]['avg_security']:.1f}/20)")
+    section.append(f"- ⚡ **Best Efficiency:** {best_efficiency[0]} ({best_efficiency[1]['avg_efficiency']:.1f}/15)")
+    section.append("")
+    
+    return section
+
+
+def _generate_model_performance_section(model: str, stats: Dict[str, Any]) -> List[str]:
+    """Helper to generate performance section for a model"""
+    section = []
+    section.append(f"### {model}")
+    section.append("")
+    section.append(f"**Overall Performance:**")
+    section.append(f"- Scenarios: {stats['total_scenarios']}")
+    section.append(f"- Pass Rate: {stats['pass_rate']:.1f}%")
+    section.append(f"- Average Score: {stats['avg_score']:.1f}/100")
+    section.append("")
+    
+    section.append(f"**Score Breakdown:**")
+    section.append(f"- Accuracy: {stats['avg_accuracy']:.1f}/40")
+    section.append(f"- Security: {stats['avg_security']:.1f}/20")
+    section.append(f"- Efficiency: {stats['avg_efficiency']:.1f}/15")
+    section.append(f"- Currency: {stats['avg_currency']:.1f}/15")
+    section.append(f"- Usability: {stats['avg_usability']:.1f}/10")
+    section.append("")
+    
+    if stats['avg_tokens'] > 0:
+        section.append(f"**Resource Usage:**")
+        section.append(f"- Average Tokens: {stats['avg_tokens']:.0f}")
+        section.append(f"- Total Cost: ${stats['total_cost']:.2f}")
+        section.append("")
+    
+    if stats['avg_doc_fetches'] > 0:
+        section.append(f"**Documentation Usage:**")
+        section.append(f"- Average Doc Fetches: {stats['avg_doc_fetches']:.1f} pages/scenario")
+        section.append(f"- Total Doc Fetches: {stats['total_doc_fetches']}")
+        section.append("")
+    
+    # Identify weaknesses
+    weaknesses = []
+    if stats['avg_accuracy'] < 30:
+        weaknesses.append("Accuracy (skill invocation & file creation)")
+    if stats['avg_security'] < 15:
+        weaknesses.append("Security compliance")
+    if stats['avg_efficiency'] < 10:
+        weaknesses.append("Efficiency (batching & web fetch)")
+    if stats['avg_currency'] < 10:
+        weaknesses.append("Version currency")
+    
+    if weaknesses:
+        section.append(f"**⚠️ Areas for Improvement:**")
+        for weakness in weaknesses:
+            section.append(f"- {weakness}")
+        section.append("")
+    
+    return section
+
+
+def _generate_recommendations_section(all_stats: List[tuple]) -> List[str]:
+    """Helper to generate recommendations section"""
+    section = []
+    section.append("---")
+    section.append("")
+    section.append("## Recommendations")
+    section.append("")
+    
+    best_overall = max(all_stats, key=lambda x: x[1]['avg_score'])
+    best_cost = min([s for s in all_stats if s[1]['total_cost'] > 0], 
+                    key=lambda x: x[1]['total_cost'], default=None)
+    
+    section.append(f"### Best Overall Model")
+    section.append(f"**{best_overall[0]}**")
+    section.append(f"- Average Score: {best_overall[1]['avg_score']:.1f}/100")
+    section.append(f"- Pass Rate: {best_overall[1]['pass_rate']:.1f}%")
+    section.append("")
+    
+    if best_cost:
+        section.append(f"### Most Cost-Effective")
+        section.append(f"**{best_cost[0]}**")
+        section.append(f"- Total Cost: ${best_cost[1]['total_cost']:.2f}")
+        section.append(f"- Average Score: {best_cost[1]['avg_score']:.1f}/100")
+        section.append("")
+    
+    return section
+
+
 def generate_comparison_report(models_data: List[Dict[str, Any]], output_file: Path):
     """Generate detailed comparison report in markdown"""
     
@@ -135,23 +236,8 @@ def generate_comparison_report(models_data: List[Dict[str, Any]], output_file: P
     report.append("")
     
     # Best in category
-    report.append("---")
-    report.append("")
-    report.append("## Best in Category")
-    report.append("")
-    
     all_stats = [(m['model'], calculate_model_stats(m)) for m in models_data]
-    
-    best_pass_rate = max(all_stats, key=lambda x: x[1]['pass_rate'])
-    best_score = max(all_stats, key=lambda x: x[1]['avg_score'])
-    best_security = max(all_stats, key=lambda x: x[1]['avg_security'])
-    best_efficiency = max(all_stats, key=lambda x: x[1]['avg_efficiency'])
-    
-    report.append(f"- 🏆 **Best Pass Rate:** {best_pass_rate[0]} ({best_pass_rate[1]['pass_rate']:.1f}%)")
-    report.append(f"- 🏆 **Best Average Score:** {best_score[0]} ({best_score[1]['avg_score']:.1f}/100)")
-    report.append(f"- 🔒 **Best Security:** {best_security[0]} ({best_security[1]['avg_security']:.1f}/20)")
-    report.append(f"- ⚡ **Best Efficiency:** {best_efficiency[0]} ({best_efficiency[1]['avg_efficiency']:.1f}/15)")
-    report.append("")
+    report.extend(_generate_best_in_category_section(all_stats))
     
     # Performance breakdown
     report.append("---")
@@ -162,74 +248,10 @@ def generate_comparison_report(models_data: List[Dict[str, Any]], output_file: P
     for model_data in models_data:
         model = model_data['model']
         stats = calculate_model_stats(model_data)
-        
-        report.append(f"### {model}")
-        report.append("")
-        report.append(f"**Overall Performance:**")
-        report.append(f"- Scenarios: {stats['total_scenarios']}")
-        report.append(f"- Pass Rate: {stats['pass_rate']:.1f}%")
-        report.append(f"- Average Score: {stats['avg_score']:.1f}/100")
-        report.append("")
-        
-        report.append(f"**Score Breakdown:**")
-        report.append(f"- Accuracy: {stats['avg_accuracy']:.1f}/40")
-        report.append(f"- Security: {stats['avg_security']:.1f}/20")
-        report.append(f"- Efficiency: {stats['avg_efficiency']:.1f}/15")
-        report.append(f"- Currency: {stats['avg_currency']:.1f}/15")
-        report.append(f"- Usability: {stats['avg_usability']:.1f}/10")
-        report.append("")
-        
-        if stats['avg_tokens'] > 0:
-            report.append(f"**Resource Usage:**")
-            report.append(f"- Average Tokens: {stats['avg_tokens']:.0f}")
-            report.append(f"- Total Cost: ${stats['total_cost']:.2f}")
-            report.append("")
-        
-        if stats['avg_doc_fetches'] > 0:
-            report.append(f"**Documentation Usage:**")
-            report.append(f"- Average Doc Fetches: {stats['avg_doc_fetches']:.1f} pages/scenario")
-            report.append(f"- Total Doc Fetches: {stats['total_doc_fetches']}")
-            report.append("")
-        
-        # Identify weaknesses
-        weaknesses = []
-        if stats['avg_accuracy'] < 30:
-            weaknesses.append("Accuracy (skill invocation & file creation)")
-        if stats['avg_security'] < 15:
-            weaknesses.append("Security compliance")
-        if stats['avg_efficiency'] < 10:
-            weaknesses.append("Efficiency (batching & web fetch)")
-        if stats['avg_currency'] < 10:
-            weaknesses.append("Version currency")
-        
-        if weaknesses:
-            report.append(f"**⚠️ Areas for Improvement:**")
-            for weakness in weaknesses:
-                report.append(f"- {weakness}")
-            report.append("")
+        report.extend(_generate_model_performance_section(model, stats))
     
     # Recommendations
-    report.append("---")
-    report.append("")
-    report.append("## Recommendations")
-    report.append("")
-    
-    best_overall = max(all_stats, key=lambda x: x[1]['avg_score'])
-    best_cost = min([s for s in all_stats if s[1]['total_cost'] > 0], 
-                    key=lambda x: x[1]['total_cost'], default=None)
-    
-    report.append(f"### Best Overall Model")
-    report.append(f"**{best_overall[0]}**")
-    report.append(f"- Average Score: {best_overall[1]['avg_score']:.1f}/100")
-    report.append(f"- Pass Rate: {best_overall[1]['pass_rate']:.1f}%")
-    report.append("")
-    
-    if best_cost:
-        report.append(f"### Most Cost-Effective")
-        report.append(f"**{best_cost[0]}**")
-        report.append(f"- Total Cost: ${best_cost[1]['total_cost']:.2f}")
-        report.append(f"- Average Score: {best_cost[1]['avg_score']:.1f}/100")
-        report.append("")
+    report.extend(_generate_recommendations_section(all_stats))
     
     # Write report
     with open(output_file, 'w') as f:

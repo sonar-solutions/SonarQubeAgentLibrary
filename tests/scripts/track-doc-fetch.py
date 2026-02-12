@@ -13,10 +13,13 @@ Usage:
 import argparse
 import json
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Any
 from urllib.parse import urlparse
+
+# Constants
+TRACKING_FILE_PATH_KEY = 'Tracking file path'
 
 
 def load_tracking_file(file_path: Path) -> Dict[str, Any]:
@@ -41,7 +44,7 @@ def add_fetch(file_path: Path, url: str, title: str = None, duration_ms: int = N
     fetch_entry = {
         'url': url,
         'title': title or '',
-        'timestamp': datetime.utcnow().isoformat() + 'Z',
+        'timestamp': datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
         'fetch_duration_ms': duration_ms
     }
     
@@ -72,7 +75,7 @@ def get_summary(file_path: Path) -> Dict[str, Any]:
             parsed = urlparse(url)
             if parsed.hostname:
                 domains.append(parsed.hostname)
-        except:
+        except Exception:
             pass
     
     unique_domains = list(set(domains))
@@ -131,15 +134,15 @@ def main():
     add_parser.add_argument('--url', required=True, help='URL of the fetched page')
     add_parser.add_argument('--title', help='Page title')
     add_parser.add_argument('--duration', type=int, help='Fetch duration in milliseconds')
-    add_parser.add_argument('--file', required=True, help='Tracking file path')
+    add_parser.add_argument('--file', required=True, help=TRACKING_FILE_PATH_KEY)
     
     # Summary command
     summary_parser = subparsers.add_parser('summary', help='Show fetch summary')
-    summary_parser.add_argument('--file', required=True, help='Tracking file path')
+    summary_parser.add_argument('--file', required=True, help=TRACKING_FILE_PATH_KEY)
     
     # Export command
     export_parser = subparsers.add_parser('export', help='Export summary to JSON')
-    export_parser.add_argument('--file', required=True, help='Tracking file path')
+    export_parser.add_argument('--file', required=True, help=TRACKING_FILE_PATH_KEY)
     export_parser.add_argument('--output', required=True, help='Output file path')
     
     args = parser.parse_args()
