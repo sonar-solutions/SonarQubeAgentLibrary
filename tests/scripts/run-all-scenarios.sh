@@ -70,7 +70,7 @@ if [[ -n "$FILTER_LANGUAGE" ]]; then
   # Filter by language
   SEARCH_DIR="$SCENARIOS_DIR/$FILTER_LANGUAGE"
   if [[ ! -d "$SEARCH_DIR" ]]; then
-    echo -e "${RED}Error: Language directory not found: $SEARCH_DIR${NC}"
+    echo -e "${RED}Error: Language directory not found: $SEARCH_DIR${NC}" >&2
     exit 1
   fi
   while IFS= read -r -d '' file; do

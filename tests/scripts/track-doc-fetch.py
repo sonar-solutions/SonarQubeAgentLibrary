@@ -93,7 +93,7 @@ def print_summary(file_path: Path):
     """Print summary to console"""
     summary = get_summary(file_path)
     
-    print(f"\n📚 Documentation Fetch Summary")
+    print("\n📚 Documentation Fetch Summary")
     print(f"{'=' * 50}")
     print(f"Total Fetches: {summary['total_count']}")
     print(f"Unique Pages: {summary['unique_pages']}")

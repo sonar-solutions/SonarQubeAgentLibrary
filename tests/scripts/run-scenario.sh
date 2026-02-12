@@ -56,7 +56,7 @@ done
 
 # Validate scenario file
 if [[ -z "$SCENARIO_FILE" ]]; then
-  echo -e "${RED}Error: No scenario file specified${NC}"
+  echo -e "${RED}Error: No scenario file specified${NC}" >&2
   echo "Usage: $0 <scenario-file> --model <model-name>"
   exit 1
 fi
@@ -67,7 +67,7 @@ if [[ ! "$SCENARIO_FILE" = /* ]]; then
 fi
 
 if [[ ! -f "$SCENARIO_FILE" ]]; then
-  echo -e "${RED}Error: Scenario file not found: $SCENARIO_FILE${NC}"
+  echo -e "${RED}Error: Scenario file not found: $SCENARIO_FILE${NC}" >&2
   exit 1
 fi
 

@@ -146,13 +146,13 @@ def _generate_model_performance_section(model: str, stats: Dict[str, Any]) -> Li
     section = []
     section.append(f"### {model}")
     section.append("")
-    section.append(f"**Overall Performance:**")
+    section.append("**Overall Performance:**")
     section.append(f"- Scenarios: {stats['total_scenarios']}")
     section.append(f"- Pass Rate: {stats['pass_rate']:.1f}%")
     section.append(f"- Average Score: {stats['avg_score']:.1f}/100")
     section.append("")
     
-    section.append(f"**Score Breakdown:**")
+    section.append("**Score Breakdown:**")
     section.append(f"- Accuracy: {stats['avg_accuracy']:.1f}/40")
     section.append(f"- Security: {stats['avg_security']:.1f}/20")
     section.append(f"- Efficiency: {stats['avg_efficiency']:.1f}/15")
@@ -161,13 +161,13 @@ def _generate_model_performance_section(model: str, stats: Dict[str, Any]) -> Li
     section.append("")
     
     if stats['avg_tokens'] > 0:
-        section.append(f"**Resource Usage:**")
+        section.append("**Resource Usage:**")
         section.append(f"- Average Tokens: {stats['avg_tokens']:.0f}")
         section.append(f"- Total Cost: ${stats['total_cost']:.2f}")
         section.append("")
     
     if stats['avg_doc_fetches'] > 0:
-        section.append(f"**Documentation Usage:**")
+        section.append("**Documentation Usage:**")
         section.append(f"- Average Doc Fetches: {stats['avg_doc_fetches']:.1f} pages/scenario")
         section.append(f"- Total Doc Fetches: {stats['total_doc_fetches']}")
         section.append("")
@@ -184,7 +184,7 @@ def _generate_model_performance_section(model: str, stats: Dict[str, Any]) -> Li
         weaknesses.append("Version currency")
     
     if weaknesses:
-        section.append(f"**⚠️ Areas for Improvement:**")
+        section.append("**⚠️ Areas for Improvement:**")
         for weakness in weaknesses:
             section.append(f"- {weakness}")
         section.append("")
@@ -204,14 +204,14 @@ def _generate_recommendations_section(all_stats: List[tuple]) -> List[str]:
     best_cost = min([s for s in all_stats if s[1]['total_cost'] > 0], 
                     key=lambda x: x[1]['total_cost'], default=None)
     
-    section.append(f"### Best Overall Model")
+    section.append("### Best Overall Model")
     section.append(f"**{best_overall[0]}**")
     section.append(f"- Average Score: {best_overall[1]['avg_score']:.1f}/100")
     section.append(f"- Pass Rate: {best_overall[1]['pass_rate']:.1f}%")
     section.append("")
     
     if best_cost:
-        section.append(f"### Most Cost-Effective")
+        section.append("### Most Cost-Effective")
         section.append(f"**{best_cost[0]}**")
         section.append(f"- Total Cost: ${best_cost[1]['total_cost']:.2f}")
         section.append(f"- Average Score: {best_cost[1]['avg_score']:.1f}/100")
@@ -277,7 +277,12 @@ def print_console_comparison(models_data: List[Dict[str, Any]]):
         model = model_data['model']
         stats = calculate_model_stats(model_data)
         
-        status_color = GREEN if stats['pass_rate'] >= 80 else YELLOW if stats['pass_rate'] >= 60 else RED
+        if stats['pass_rate'] >= 80:
+            status_color = GREEN
+        elif stats['pass_rate'] >= 60:
+            status_color = YELLOW
+        else:
+            status_color = RED
         
         print(
             f"{model:<20} "

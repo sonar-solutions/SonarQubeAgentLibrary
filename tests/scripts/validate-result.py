@@ -374,7 +374,7 @@ class TestValidator:
     def _print_fetched_pages(self, fetched_pages):
         """Helper to print fetched pages summary"""
         if fetched_pages:
-            print(f"\n  📚 Documentation pages fetched:")
+            print("\n  📚 Documentation pages fetched:")
             for i, page in enumerate(fetched_pages[:10], 1):  # Show first 10
                 url = page.get('url', 'unknown')
                 title = page.get('title', '')
