@@ -325,12 +325,136 @@ class TestValidator:
         else:
             print(f"  {YELLOW}!{NC} No version checks applicable")
     
+    def _check_min_fetches(self, doc_assertions, total_fetches):
+        """Check minimum fetch count rule and return score"""
+        min_fetches_rule = next((r for r in doc_assertions['rules'] if r['id'] == 'minimum-fetches'), None)
+        if not min_fetches_rule:
+            return 0
+        
+        min_fetches = min_fetches_rule.get('default_min', 2)
+        scenario_doc_fetch = self.scenario.get('expected', {}).get('documentation_fetches', {})
+        if 'min_fetches' in scenario_doc_fetch:
+            min_fetches = scenario_doc_fetch['min_fetches']
+        
+        if total_fetches < min_fetches:
+            self.failures.append(f"Too few documentation fetches: {total_fetches} < {min_fetches}")
+            print(f"  {RED}✗{NC} Too few fetches ({total_fetches} < {min_fetches})")
+            return min_fetches_rule.get('score_if_not_met', -5)
+        else:
+            print(f"  {GREEN}✓{NC} Sufficient fetches ({total_fetches})")
+            return min_fetches_rule.get('score_if_met', 3)
+    
+    def _check_max_fetches(self, doc_assertions, total_fetches):
+        """Check maximum fetch count rule and return score"""
+        max_fetches_rule = next((r for r in doc_assertions['rules'] if r['id'] == 'maximum-fetches'), None)
+        if not max_fetches_rule:
+            return 0
+        
+        max_fetches = max_fetches_rule.get('default_max', 10)
+        scenario_doc_fetch = self.scenario.get('expected', {}).get('documentation_fetches', {})
+        if 'max_fetches' in scenario_doc_fetch:
+            max_fetches = scenario_doc_fetch['max_fetches']
+        
+        if total_fetches > max_fetches:
+            print(f"  {YELLOW}!{NC} Many fetches ({total_fetches} > {max_fetches})")
+            return max_fetches_rule.get('score_if_exceeded', -2)
+        return 0
+    
+    def _check_official_sources(self, doc_assertions, fetched_domains, platform):
+        """Check official sources rule and return score"""
+        official_sources_rule = next((r for r in doc_assertions['rules'] if r['id'] == 'official-sources'), None)
+        if not official_sources_rule:
+            return 0
+        
+        required_domains = list(official_sources_rule['required_domains']['all_scenarios'])
+        if platform in official_sources_rule['required_domains']:
+            required_domains.extend(official_sources_rule['required_domains'][platform])
+        
+        scenario_doc_fetch = self.scenario.get('expected', {}).get('documentation_fetches', {})
+        if 'expected_domains' in scenario_doc_fetch:
+            required_domains.extend(scenario_doc_fetch['expected_domains'])
+        
+        required_domains = list(set(required_domains))
+        score = 0
+        
+        for domain in required_domains:
+            if any(domain in fd for fd in fetched_domains):
+                print(f"  {GREEN}✓{NC} Fetched from {domain}")
+                score += official_sources_rule.get('score_per_domain', 2)
+            else:
+                print(f"  {YELLOW}!{NC} No fetches from {domain}")
+        return score
+    
+    def _check_relevant_pages(self, doc_assertions, fetched_pages, language):
+        """Check relevant pages rule and return score"""
+        relevant_pages_rule = next((r for r in doc_assertions['rules'] if r['id'] == 'relevant-pages'), None)
+        if not relevant_pages_rule:
+            return 0
+        
+        expected_patterns = relevant_pages_rule['expected_patterns_by_language'].get(language, [])
+        scenario_doc_fetch = self.scenario.get('expected', {}).get('documentation_fetches', {})
+        if 'expected_pages' in scenario_doc_fetch:
+            for page in scenario_doc_fetch['expected_pages']:
+                expected_patterns.append(page)
+        
+        score = 0
+        for expected in expected_patterns:
+            pattern = expected.get('pattern')
+            description = expected.get('description')
+            score_value = expected.get('score', 1)
+            
+            matched = False
+            for page in fetched_pages:
+                if re.search(pattern, page.get('url', '')):
+                    matched = True
+                    print(f"  {GREEN}✓{NC} Fetched: {description}")
+                    score += score_value
+                    break
+            
+            if not matched:
+                print(f"  {YELLOW}!{NC} Missing: {description}")
+        return score
+    
+    def _check_duplicate_fetches(self, doc_assertions, fetched_pages, total_fetches):
+        """Check duplicate fetches rule and return score"""
+        if total_fetches == 0:
+            return 0
+        
+        unique_urls = len({p.get('url') for p in fetched_pages})
+        duplicate_ratio = 1 - (unique_urls / total_fetches)
+        
+        no_dup_rule = next((r for r in doc_assertions['rules'] if r['id'] == 'no-duplicate-fetches'), None)
+        if not no_dup_rule:
+            return 0
+        
+        max_dup_ratio = no_dup_rule.get('max_duplicate_ratio', 0.3)
+        if duplicate_ratio <= max_dup_ratio:
+            return no_dup_rule.get('score_if_met', 1)
+        else:
+            print(f"  {YELLOW}!{NC} {no_dup_rule.get('warning_message')}")
+            return 0
+    
+    def _print_fetched_pages(self, fetched_pages):
+        """Print the fetched pages for review"""
+        if not fetched_pages:
+            return
+        
+        print("\n  📚 Documentation pages fetched:")
+        for i, page in enumerate(fetched_pages[:10], 1):
+            url = page.get('url', 'unknown')
+            title = page.get('title', '')
+            if title:
+                print(f"     {i}. {url} - {title[:50]}")
+            else:
+                print(f"     {i}. {url}")
+        
+        if len(fetched_pages) > 10:
+            print(f"     ... and {len(fetched_pages) - 10} more")
 
     def validate_documentation_fetches(self):
         """Validate that proper documentation was fetched"""
         print(f"{YELLOW}[Checkpoint]{NC} Validating documentation fetches...")
         
-        # Load documentation fetch assertions
         assertion_file = self.assertions_dir / 'documentation-fetches.json'
         if not assertion_file.exists():
             print(f"  {YELLOW}!{NC} No documentation fetch assertions found")
@@ -347,126 +471,23 @@ class TestValidator:
         language = self.scenario.get('language')
         platform = self.scenario.get('platform')
         
-        # Print fetch summary
         print(f"  📄 Total documentation fetches: {total_fetches}")
         if fetched_domains:
             print(f"  🌐 Domains accessed: {', '.join(set(fetched_domains))}")
         
-        doc_score = 0
         max_doc_score = doc_assertions.get('scoring', {}).get('max_points', 15)
+        doc_score = 0
         
-        # Rule 1: Check minimum fetches
-        min_fetches_rule = next((r for r in doc_assertions['rules'] if r['id'] == 'minimum-fetches'), None)
-        if min_fetches_rule:
-            min_fetches = min_fetches_rule.get('default_min', 2)
-            
-            # Check scenario override
-            scenario_doc_fetch = self.scenario.get('expected', {}).get('documentation_fetches', {})
-            if 'min_fetches' in scenario_doc_fetch:
-                min_fetches = scenario_doc_fetch['min_fetches']
-            
-            if total_fetches < min_fetches:
-                self.failures.append(f"Too few documentation fetches: {total_fetches} < {min_fetches}")
-                print(f"  {RED}✗{NC} Too few fetches ({total_fetches} < {min_fetches})")
-                doc_score += min_fetches_rule.get('score_if_not_met', -5)
-            else:
-                doc_score += min_fetches_rule.get('score_if_met', 3)
-                print(f"  {GREEN}✓{NC} Sufficient fetches ({total_fetches})")
+        doc_score += self._check_min_fetches(doc_assertions, total_fetches)
+        doc_score += self._check_max_fetches(doc_assertions, total_fetches)
+        doc_score += self._check_official_sources(doc_assertions, fetched_domains, platform)
+        doc_score += self._check_relevant_pages(doc_assertions, fetched_pages, language)
+        doc_score += self._check_duplicate_fetches(doc_assertions, fetched_pages, total_fetches)
         
-        # Rule 2: Check maximum fetches
-        max_fetches_rule = next((r for r in doc_assertions['rules'] if r['id'] == 'maximum-fetches'), None)
-        if max_fetches_rule:
-            max_fetches = max_fetches_rule.get('default_max', 10)
-            
-            scenario_doc_fetch = self.scenario.get('expected', {}).get('documentation_fetches', {})
-            if 'max_fetches' in scenario_doc_fetch:
-                max_fetches = scenario_doc_fetch['max_fetches']
-            
-            if total_fetches > max_fetches:
-                print(f"  {YELLOW}!{NC} Many fetches ({total_fetches} > {max_fetches})")
-                doc_score += max_fetches_rule.get('score_if_exceeded', -2)
-        
-        # Rule 3: Check official sources
-        official_sources_rule = next((r for r in doc_assertions['rules'] if r['id'] == 'official-sources'), None)
-        if official_sources_rule:
-            required_domains = list(official_sources_rule['required_domains']['all_scenarios'])
-            
-            # Add platform-specific domains
-            if platform in official_sources_rule['required_domains']:
-                required_domains.extend(official_sources_rule['required_domains'][platform])
-            
-            # Also check scenario-defined expected domains
-            scenario_doc_fetch = self.scenario.get('expected', {}).get('documentation_fetches', {})
-            if 'expected_domains' in scenario_doc_fetch:
-                required_domains.extend(scenario_doc_fetch['expected_domains'])
-            
-            required_domains = list(set(required_domains))  # Dedupe
-            
-            for domain in required_domains:
-                if any(domain in fd for fd in fetched_domains):
-                    print(f"  {GREEN}✓{NC} Fetched from {domain}")
-                    doc_score += official_sources_rule.get('score_per_domain', 2)
-                else:
-                    print(f"  {YELLOW}!{NC} No fetches from {domain}")
-        
-        # Rule 4: Check relevant pages
-        relevant_pages_rule = next((r for r in doc_assertions['rules'] if r['id'] == 'relevant-pages'), None)
-        if relevant_pages_rule:
-            expected_patterns = relevant_pages_rule['expected_patterns_by_language'].get(language, [])
-            
-            # Also check scenario-defined expected pages
-            scenario_doc_fetch = self.scenario.get('expected', {}).get('documentation_fetches', {})
-            if 'expected_pages' in scenario_doc_fetch:
-                for page in scenario_doc_fetch['expected_pages']:
-                    expected_patterns.append(page)
-            
-            for expected in expected_patterns:
-                pattern = expected.get('pattern')
-                description = expected.get('description')
-                score_value = expected.get('score', 1)
-                
-                matched = False
-                for page in fetched_pages:
-                    if re.search(pattern, page.get('url', '')):
-                        matched = True
-                        print(f"  {GREEN}✓{NC} Fetched: {description}")
-                        doc_score += score_value
-                        break
-                
-                if not matched:
-                    print(f"  {YELLOW}!{NC} Missing: {description}")
-        
-        # Rule 5: Check for duplicate fetches
-        if total_fetches > 0:
-            unique_urls = len(set(p.get('url') for p in fetched_pages))
-            duplicate_ratio = 1 - (unique_urls / total_fetches)
-            
-            no_dup_rule = next((r for r in doc_assertions['rules'] if r['id'] == 'no-duplicate-fetches'), None)
-            if no_dup_rule:
-                max_dup_ratio = no_dup_rule.get('max_duplicate_ratio', 0.3)
-                if duplicate_ratio <= max_dup_ratio:
-                    doc_score += no_dup_rule.get('score_if_met', 1)
-                else:
-                    print(f"  {YELLOW}!{NC} {no_dup_rule.get('warning_message')}")
-        
-        # Add to efficiency score (capped at max_doc_score)
-        actual_doc_score = min(doc_score, max_doc_score)
-        actual_doc_score = max(actual_doc_score, 0)  # Don't go negative
+        actual_doc_score = min(max(doc_score, 0), max_doc_score)
         self.scores['efficiency'] += actual_doc_score
         
-        # Log all fetched pages for review
-        if fetched_pages:
-            print(f"\n  📚 Documentation pages fetched:")
-            for i, page in enumerate(fetched_pages[:10], 1):  # Show first 10
-                url = page.get('url', 'unknown')
-                title = page.get('title', '')
-                if title:
-                    print(f"     {i}. {url} - {title[:50]}")
-                else:
-                    print(f"     {i}. {url}")
-            
-            if len(fetched_pages) > 10:
-                print(f"     ... and {len(fetched_pages) - 10} more")
+        self._print_fetched_pages(fetched_pages)
         
         print(f"  📊 Documentation score: {actual_doc_score}/{max_doc_score}")
         
@@ -478,7 +499,7 @@ class TestValidator:
             'max_score': max_doc_score,
             'details': {
                 'total_count': total_fetches,
-                'unique_count': len(set(p.get('url') for p in fetched_pages)),
+                'unique_count': len({p.get('url') for p in fetched_pages}),
                 'domains': list(set(fetched_domains)),
                 'pages': [p.get('url') for p in fetched_pages]
             }
