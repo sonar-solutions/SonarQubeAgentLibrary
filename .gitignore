@@ -66,3 +66,6 @@ target/
 
 # OS
 Thumbs.db
+
+# Tests Results
+tests/results/
