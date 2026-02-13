@@ -128,6 +128,12 @@ if [[ -d "$FIXTURE_DIR" ]]; then
     echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Copied project fixture for $LANGUAGE"
 fi
 
+# Copy .github directory with agents and skills for the agent to access
+if [[ -d "$WORKSPACE_ROOT/.github" ]]; then
+    cp -r "$WORKSPACE_ROOT/.github" "$TEST_WORKSPACE/"
+    echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Copied agent and skills to workspace"
+fi
+
 # Build prompt for agent - include expected responses directly
 AGENT_PROMPT="Setup SonarQube analysis for a $LANGUAGE project using $PLATFORM. "
 AGENT_PROMPT+="Target: $SONARQUBE_TYPE. "
@@ -154,8 +160,7 @@ if echo "$USER_RESPONSES" | grep -qi "cloud"; then
     
     AGENT_PROMPT="I need to set up SonarQube analysis for my $LANGUAGE project. "
     AGENT_PROMPT+="I'm using SonarQube Cloud (${REGION} region) with organization '$ORG_KEY' and project key '$PROJECT_KEY'. "
-    AGENT_PROMPT+="My CI/CD platform is $PLATFORM. "
-    AGENT_PROMPT+="The project is in this directory: $TEST_WORKSPACE"
+    AGENT_PROMPT+="My CI/CD platform is $PLATFORM."
 elif echo "$USER_RESPONSES" | grep -qi "server"; then
     # Parse Server response: "Server, https://url, project-key"
     SERVER_INFO=$(echo "$USER_RESPONSES" | grep -i "server")
@@ -164,13 +169,11 @@ elif echo "$USER_RESPONSES" | grep -qi "server"; then
     
     AGENT_PROMPT="I need to set up SonarQube analysis for my $LANGUAGE project. "
     AGENT_PROMPT+="I'm using SonarQube Server at $SERVER_URL with project key '$PROJECT_KEY'. "
-    AGENT_PROMPT+="My CI/CD platform is $PLATFORM. "
-    AGENT_PROMPT+="The project is in this directory: $TEST_WORKSPACE"
+    AGENT_PROMPT+="My CI/CD platform is $PLATFORM."
 else
     # Fallback if no responses found
     AGENT_PROMPT="I need to set up SonarQube analysis for my $LANGUAGE project using $PLATFORM. "
-    AGENT_PROMPT+="Target: $SONARQUBE_TYPE. "
-    AGENT_PROMPT+="The project is in this directory: $TEST_WORKSPACE"
+    AGENT_PROMPT+="Target: $SONARQUBE_TYPE."
 fi
 
 if [[ "$VERBOSE" == "true" ]]; then
@@ -185,26 +188,25 @@ echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Invoking SonarArchitectLight ag
 if [[ "$VERBOSE" == "true" ]]; then
     echo -e "${BLUE}Full prompt:${NC}"
     echo "  $AGENT_PROMPT" | fold -s -w 80 | sed 's/^/  /'
-    echo -e "${BLUE}Project directory:${NC} $TEST_WORKSPACE"
-    echo -e "${BLUE}Running from:${NC} $(pwd)"
+    echo -e "${BLUE}Running from:${NC} $TEST_WORKSPACE"
 fi
 
-# Invoke agent and capture output - must run from main workspace where .github/agents/ exists
-AGENT_OUTPUT="$RESULTS_DIR/${LANGUAGE}-${SCENARIO_NAME}.agent-output.txt"
+# Invoke agent and capture output
+# Resolve to absolute path BEFORE changing directories
+AGENT_OUTPUT="$(cd "$RESULTS_DIR" && pwd)/${LANGUAGE}-${SCENARIO_NAME}.agent-output.txt"
 
-# Ensure we're in the workspace root where .github/agents/ exists
-cd "$WORKSPACE_ROOT"
+# Change to test workspace where .github/agents/ and skills are now available
+cd "$TEST_WORKSPACE"
 
 # Use non-interactive mode with auto-approval
-# --agent: Use custom agent (loads from .github/agents/SonarArchitectLight.agent.md)
+# --agent: Use custom agent (loads from .github/agents/SonarArchitectLight.agent.md in current dir)
 # --allow-all-tools: Allow tools to run without confirmation
 # --no-ask-user: Don't ask questions, work autonomously
-# --add-dir: Allow access to test workspace directory
+# The agent now has direct access to skills/ directory in its working context
 if copilot --agent=SonarArchitectLight \
           --prompt "$AGENT_PROMPT" \
           --allow-all-tools \
           --no-ask-user \
-          --add-dir "$TEST_WORKSPACE" \
           > "$AGENT_OUTPUT" 2>&1; then
     AGENT_STATUS="success"
     echo -e "${GREEN}✓${NC} Agent execution completed"
@@ -223,14 +225,21 @@ cd "$WORKSPACE_ROOT"
 echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Capturing created files..."
 FILES_CREATED=$(find "$TEST_WORKSPACE" -type f -newer "$RESULTS_DIR" 2>/dev/null || find "$TEST_WORKSPACE" -type f 2>/dev/null)
 
+# Exclude .github directory from files_created (it's just copied for agent use)
+FILES_CREATED=$(echo "$FILES_CREATED" | grep -v "\.github/agents")
+
 # Build files_created array for result JSON
 FILES_JSON="[]"
 if [[ -n "$FILES_CREATED" ]]; then
     FILES_JSON="["
     FIRST=true
     while IFS= read -r file; do
-        if [[ -f "$file" ]]; then
+        if [[ -f "$file" && ! -z "$file" ]]; then
             REL_PATH="${file#$TEST_WORKSPACE/}"
+            # Skip .github/agents files
+            if [[ "$REL_PATH" =~ ^\.github/agents ]]; then
+                continue
+            fi
             CONTENT=$(cat "$file" | jq -Rs '.')
             
             if [[ "$FIRST" == "true" ]]; then
@@ -243,6 +252,34 @@ if [[ -n "$FILES_CREATED" ]]; then
         fi
     done <<< "$FILES_CREATED"
     FILES_JSON+="]"
+fi
+
+# Extract skill invocations from agent output
+echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Tracking skill invocations..."
+SKILLS_INVOKED=$(grep -oE "\.github/agents/skills/[a-z-]+\.md" "$AGENT_OUTPUT" | sed 's|.*/||; s|\.md||' | sort -u)
+SKILLS_COUNT=$(echo "$SKILLS_INVOKED" | grep -c . || echo "0")
+
+# Build skills_invoked array for result JSON
+SKILLS_JSON="[]"
+if [[ "$SKILLS_COUNT" -gt 0 ]]; then
+    SKILLS_JSON="["
+    FIRST=true
+    while IFS= read -r skill; do
+        if [[ -n "$skill" ]]; then
+            if [[ "$FIRST" == "true" ]]; then
+                FIRST=false
+            else
+                SKILLS_JSON+=","
+            fi
+            SKILLS_JSON+="\"$skill\""
+        fi
+    done <<< "$SKILLS_INVOKED"
+    SKILLS_JSON+="]"
+fi
+
+if [[ "$VERBOSE" == "true" ]]; then
+    echo -e "${BLUE}Skills invoked ($SKILLS_COUNT):${NC}"
+    echo "$SKILLS_INVOKED" | sed 's/^/  - /'
 fi
 
 # Extract documentation fetches from agent output (if logged)
@@ -298,6 +335,7 @@ cat > "$RESULT_FILE" <<EOF
     "agent_output": "$AGENT_OUTPUT"
   },
   "files_created": $FILES_JSON,
+  "skills_invoked": $SKILLS_JSON,
   "documentation_fetches": $DOC_JSON,
   "scores": {
     "total": 0,
