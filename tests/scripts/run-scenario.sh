@@ -178,17 +178,22 @@ echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Invoking SonarArchitectLight ag
 if [[ "$VERBOSE" == "true" ]]; then
     echo -e "${BLUE}Full prompt:${NC}"
     echo "  $AGENT_PROMPT" | fold -s -w 80 | sed 's/^/  /'
+    echo -e "${BLUE}Working directory:${NC} $TEST_WORKSPACE"
 fi
 
-# Invoke agent and capture output
+# Invoke agent and capture output - must run from main workspace where .github/agents/ exists
 AGENT_OUTPUT="$RESULTS_DIR/${LANGUAGE}-${SCENARIO_NAME}.agent-output.txt"
-cd "$TEST_WORKSPACE"
 
 # Use non-interactive mode with auto-approval
+# --agent: Use custom agent (requires .github/agents/ in current dir)
 # --allow-all-tools: Allow tools to run without confirmation
+# --no-ask-user: Don't ask questions, work autonomously
+# --add-dir: Allow access to test workspace directory
 if copilot --agent=SonarArchitectLight \
-          --prompt "$AGENT_PROMPT" \
+          --prompt "Change to directory '$TEST_WORKSPACE' and $AGENT_PROMPT" \
           --allow-all-tools \
+          --no-ask-user \
+          --add-dir "$TEST_WORKSPACE" \
           > "$AGENT_OUTPUT" 2>&1; then
     AGENT_STATUS="success"
     echo -e "${GREEN}✓${NC} Agent execution completed"
