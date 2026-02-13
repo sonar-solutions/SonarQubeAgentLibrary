@@ -194,6 +194,7 @@ fi
 # Invoke agent and capture output
 # Resolve to absolute path BEFORE changing directories
 AGENT_OUTPUT="$(cd "$RESULTS_DIR" && pwd)/${LANGUAGE}-${SCENARIO_NAME}.agent-output.txt"
+AGENT_SHARE="$(cd "$RESULTS_DIR" && pwd)/${LANGUAGE}-${SCENARIO_NAME}.session.md"
 
 # Change to test workspace where .github/agents/ and skills are now available
 cd "$TEST_WORKSPACE"
@@ -204,7 +205,7 @@ echo "  copilot --agent=SonarArchitectLight \\"
 echo "          --prompt \"$AGENT_PROMPT\" \\"
 echo "          --allow-all-tools \\"
 echo "          --no-ask-user \\"
-echo "          --log-level all \\"
+echo "          --share \"$AGENT_SHARE\" \\"
 echo "          --add-dir . \\"
 echo "          --add-dir \"$WORKSPACE_ROOT\""
 echo ""
@@ -213,7 +214,7 @@ echo ""
 # --agent: Use custom agent (loads from .github/agents/SonarArchitectLight.agent.md in current dir)
 # --allow-all-tools: Allow tools to run without confirmation
 # --no-ask-user: Don't ask questions, work autonomously
-# --log-level all: Enable full logging including LLM conversation
+# --share: Output full session transcript to markdown file (includes prompts, responses, tool calls)
 # --add-dir .: Grant explicit access to current directory (test workspace)
 # --add-dir WORKSPACE_ROOT: Grant access to original workspace (for reading docs, etc.)
 # The agent now has direct access to skills/ directory in its working context
@@ -221,7 +222,7 @@ if copilot --agent=SonarArchitectLight \
           --prompt "$AGENT_PROMPT" \
           --allow-all-tools \
           --no-ask-user \
-          --log-level all \
+          --share "$AGENT_SHARE" \
           --add-dir . \
           --add-dir "$WORKSPACE_ROOT" \
           > "$AGENT_OUTPUT" 2>&1; then
@@ -271,9 +272,19 @@ if [[ -n "$FILES_CREATED" ]]; then
     FILES_JSON+="]"
 fi
 
-# Extract skill invocations from agent output
+# Extract skill invocations from agent output and session file
 echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Tracking skill invocations..."
-SKILLS_INVOKED=$(grep -oE "\.github/agents/skills/[a-z-]+\.md" "$AGENT_OUTPUT" | sed 's|.*/||; s|\.md||' | sort -u)
+# Try session file first (more complete), fall back to agent-output.txt
+# Look for both file reads AND explicit skill announcements (🔧 Using skill: X or 📖 Consulting X skill)
+if [[ -f "$AGENT_SHARE" ]]; then
+    SKILLS_FROM_FILES=$(grep -oE "skills/[a-z-]+\.md" "$AGENT_SHARE" | sed 's|.*/||; s|\.md||')
+    SKILLS_FROM_ANNOUNCEMENTS=$(grep -oE "(Using skill:|Consulting) [a-z-]+ (skill|for)" "$AGENT_SHARE" | sed -E 's/.*(Using skill:|Consulting) ([a-z-]+).*/\2/')
+    SKILLS_INVOKED=$(echo -e "$SKILLS_FROM_FILES\n$SKILLS_FROM_ANNOUNCEMENTS" | sort -u | grep -v '^$')
+else
+    SKILLS_FROM_FILES=$(grep -oE "\.github/agents/skills/[a-z-]+\.md" "$AGENT_OUTPUT" | sed 's|.*/||; s|\.md||')
+    SKILLS_FROM_ANNOUNCEMENTS=$(grep -oE "(Using skill:|Consulting) [a-z-]+ (skill|for)" "$AGENT_OUTPUT" | sed -E 's/.*(Using skill:|Consulting) ([a-z-]+).*/\2/')
+    SKILLS_INVOKED=$(echo -e "$SKILLS_FROM_FILES\n$SKILLS_FROM_ANNOUNCEMENTS" | sort -u | grep -v '^$')
+fi
 SKILLS_COUNT=$(echo "$SKILLS_INVOKED" | grep -c . || echo "0")
 
 # Build skills_invoked array for result JSON
@@ -299,9 +310,14 @@ if [[ "$VERBOSE" == "true" ]]; then
     echo "$SKILLS_INVOKED" | sed 's/^/  - /'
 fi
 
-# Extract documentation fetches from agent output (if logged)
+# Extract documentation fetches from agent output and session file
 # Look for patterns like "Fetched: https://docs.sonarsource.com/..."
-DOC_FETCHES=$(grep -oE 'https?://[^ ]+' "$AGENT_OUTPUT" | grep -E '(docs\.sonarsource|github\.com|docs\.gitlab|learn\.microsoft|docs\.azure)' 2>/dev/null || true)
+# Try session file first for more complete data, fall back to agent-output.txt
+if [[ -f "$AGENT_SHARE" ]]; then
+    DOC_FETCHES=$(grep -oE 'https?://[^ ]+' "$AGENT_SHARE" | grep -E '(docs\.sonarsource|github\.com|docs\.gitlab|learn\.microsoft|docs\.azure)' 2>/dev/null || true)
+else
+    DOC_FETCHES=$(grep -oE 'https?://[^ ]+' "$AGENT_OUTPUT" | grep -E '(docs\.sonarsource|github\.com|docs\.gitlab|learn\.microsoft|docs\.azure)' 2>/dev/null || true)
+fi
 if [[ -z "$DOC_FETCHES" ]]; then
     DOC_COUNT="0"
 else
@@ -382,7 +398,8 @@ else
     echo ""
     echo -e "${RED}✗${NC} Validation failed"
 fi
-
+Session transcript:${NC} $AGENT_SHARE"
+echo -e "${BLUE}
 echo ""
 echo "$SEPARATOR"
 echo -e "${BLUE}Test workspace:${NC} $TEST_WORKSPACE"
