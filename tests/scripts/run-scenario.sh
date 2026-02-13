@@ -138,59 +138,70 @@ echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Preparing test configuration...
 USER_RESPONSES=$(grep -A 100 "user_responses:" "$SCENARIO_FILE" | grep "answer:" | sed 's/.*answer: *//' | tr -d '"')
 RESPONSE_COUNT=$(echo "$USER_RESPONSES" | grep -c . || echo "0")
 
-if [[ "$RESPONSE_COUNT" -gt 0 ]]; then
-    # Extract key information from responses
-    PROJECT_KEY=""
-    ORG_KEY=""
-    SERVER_URL=""
-    REGION=""
+# Build prompt for agent - phrase as user request, not commands
+# This allows the agent to use its persona and skills properly
+PROJECT_KEY=""
+ORG_KEY=""
+SERVER_URL=""
+REGION=""
+
+if echo "$USER_RESPONSES" | grep -qi "cloud"; then
+    # Parse Cloud response: "Cloud, project-key, org-key, US/EU"
+    CLOUD_INFO=$(echo "$USER_RESPONSES" | grep -i "cloud")
+    PROJECT_KEY=$(echo "$CLOUD_INFO" | cut -d',' -f2 | tr -d ' ')
+    ORG_KEY=$(echo "$CLOUD_INFO" | cut -d',' -f3 | tr -d ' ')
+    REGION=$(echo "$CLOUD_INFO" | cut -d',' -f4 | tr -d ' ')
     
-    if echo "$USER_RESPONSES" | grep -qi "cloud"; then
-        # Parse Cloud response: "Cloud, project-key, org-key, US/EU"
-        CLOUD_INFO=$(echo "$USER_RESPONSES" | grep -i "cloud")
-        PROJECT_KEY=$(echo "$CLOUD_INFO" | cut -d',' -f2 | tr -d ' ')
-        ORG_KEY=$(echo "$CLOUD_INFO" | cut -d',' -f3 | tr -d ' ')
-        REGION=$(echo "$CLOUD_INFO" | cut -d',' -f4 | tr -d ' ')
-        
-        AGENT_PROMPT+="Use SonarQube Cloud with project key '$PROJECT_KEY' and organization '$ORG_KEY' in the $REGION region. "
-    elif echo "$USER_RESPONSES" | grep -qi "server"; then
-        # Parse Server response: "Server, https://url, project-key"
-        SERVER_INFO=$(echo "$USER_RESPONSES" | grep -i "server")
-        SERVER_URL=$(echo "$SERVER_INFO" | cut -d',' -f2 | tr -d ' ')
-        PROJECT_KEY=$(echo "$SERVER_INFO" | cut -d',' -f3 | tr -d ' ')
-        
-        AGENT_PROMPT+="Use SonarQube Server at '$SERVER_URL' with project key '$PROJECT_KEY'. "
-    fi
+    AGENT_PROMPT="I need to set up SonarQube analysis for my $LANGUAGE project. "
+    AGENT_PROMPT+="I'm using SonarQube Cloud (${REGION} region) with organization '$ORG_KEY' and project key '$PROJECT_KEY'. "
+    AGENT_PROMPT+="My CI/CD platform is $PLATFORM. "
+    AGENT_PROMPT+="The project is in this directory: $TEST_WORKSPACE"
+elif echo "$USER_RESPONSES" | grep -qi "server"; then
+    # Parse Server response: "Server, https://url, project-key"
+    SERVER_INFO=$(echo "$USER_RESPONSES" | grep -i "server")
+    SERVER_URL=$(echo "$SERVER_INFO" | cut -d',' -f2 | tr -d ' ')
+    PROJECT_KEY=$(echo "$SERVER_INFO" | cut -d',' -f3 | tr -d ' ')
     
-    if [[ "$VERBOSE" == "true" ]]; then
-        echo -e "${BLUE}Parsed responses:${NC}"
-        [[ -n "$PROJECT_KEY" ]] && echo "  Project key: $PROJECT_KEY"
-        [[ -n "$ORG_KEY" ]] && echo "  Organization: $ORG_KEY"
-        [[ -n "$SERVER_URL" ]] && echo "  Server URL: $SERVER_URL"
-        [[ -n "$REGION" ]] && echo "  Region: $REGION"
-    fi
+    AGENT_PROMPT="I need to set up SonarQube analysis for my $LANGUAGE project. "
+    AGENT_PROMPT+="I'm using SonarQube Server at $SERVER_URL with project key '$PROJECT_KEY'. "
+    AGENT_PROMPT+="My CI/CD platform is $PLATFORM. "
+    AGENT_PROMPT+="The project is in this directory: $TEST_WORKSPACE"
+else
+    # Fallback if no responses found
+    AGENT_PROMPT="I need to set up SonarQube analysis for my $LANGUAGE project using $PLATFORM. "
+    AGENT_PROMPT+="Target: $SONARQUBE_TYPE. "
+    AGENT_PROMPT+="The project is in this directory: $TEST_WORKSPACE"
 fi
 
-AGENT_PROMPT+="Create all necessary CI/CD configuration files with proper structure and best practices. "
-AGENT_PROMPT+="Do not ask for additional information - proceed with the setup using the provided details."
+if [[ "$VERBOSE" == "true" ]]; then
+    echo -e "${BLUE}Configuration:${NC}"
+    [[ -n "$PROJECT_KEY" ]] && echo "  Project key: $PROJECT_KEY"
+    [[ -n "$ORG_KEY" ]] && echo "  Organization: $ORG_KEY"
+    [[ -n "$SERVER_URL" ]] && echo "  Server URL: $SERVER_URL"
+    [[ -n "$REGION" ]] && echo "  Region: $REGION"
+fi
 
 echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Invoking SonarArchitectLight agent..."
 if [[ "$VERBOSE" == "true" ]]; then
     echo -e "${BLUE}Full prompt:${NC}"
     echo "  $AGENT_PROMPT" | fold -s -w 80 | sed 's/^/  /'
-    echo -e "${BLUE}Working directory:${NC} $TEST_WORKSPACE"
+    echo -e "${BLUE}Project directory:${NC} $TEST_WORKSPACE"
+    echo -e "${BLUE}Running from:${NC} $(pwd)"
 fi
 
 # Invoke agent and capture output - must run from main workspace where .github/agents/ exists
 AGENT_OUTPUT="$RESULTS_DIR/${LANGUAGE}-${SCENARIO_NAME}.agent-output.txt"
 
+# Ensure we're in the workspace root where .github/agents/ exists
+cd "$WORKSPACE_ROOT"
+
 # Use non-interactive mode with auto-approval
-# --agent: Use custom agent (requires .github/agents/ in current dir)
+# --agent: Use custom agent (loads from .github/agents/SonarArchitectLight.agent.md)
 # --allow-all-tools: Allow tools to run without confirmation
 # --no-ask-user: Don't ask questions, work autonomously
 # --add-dir: Allow access to test workspace directory
 if copilot --agent=SonarArchitectLight \
-          --prompt "Change to directory '$TEST_WORKSPACE' and $AGENT_PROMPT" \
+          --prompt "$AGENT_PROMPT" \
           --allow-all-tools \
           --no-ask-user \
           --add-dir "$TEST_WORKSPACE" \

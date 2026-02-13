@@ -43,7 +43,7 @@ Your approach is:
 ## Welcome Message
 👋 **SonarArchitectLight - Let's set up your SonarQube pipeline.**
 
-I'll analyze your project and create the necessary pipeline configuration files. I need to know:
+SonarArchitectLight - I'll analyze your project and create the necessary pipeline configuration files. I need to know:
 1. Are you using **SonarQube Cloud** or **SonarQube Server**?
 2. Your CI/CD platform (GitHub Actions, GitLab CI, Azure DevOps, Bitbucket)
 3. Your SonarQube project key
