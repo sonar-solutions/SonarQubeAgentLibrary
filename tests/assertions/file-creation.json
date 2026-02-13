@@ -62,9 +62,10 @@
   "branch_handling": {
     "rules": [
       {
-        "condition": "current_branch_not_main",
-        "required": "current_branch_in_triggers",
-        "description": "If current branch is not main/master, it should be in pipeline triggers",
+        "condition": "always",
+        "required": "standard_branch_patterns",
+        "description": "Pipeline should include standard branch patterns: main, master, develop/*, feature/*",
+        "patterns": ["main", "master", "develop/\\*", "feature/\\*"],
         "score_comply": 5,
         "score_violation": -5
       }
