@@ -198,15 +198,29 @@ AGENT_OUTPUT="$(cd "$RESULTS_DIR" && pwd)/${LANGUAGE}-${SCENARIO_NAME}.agent-out
 # Change to test workspace where .github/agents/ and skills are now available
 cd "$TEST_WORKSPACE"
 
+echo -e "${BLUE}Executing command:${NC}"
+echo "  cd $TEST_WORKSPACE"
+echo "  copilot --agent=SonarArchitectLight \\"
+echo "          --prompt \"$AGENT_PROMPT\" \\"
+echo "          --allow-all-tools \\"
+echo "          --no-ask-user \\"
+echo "          --add-dir . \\"
+echo "          --add-dir \"$WORKSPACE_ROOT\""
+echo ""
+
 # Use non-interactive mode with auto-approval
 # --agent: Use custom agent (loads from .github/agents/SonarArchitectLight.agent.md in current dir)
 # --allow-all-tools: Allow tools to run without confirmation
 # --no-ask-user: Don't ask questions, work autonomously
+# --add-dir .: Grant explicit access to current directory (test workspace)
+# --add-dir WORKSPACE_ROOT: Grant access to original workspace (for reading docs, etc.)
 # The agent now has direct access to skills/ directory in its working context
 if copilot --agent=SonarArchitectLight \
           --prompt "$AGENT_PROMPT" \
           --allow-all-tools \
           --no-ask-user \
+          --add-dir . \
+          --add-dir "$WORKSPACE_ROOT" \
           > "$AGENT_OUTPUT" 2>&1; then
     AGENT_STATUS="success"
     echo -e "${GREEN}✓${NC} Agent execution completed"
