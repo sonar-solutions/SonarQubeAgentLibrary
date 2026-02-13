@@ -204,6 +204,7 @@ echo "  copilot --agent=SonarArchitectLight \\"
 echo "          --prompt \"$AGENT_PROMPT\" \\"
 echo "          --allow-all-tools \\"
 echo "          --no-ask-user \\"
+echo "          --log-level all \\"
 echo "          --add-dir . \\"
 echo "          --add-dir \"$WORKSPACE_ROOT\""
 echo ""
@@ -212,6 +213,7 @@ echo ""
 # --agent: Use custom agent (loads from .github/agents/SonarArchitectLight.agent.md in current dir)
 # --allow-all-tools: Allow tools to run without confirmation
 # --no-ask-user: Don't ask questions, work autonomously
+# --log-level all: Enable full logging including LLM conversation
 # --add-dir .: Grant explicit access to current directory (test workspace)
 # --add-dir WORKSPACE_ROOT: Grant access to original workspace (for reading docs, etc.)
 # The agent now has direct access to skills/ directory in its working context
@@ -219,6 +221,7 @@ if copilot --agent=SonarArchitectLight \
           --prompt "$AGENT_PROMPT" \
           --allow-all-tools \
           --no-ask-user \
+          --log-level all \
           --add-dir . \
           --add-dir "$WORKSPACE_ROOT" \
           > "$AGENT_OUTPUT" 2>&1; then

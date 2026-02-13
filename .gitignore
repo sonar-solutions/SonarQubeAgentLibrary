@@ -69,3 +69,4 @@ Thumbs.db
 
 # Tests Results
 tests/results/
+tests/results/SonarArchitectLight/*.agent-output.txt
