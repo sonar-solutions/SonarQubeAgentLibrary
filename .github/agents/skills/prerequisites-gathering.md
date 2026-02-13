@@ -27,24 +27,17 @@ This skill defines the critical information needed before creating any SonarQube
   - Jenkins
 - DO NOT proceed without confirming the platform
 
-### 3. Current Branch (REQUIRED)
-- Use `execute` tool to run: `git branch --show-current`
-- If the current branch is NOT `main` or `master`:
-  - Add that branch to workflow triggers/pipeline configuration
-  - Ensure analysis runs on the current branch
-- DO NOT create pipeline files without branch information
-
-### 4. SonarQube Cloud Specific Information (REQUIRED if using Cloud)
+### 3. SonarQube Cloud Specific Information (REQUIRED if using Cloud)
 
 **If the user is using SonarQube Cloud, collect:**
 
-**4a. Organization Key (REQUIRED for Cloud)**
+**3a. Organization Key (REQUIRED for Cloud)**
 - Ask user: "What is your SonarQube Cloud organization key?"
 - This is the organization identifier in SonarCloud
 - Format: lowercase organization name (e.g., `my-org`, `company-name`)
 - DO NOT proceed without this for Cloud users
 
-**4b. SonarQube Cloud Instance (REQUIRED for Cloud)**
+**3b. SonarQube Cloud Instance (REQUIRED for Cloud)**
 - **CRITICAL**: Ask user: "Which SonarQube Cloud instance are you using?"
 - **ONLY these two options exist - use them exactly as shown**:
   - **US**: `sonarqube.us` (full URL: https://sonarqube.us)
@@ -54,14 +47,14 @@ This skill defines the critical information needed before creating any SonarQube
 - This determines the SONAR_HOST_URL value
 - **DO NOT** use any other URLs or variations
 
-### 5. Project Key (REQUIRED)
+### 4. Project Key (REQUIRED)
 - Ask user for their SonarQube project key
 - This uniquely identifies the project in SonarQube
 - Format varies by platform:
   - Cloud: Often matches project name or custom format
   - Server: `projectname` or custom format
 
-### 6. Project Type/Build System (REQUIRED)
+### 5. Project Type/Build System (REQUIRED)
 - Identified through project detection skill
 - Determines which scanner to use:
   - Maven projects → Maven plugin
@@ -90,11 +83,4 @@ This skill defines the critical information needed before creating any SonarQube
    - SonarQube type (Cloud or Server)?
    - SonarQube project key?
    - If Cloud: Organization key and instance (US/EU)?
-4. Detect current branch using `execute` tool
-3. **If SonarQube Cloud:**
-   - Ask for organization key
-   - Ask for Cloud instance (US or EU)
-4. Confirm CI/CD platform (if not detected)
-5. Detect current branch (use execute tool)
-6. Ask for project key
-7. Proceed to file creation only when all prerequisites are confirmed
+4. Proceed to file creation only when all prerequisites are confirmed

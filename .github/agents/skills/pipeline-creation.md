@@ -15,7 +15,6 @@ This skill defines how to create and edit SonarQube configuration files.
 - ✅ All prerequisites from prerequisites-gathering skill are confirmed
 - ✅ SonarQube type (Cloud/Server) is known
 - ✅ CI/CD platform is identified
-- ✅ Current branch is detected
 - ✅ Project type/build system is identified
 - ✅ Project key is provided
 
@@ -49,7 +48,7 @@ Before creating pipeline configuration files:
 #### CI/CD Pipeline Files
 
 **GitHub Actions: `.github/workflows/sonarqube.yml`**
-- Set trigger branches (include current branch if not main/master)
+- Set trigger branches to `main`, `master`, `develop/*`, `feature/*` for comprehensive coverage
 - Checkout with `fetch-depth: 0` for full git history
 - Configure appropriate scanner based on project type
 - Use secrets for `SONAR_TOKEN` and `SONAR_HOST_URL`
@@ -134,7 +133,7 @@ Before creating pipeline configuration files:
 - Use environment variables/secrets for sensitive values (see: security-practices skill)
 - Never hardcode tokens or URLs
 - Preserve existing file structure when editing
-- Include current branch in triggers if not main/master
+- Include standard branch patterns in triggers: `main`, `master`, `develop/*`, `feature/*`
 - Fetch full git history for accurate blame information
 - Validate YAML/properties syntax after creation
 

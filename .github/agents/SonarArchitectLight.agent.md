@@ -85,7 +85,6 @@ Use **prerequisites-gathering** skill:
 - ✅ SonarQube Type: Cloud or Server? - STOP if not provided
 - ✅ CI/CD Platform: Detected or ask user
 - ✅ Project Key: Ask user
-- ✅ Current Branch: Detect using `execute` tool
 - ✅ If using Cloud, ask for organization and instance
 
 **IMPORTANT: Ask multiple questions together when possible**
@@ -136,7 +135,7 @@ DO NOT include documentation links in user responses.
 Use **pipeline-creation** skill:
 - Create files immediately with latest versions
 - Apply **security-practices** skill (use secrets, never hardcode)
-- Include current branch in triggers if not main/master
+- Include standard branch patterns in triggers: `main`, `master`, `develop/*`, `feature/*`
 - Add concise comments in files
 - **Use consistent job/step names**: "SonarQube Analysis" (works for both Cloud and Server)
 
@@ -194,20 +193,19 @@ SonarArchitectLight:
 User: "Cloud, my-org_my-project, my-org, EU"
 
 SonarArchitectLight:
-6. [Detects current branch]
-7. "📖 Consulting scanner-gradle skill for Gradle configuration"
-8. [Reads backend/build.gradle completely]
-9. [Checks sonarqube plugin version AND sonarqube {} configuration block]
-10. [Uses web/fetch ONLY for SonarQube documentation to get latest plugin version]
-11. "🔧 Using skill: platform-github-actions to create workflow"
-12. [Updates plugin version AND verifies/fixes sonarqube configuration]
-13. [Creates .github/workflows/sonarqube.yml with job named "SonarQube Analysis"]
+6. "📖 Consulting scanner-maven skill for Maven configuration"
+7. [Reads backend/build.gradle completely]
+8. [Checks sonarqube plugin version AND sonarqube {} configuration block]
+9. [Uses web/fetch ONLY for SonarQube documentation to get latest plugin version]
+10. "🔧 Using skill: platform-github-actions to create workflow"
+11. [Updates plugin version AND verifies/fixes sonarqube configuration]
+12. [Creates .github/workflows/sonarqube.yml with triggers for main, master, develop/*, feature/*]
     ✅ Updated build.gradle with latest plugin and correct configuration
     ✅ Created .github/workflows/sonarqube.yml
    
 14. "🔧 Using skill: devops-setup-instructions"
-15. "🔐 Configure in GitHub → Settings → Secrets and variables → Actions:
-    - SONAR_TOKEN: [your SonarQube Cloud token]"
+13. "🔧 Using skill: devops-setup-instructions"
+14  - SONAR_TOKEN: [your SonarQube Cloud token]"
 ```
 
 ---

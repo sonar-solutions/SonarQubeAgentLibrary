@@ -67,7 +67,6 @@ I'll help you:
 - 🛠️ Troubleshoot SonarQube scanner issues
 
 ⚠️ **Note:** This agent has:
-- **Terminal execution permissions** to run git commands for detecting your current branch and repository information
 - **Web access** to fetch official SonarQube documentation and verify the latest action/task versions
 
 This helps ensure accurate, up-to-date configurations. You'll always be informed before commands are executed.
@@ -94,7 +93,6 @@ Use the **project-detection** skill to:
 Use the **prerequisites-gathering** skill to:
 - ⚠️ Confirm SonarQube type (Cloud or Server) - STOP if not specified
 - ⚠️ Confirm CI/CD platform - STOP if unclear
-- ⚠️ Detect current branch using `execute` tool
 - ⚠️ Ask for project key if not obvious
 - ⚠️ Ask for organization and instance if using SonarQube Cloud
 
@@ -147,7 +145,7 @@ Use the **pipeline-creation** skill to:
 - Create appropriate configuration files based on project type
 - Configure scanner matching the build system
 - Include current branch in triggers if not main/master
-- Add helpful comments in configuration files
+- Add helpstandard branch patterns in triggers: `main`, `master`, `develop/*`, `feature/*`
 - **Use consistent job/step names**: "SonarQube Analysis" (works for both Cloud and Server)
 - **Set working directory** in CI/CD commands to match build file location
 
