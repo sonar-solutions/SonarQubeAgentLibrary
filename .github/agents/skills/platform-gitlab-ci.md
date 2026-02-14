@@ -7,6 +7,12 @@ description: GitLab CI integration for SonarQube Cloud and Server. Use this when
 
 This skill provides GitLab CI-specific documentation and guidance for SonarQube integration.
 
+**IMPORTANT - Scope of This Skill:**
+- This skill is ONLY for GitLab CI pipeline structure and platform-specific configuration
+- Provides pipeline examples, job syntax, triggers, variables setup, and GitLab CI-specific features
+- For scanner parameters, properties, and configuration: Refer to scanner-* skills (scanner-maven, scanner-gradle, scanner-dotnet, scanner-cli)
+- Fetch pipeline examples from documentation, adapt scanner configuration from scanner skills
+
 ## Official Documentation
 
 ### SonarQube Cloud
@@ -15,9 +21,18 @@ This skill provides GitLab CI-specific documentation and guidance for SonarQube 
 ### SonarQube Server
 - **Main Documentation**: https://docs.sonarsource.com/sonarqube-server/devops-platform-integration/gitlab-integration/adding-analysis-to-gitlab-ci-cd
 
-## GitLab CI Implementation
+## Documentation Fetching Strategy
 
 **Use `web/fetch` to get current examples and versions from official documentation.**
+
+**Fallback Approach:**
+- If working with SonarQube Cloud, first fetch from the Cloud documentation URL
+- If the Cloud documentation lacks complete pipeline examples, also fetch from the Server documentation URL as a fallback
+- If working with SonarQube Server, first fetch from the Server documentation URL
+- If the Server documentation lacks complete pipeline examples, also fetch from the Cloud documentation URL as a fallback
+- Adapt any server-specific or cloud-specific details when using fallback documentation
+
+## GitLab CI Implementation
 
 ### Scanner Implementation
 

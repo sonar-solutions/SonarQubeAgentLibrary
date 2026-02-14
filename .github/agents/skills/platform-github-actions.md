@@ -7,6 +7,12 @@ description: GitHub Actions integration for SonarQube Cloud and Server. Use this
 
 This skill provides GitHub Actions-specific documentation and guidance for SonarQube integration.
 
+**IMPORTANT - Scope of This Skill:**
+- This skill is ONLY for GitHub Actions workflow structure and platform-specific configuration
+- Provides pipeline examples, workflow syntax, triggers, secrets setup, and GitHub Actions-specific features
+- For scanner parameters, properties, and configuration: Refer to scanner-* skills (scanner-maven, scanner-gradle, scanner-dotnet, scanner-cli)
+- Fetch pipeline examples from documentation, adapt scanner configuration from scanner skills
+
 ## Official Documentation
 
 ### SonarQube Cloud
@@ -17,9 +23,18 @@ This skill provides GitHub Actions-specific documentation and guidance for Sonar
 - **Main Documentation**: https://docs.sonarsource.com/sonarqube-server/devops-platform-integration/github-integration/adding-analysis-to-github-actions-workflow
 - **GitHub Action Repository**: https://github.com/SonarSource/sonarqube-scan-action
 
-## GitHub Actions Implementation
+## Documentation Fetching Strategy
 
 **Use `web/fetch` to get current examples and versions from official documentation.**
+
+**Fallback Approach:**
+- If working with SonarQube Cloud, first fetch from the Cloud documentation URL
+- If the Cloud documentation lacks complete pipeline examples, also fetch from the Server documentation URL as a fallback
+- If working with SonarQube Server, first fetch from the Server documentation URL
+- If the Server documentation lacks complete pipeline examples, also fetch from the Cloud documentation URL as a fallback
+- Adapt any server-specific or cloud-specific details when using fallback documentation
+
+## GitHub Actions Implementation
 
 ### Scanner Implementation
 
@@ -46,7 +61,7 @@ Use `sonarsource/sonarqube-scan-action` for **CLI scanner projects only**:
 - **Gradle**: Run `./gradlew sonar` (see: scanner-gradle skill)
 - **.NET**: Run `dotnet sonarscanner begin/build/end` (see: scanner-dotnet skill)
 
-Fetch examples from official documentation to get latest versions and configuration.
+Fetch examples from official documentation to get latest versions and configuration. 
 
 ## Platform-Specific Configuration
 
