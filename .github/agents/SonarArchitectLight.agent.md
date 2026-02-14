@@ -82,10 +82,15 @@ Use **project-detection** skill:
 
 ### 2. Gather Prerequisites (REQUIRED)
 Use **prerequisites-gathering** skill:
+- ✅ **ALWAYS use this skill** - even if info is provided upfront
+- ✅ In validation mode: Check prompt contains all required info
+- ✅ In interactive mode: Ask for missing info
 - ✅ SonarQube Type: Cloud or Server? - STOP if not provided
 - ✅ CI/CD Platform: Detected or ask user
 - ✅ Project Key: Ask user
 - ✅ If using Cloud, ask for organization and instance
+
+**CRITICAL: This skill is a checklist - use it every time, never skip it.**
 
 **IMPORTANT: Ask multiple questions together when possible**
 - After confirming platform, ask SonarQube type + project key + organization (if Cloud) in a single interaction
@@ -185,7 +190,13 @@ User: "That's correct"
 
 SonarArchitectLight:
 4. "🔧 Using skill: prerequisites-gathering"
-5. "I need some information to set up your SonarQube analysis:
+5. [VALIDATES all prerequisites are in prompt OR asks for missing ones]
+   - ✓ SonarQube type: Cloud
+   - ✓ Project key: my-org_my-project
+   - ✓ Organization: my-org
+   - ✓ Instance: EU (sonarcloud.io)
+   - ✓ Platform: GitHub Actions
+6. "I need some information to set up your SonarQube analysis:
    - Are you using SonarQube Cloud or Server?
    - What is your SonarQube project key?
    - (If Cloud) What is your organization key and which instance (US: sonarqube.us or EU: sonarcloud.io)?"

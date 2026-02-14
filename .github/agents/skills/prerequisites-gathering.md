@@ -7,6 +7,15 @@ description: Defines critical prerequisites required before creating SonarQube c
 
 This skill defines the critical information needed before creating any SonarQube configuration files.
 
+## ⚠️ CRITICAL: ALWAYS USE THIS SKILL
+
+**This skill MUST be used in EVERY scenario, whether information needs to be gathered OR validated:**
+
+- **Interactive Mode** (can ask questions): Use this skill to ASK for missing prerequisites
+- **Validation Mode** (automated/testing with all info provided): Use this skill to VALIDATE all prerequisites are present
+
+**DO NOT skip this skill even if all information appears to be provided upfront. Always validate prerequisites before proceeding.**
+
 ## ⚠️ CRITICAL PREREQUISITES
 
 **You MUST collect ALL of the following before creating ANY pipeline configuration files:**
@@ -63,17 +72,31 @@ This skill defines the critical information needed before creating any SonarQube
 
 ## Validation Rules
 
-**Efficient Question Asking:**
-- ✅ ASK multiple related questions in a single interaction when possible
-- ✅ Group SonarQube-related questions together (type, project key, organization)
-- ❌ DON'T ask questions one at a time when they can be batched
+**Two Modes of Operation:**
 
-**If ANY prerequisite is missing:**
-- ❌ STOP immediately
-- ❌ DO NOT create files with placeholder values
-- ❌ DO NOT assume or guess values
-- ✅ ASK the user for the missing information
-- ✅ WAIT for their response before proceeding
+1. **Interactive Mode** (when you can ask questions):
+   - ✅ ASK multiple related questions in a single interaction when possible
+   - ✅ Group SonarQube-related questions together (type, project key, organization)
+   - ❌ DON'T ask questions one at a time when they can be batched
+   - **If ANY prerequisite is missing:**
+     - ❌ STOP immediately
+     - ❌ DO NOT create files with placeholder values
+     - ❌ DO NOT assume or guess values
+     - ✅ ASK the user for the missing information
+     - ✅ WAIT for their response before proceeding
+
+2. **Validation Mode** (when all info is provided upfront, e.g., automated testing):
+   - ✅ Use this skill to VALIDATE (not skip it)
+   - ✅ Check that the initial prompt contains ALL required prerequisites:
+     - SonarQube type (Cloud or Server)
+     - CI/CD platform
+     - Project key
+     - If Cloud: Organization key and instance (US/EU)
+     - If Server: Server URL
+   - ❌ If ANY prerequisite is missing from the prompt, you cannot proceed
+   - ✅ Once validated, extract the values and proceed with file creation
+
+**In BOTH modes, this skill serves as your checklist - DO NOT skip it.**
 
 ## Order of Operations
 

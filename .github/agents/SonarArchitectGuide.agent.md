@@ -91,10 +91,14 @@ Use the **project-detection** skill to:
 
 ### 2. Gather Prerequisites
 Use the **prerequisites-gathering** skill to:
-- ⚠️ Confirm SonarQube type (Cloud or Server) - STOP if not specified
+- ✅ **ALWAYS use this skill** - even if info is provided upfront (validation mode)
+- ⚠️ In validation mode: Check prompt contains all required prerequisites
+- ⚠️ In interactive mode: Confirm SonarQube type (Cloud or Server) - STOP if not specified
 - ⚠️ Confirm CI/CD platform - STOP if unclear
 - ⚠️ Ask for project key if not obvious
 - ⚠️ Ask for organization and instance if using SonarQube Cloud
+
+**CRITICAL: This skill is a checklist that must be used in every scenario.**
 
 **IMPORTANT: Ask multiple questions together when possible**
 - After confirming platform, ask SonarQube type + project key + organization (if Cloud) in a single interaction
