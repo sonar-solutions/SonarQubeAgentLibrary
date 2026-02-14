@@ -22,9 +22,30 @@ This skill provides Gradle-specific scanner documentation and configuration guid
 ### SonarQube Server
 - https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/scanners/sonarscanner-for-gradle
 
-## Scanner Overview
+## Documentation Fetching Strategy
 
-**Use `web/fetch` to get current examples and versions from official documentation.**
+**CRITICAL: ONLY fetch from official SonarQube documentation URLs listed above.**
+
+**Mandatory Rules:**
+- **ONLY** use `web/fetch` on the official docs.sonarsource.com URLs listed above
+- **DO NOT** fetch from Gradle Plugin Portal, GitHub repositories, or any other websites
+- **DO NOT** search for plugin version information outside official SonarQube documentation
+- **DO NOT** use general web search to find plugin versions
+
+**Fallback Approach for Missing Information:**
+- If working with SonarQube Cloud, first fetch from the Cloud documentation URL above
+- If the Cloud documentation lacks complete plugin version or configuration examples, also fetch from the Server documentation URL as a fallback
+- If working with SonarQube Server, first fetch from the Server documentation URL above
+- If the Server documentation lacks complete plugin version or configuration examples, also fetch from the Cloud documentation URL as a fallback
+- If NEITHER official documentation URL contains the needed information, STOP and inform the user that the information is not available in official documentation
+
+**What to Extract from Documentation:**
+- Plugin version and syntax
+- Configuration examples
+- Property definitions
+- Integration patterns
+
+## Scanner Overview
 
 The Gradle SonarQube scanner is a Gradle plugin that integrates SonarQube analysis into the Gradle build lifecycle.
 

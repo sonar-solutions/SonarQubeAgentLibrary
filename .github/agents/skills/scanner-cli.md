@@ -15,9 +15,30 @@ This skill provides SonarScanner CLI documentation and configuration guidance fo
 ### SonarQube Server
 - https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/scanners/sonarscanner
 
-## Scanner Overview
+## Documentation Fetching Strategy
 
-**Use `web/fetch` to get current installation methods and versions from official documentation.**
+**CRITICAL: ONLY fetch from official SonarQube documentation URLs listed above.**
+
+**Mandatory Rules:**
+- **ONLY** use `web/fetch` on the official docs.sonarsource.com URLs listed above
+- **DO NOT** fetch from NPM registry, GitHub repositories, or any other websites
+- **DO NOT** search for scanner version information outside official SonarQube documentation
+- **DO NOT** use general web search to find scanner versions or installation methods
+
+**Fallback Approach for Missing Information:**
+- If working with SonarQube Cloud, first fetch from the Cloud documentation URL above
+- If the Cloud documentation lacks complete installation or configuration examples, also fetch from the Server documentation URL as a fallback
+- If working with SonarQube Server, first fetch from the Server documentation URL above
+- If the Server documentation lacks complete installation or configuration examples, also fetch from the Cloud documentation URL as a fallback
+- If NEITHER official documentation URL contains the needed information, STOP and inform the user that the information is not available in official documentation
+
+**What to Extract from Documentation:**
+- Scanner installation methods and versions
+- Configuration file format
+- Property definitions
+- Integration patterns with CI/CD platforms
+
+## Scanner Overview
 
 The SonarScanner CLI is a standalone scanner for JavaScript, TypeScript, Python, Go, PHP, Ruby, and other languages not using Maven, Gradle, or .NET.
 

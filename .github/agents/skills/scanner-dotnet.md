@@ -22,9 +22,28 @@ This skill provides .NET-specific scanner documentation and configuration guidan
 ### SonarQube Cloud
 - SonarQube Cloud uses the same .NET scanner as Server
 
-## Scanner Overview
+## Documentation Fetching Strategy
 
-**Use `web/fetch` to get current examples and versions from official documentation.**
+**CRITICAL: ONLY fetch from official SonarQube documentation URLs listed above.**
+
+**Mandatory Rules:**
+- **ONLY** use `web/fetch` on the official docs.sonarsource.com URLs listed above
+- **DO NOT** fetch from NuGet, GitHub repositories, or any other websites
+- **DO NOT** search for scanner version information outside official SonarQube documentation
+- **DO NOT** use general web search to find scanner versions or installation methods
+
+**Fallback Approach for Missing Information:**
+- First fetch from the Server documentation URL above (primary source for .NET scanner)
+- If the Server documentation lacks complete installation or configuration examples, inform the user
+- If NEITHER official documentation URL contains the needed information, STOP and inform the user that the information is not available in official documentation
+
+**What to Extract from Documentation:**
+- Scanner installation methods (global/local tool)
+- Command syntax and parameters
+- Configuration examples
+- Integration patterns
+
+## Scanner Overview
 
 The .NET scanner is a command-line tool that integrates SonarQube analysis for C#, VB.NET, and F# projects.
 
