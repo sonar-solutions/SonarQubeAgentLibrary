@@ -24,10 +24,16 @@ This skill provides Maven-specific scanner documentation and configuration guida
 
 ## Documentation Fetching Strategy
 
+**CRITICAL: web/fetch is a TOOL, not a bash command:**
+- `web/fetch` is a TOOL you invoke directly (like `read`, `edit`, `search`)
+- **DO NOT** implement web/fetch using bash commands like `curl` or `wget`
+- **DO NOT** use `execute` tool to run curl commands
+- Invoke the `web/fetch` tool directly with the documentation URL
+
 **CRITICAL: ONLY fetch from official SonarQube documentation URLs listed above.**
 
 **Mandatory Rules:**
-- **ONLY** use `web/fetch` on the official docs.sonarsource.com URLs listed above
+- **ONLY** use the `web/fetch` **TOOL** (not curl) on the official docs.sonarsource.com URLs listed above
 - **DO NOT** fetch from Maven Central, GitHub repositories, or any other websites
 - **DO NOT** search for version information outside official SonarQube documentation
 - **DO NOT** use general web search to find plugin versions
@@ -138,7 +144,7 @@ See platform-specific skills for CI/CD integration:
 1. **Read POM file completely**: Use `read` to view entire `pom.xml` file
 2. **Check for existing plugin**: Look for `sonar-maven-plugin` in `<plugins>` or `<pluginManagement>`
 3. **Verify plugin version**: 
-   - If plugin exists: Use `web/fetch` to get latest version, compare and UPDATE if needed
+   - If plugin exists: Use the `web/fetch` **TOOL** (not curl) to get latest version, compare and UPDATE if needed
    - If plugin missing: Maven uses default version, but explicit version recommended
 4. **Check for existing properties**: Look for `<sonar.*>` properties in `<properties>` section
 5. **Verify configuration is complete and correct**:

@@ -124,7 +124,9 @@ Once platform is identified, use the appropriate **platform-specific skill**:
 - **platform-bitbucket**: For Bitbucket Pipelines users
 
 **CRITICAL - Only fetch SonarQube-specific documentation:**
-- Use `web/fetch` to retrieve official **SonarQube documentation only**
+- Use the `web/fetch` **TOOL** (not curl/bash) to retrieve official **SonarQube documentation only**
+- Invoke `web/fetch` directly as a tool, like you invoke `read` or `edit`
+- **DO NOT** use `execute` tool with curl/wget commands to fetch web pages
 - Get latest SonarQube plugin/scanner versions and SonarQube configuration examples
 - **DO NOT** fetch Gradle, Maven, or .NET build tool documentation
 - Assume project has working build configuration already

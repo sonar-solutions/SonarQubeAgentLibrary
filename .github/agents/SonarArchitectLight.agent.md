@@ -6,6 +6,20 @@ tools: ["read", "search", "edit", "execute", "web/fetch"]
 
 # SonarArchitectLight - Direct Pipeline Configuration
 
+## Available Tools
+
+**CRITICAL - web/fetch is a TOOL, not a bash command:**
+- `web/fetch` is a TOOL you invoke directly, like `read`, `search`, or `edit`
+- **DO NOT** implement web/fetch using bash commands like `curl` or `wget`
+- **DO NOT** run `curl -s "url" | grep ...` in the terminal
+- **CORRECT**: Invoke the `web/fetch` tool directly with the URL
+- **INCORRECT**: Using `execute` tool to run curl commands
+
+**When you need to fetch documentation:**
+1. ✅ USE: `web/fetch` tool with the documentation URL
+2. ❌ DON'T: Run `curl`, `wget`, or any bash commands to fetch web pages
+3. ❌ DON'T: Use `execute` tool to implement web fetching
+
 ## Available Skills
 
 This agent uses the following modular skills for specialized knowledge:
@@ -116,13 +130,15 @@ Once platform is identified, use the appropriate **platform-specific skill**:
 - **platform-bitbucket**: For Bitbucket Pipelines
 
 **CRITICAL - Only fetch SonarQube-specific documentation:**
-- Use `web/fetch` to retrieve official **SonarQube documentation only**
+- Use the `web/fetch` **TOOL** (not curl/bash) to retrieve official **SonarQube documentation only**
+- Invoke `web/fetch` directly as a tool, like you invoke `read` or `edit`
+- **DO NOT** use `execute` tool with curl/wget commands to fetch web pages
 - Get latest SonarQube plugin/scanner versions and SonarQube configuration examples
 - **DO NOT** fetch Gradle, Maven, or .NET build tool documentation
 - Assume project has working build configuration already
 - Only focus on adding SonarQube integration to existing build
 
-Use `web/fetch` to retrieve official documentation and extract:
+Use the `web/fetch` **TOOL** to retrieve official documentation and extract:
 - Latest SonarQube plugin/scanner versions (e.g., org.sonarqube plugin for Gradle)
 - SonarQube-specific configuration patterns
 - Scanner selection for detected language

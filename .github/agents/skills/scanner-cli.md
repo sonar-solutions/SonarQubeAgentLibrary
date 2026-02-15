@@ -17,10 +17,16 @@ This skill provides SonarScanner CLI documentation and configuration guidance fo
 
 ## Documentation Fetching Strategy
 
+**CRITICAL: web/fetch is a TOOL, not a bash command:**
+- `web/fetch` is a TOOL you invoke directly (like `read`, `edit`, `search`)
+- **DO NOT** implement web/fetch using bash commands like `curl` or `wget`
+- **DO NOT** use `execute` tool to run curl commands
+- Invoke the `web/fetch` tool directly with the documentation URL
+
 **CRITICAL: ONLY fetch from official SonarQube documentation URLs listed above.**
 
 **Mandatory Rules:**
-- **ONLY** use `web/fetch` on the official docs.sonarsource.com URLs listed above
+- **ONLY** use the `web/fetch` **TOOL** (not curl) on the official docs.sonarsource.com URLs listed above
 - **DO NOT** fetch from NPM registry, GitHub repositories, or any other websites
 - **DO NOT** search for scanner version information outside official SonarQube documentation
 - **DO NOT** use general web search to find scanner versions or installation methods
