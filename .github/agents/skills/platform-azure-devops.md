@@ -7,6 +7,12 @@ description: Azure DevOps integration for SonarQube Cloud and Server. Use this w
 
 This skill provides Azure DevOps-specific documentation and guidance for SonarQube integration.
 
+**IMPORTANT - Scope of This Skill:**
+- This skill is ONLY for Azure Pipelines structure and platform-specific configuration
+- Provides pipeline examples, task syntax, triggers, service connections, and Azure DevOps-specific features
+- For scanner parameters, properties, and configuration: Refer to scanner-* skills (scanner-maven, scanner-gradle, scanner-dotnet, scanner-cli)
+- Fetch pipeline examples from documentation, adapt scanner configuration from scanner skills
+
 ## Official Documentation
 
 ### SonarQube Cloud
@@ -21,9 +27,18 @@ This skill provides Azure DevOps-specific documentation and guidance for SonarQu
 - Install **SonarQube** extension from Azure DevOps Marketplace
 - Extension provides tasks: `SonarQubePrepare`, `SonarQubeAnalyze`, `SonarQubePublish`
 
-## Azure DevOps Implementation
+## Documentation Fetching Strategy
 
-**Use `web/fetch` to get current examples and versions from official documentation.**
+**Invoke `web/fetch` TOOL to retrieve current examples and versions from official documentation.**
+
+**Fallback Approach:**
+- If working with SonarQube Cloud, first fetch from the Cloud documentation URL
+- If the Cloud documentation lacks complete pipeline examples, also fetch from the Server documentation URL as a fallback
+- If working with SonarQube Server, first fetch from the Server documentation URL
+- If the Server documentation lacks complete pipeline examples, also fetch from the Cloud documentation URL as a fallback
+- Adapt any server-specific or cloud-specific details when using fallback documentation
+
+## Azure DevOps Implementation
 
 ### Scanner Implementation
 
@@ -99,7 +114,7 @@ Configure Azure DevOps integration in SonarQube for automatic PR decoration.
 ## Task Versions
 
 **Check latest versions before use:**
-- Use `web/fetch` to verify current task versions in documentation
+- Invoke `web/fetch` TOOL to verify current task versions in documentation
 - Typical format: `SonarQubePrepare@5`, `SonarQubeAnalyze@5`, `SonarQubePublish@5`
 
 ## Usage Instructions
@@ -110,7 +125,7 @@ Configure Azure DevOps integration in SonarQube for automatic PR decoration.
 - Mention service connection setup
 
 **For SonarArchitectLight:**
-- Use `web/fetch` to check latest task versions
+- Invoke `web/fetch` TOOL to check latest task versions
 - Update or create `azure-pipelines.yml` with appropriate scanner
 - Remind users to install extension and set up service connection
 - Do NOT include links in responses

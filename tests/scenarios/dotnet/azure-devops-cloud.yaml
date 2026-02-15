@@ -12,7 +12,6 @@ input:
     - azure-pipelines.yml
     - Program.cs
     - Controllers/HomeController.cs
-  git_branch: main
   
   user_responses:
     - question: "CI/CD platform confirmation"
@@ -35,9 +34,9 @@ expected:
       expected: "Use dotnet sonarscanner commands (NO scan task)"
       reason: ".NET build tool integration"
     
-    - checkpoint: "Branch trigger"
-      expected: "main only (or main/master)"
-      reason: "Current branch is main"
+    - checkpoint: "Branch patterns"
+      expected: "Include standard patterns: main, master, develop/*, feature/*"
+      reason: "Standard branch coverage without detection"
     
     - checkpoint: "SonarQube URL"
       expected: "https://sonarcloud.io"

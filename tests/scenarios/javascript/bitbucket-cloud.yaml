@@ -13,7 +13,6 @@ input:
     - src/App.js
     - src/components/Header.js
     - public/index.html
-  git_branch: feature/new-ui
   
   user_responses:
     - question: "CI/CD platform confirmation"
@@ -36,9 +35,9 @@ expected:
       expected: "Use sonar-scanner-cli (CLI scanner, NOT build integration)"
       reason: "JavaScript project without build tool integration"
     
-    - checkpoint: "Branch trigger"
-      expected: "Include feature/new-ui"
-      reason: "Current branch not main/master"
+    - checkpoint: "Branch patterns"
+      expected: "Include standard patterns: main, master, develop/*, feature/*"
+      reason: "Standard branch coverage without detection"
     
     - checkpoint: "SonarQube URL"
       expected: "https://sonarcloud.io"
@@ -100,7 +99,7 @@ assertions:
   - "web/fetch used to get latest documentation"
   - "Correct scanner selection (CLI scanner for JS)"
   - "Security practices applied (repository variables, not hardcoded)"
-  - "Current branch included in triggers"
+  - "Standard branch patterns in triggers (main, master, develop/*, feature/*)"
   - "Repository variable setup instructions provided"
   - "sonar-project.properties created without credentials"
 

@@ -7,6 +7,12 @@ description: GitHub Actions integration for SonarQube Cloud and Server. Use this
 
 This skill provides GitHub Actions-specific documentation and guidance for SonarQube integration.
 
+**IMPORTANT - Scope of This Skill:**
+- This skill is ONLY for GitHub Actions workflow structure and platform-specific configuration
+- Provides pipeline examples, workflow syntax, triggers, secrets setup, and GitHub Actions-specific features
+- For scanner parameters, properties, and configuration: Refer to scanner-* skills (scanner-maven, scanner-gradle, scanner-dotnet, scanner-cli)
+- Access pipeline examples from documentation, adapt scanner configuration from scanner skills
+
 ## Official Documentation
 
 ### SonarQube Cloud
@@ -17,9 +23,18 @@ This skill provides GitHub Actions-specific documentation and guidance for Sonar
 - **Main Documentation**: https://docs.sonarsource.com/sonarqube-server/devops-platform-integration/github-integration/adding-analysis-to-github-actions-workflow
 - **GitHub Action Repository**: https://github.com/SonarSource/sonarqube-scan-action
 
-## GitHub Actions Implementation
+## Documentation Fetching Strategy
 
-**Use `web/fetch` to get current examples and versions from official documentation.**
+**Invoke `web/fetch` TOOL to retrieve current examples and versions from official documentation.**
+
+**Fallback Approach:**
+- If working with SonarQube Cloud, first fetch from the Cloud documentation URL
+- If the Cloud documentation lacks complete pipeline examples, also fetch from the Server documentation URL as a fallback
+- If working with SonarQube Server, first fetch from the Server documentation URL
+- If the Server documentation lacks complete pipeline examples, also fetch from the Cloud documentation URL as a fallback
+- Adapt any server-specific or cloud-specific details when using fallback documentation
+
+## GitHub Actions Implementation
 
 ### Scanner Implementation
 
@@ -46,7 +61,7 @@ Use `sonarsource/sonarqube-scan-action` for **CLI scanner projects only**:
 - **Gradle**: Run `./gradlew sonar` (see: scanner-gradle skill)
 - **.NET**: Run `dotnet sonarscanner begin/build/end` (see: scanner-dotnet skill)
 
-Fetch examples from official documentation to get latest versions and configuration.
+Access examples from official documentation to obtain latest versions and configuration. 
 
 ## Platform-Specific Configuration
 
@@ -79,7 +94,7 @@ The action automatically fails the workflow if quality gate fails.
 
 ## Best Practices
 
-1. **Use latest action version**: Always fetch from https://github.com/SonarSource/sonarqube-scan-action to check latest version
+1. **Use latest action version**: Always access https://github.com/SonarSource/sonarqube-scan-action to check latest version
 2. **Matrix builds**: Run analysis only once, not in matrix strategy
 3. **Branch protection**: Don't require SonarQube check on protected branches until setup is complete
 4. **Permissions**: Ensure workflow has necessary permissions for PR comments
@@ -91,6 +106,6 @@ The action automatically fails the workflow if quality gate fails.
 - Explain GitHub Actions concepts when relevant
 
 **For SonarArchitectLight:**
-- Use `web/fetch` to check latest action version before creating workflows
+- ⛔ STOP - Invoke `web/fetch` TOOL (NOT curl) to check latest action version before creating workflows
 - Create `.github/workflows/sonarqube.yml` with appropriate scanner
 - Do NOT include links in responses

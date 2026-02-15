@@ -12,7 +12,6 @@ input:
     - .gitlab-ci.yml
     - src/main/kotlin/com/example/Application.kt
     - src/test/kotlin/com/example/ApplicationTest.kt
-  git_branch: develop
   
   user_responses:
     - question: "CI/CD platform confirmation"
@@ -35,9 +34,9 @@ expected:
       expected: "Use gradle sonar command (NO scan action)"
       reason: "Gradle build tool integration"
     
-    - checkpoint: "Branch trigger"
-      expected: "Include develop"
-      reason: "Current branch not main/master"
+    - checkpoint: "Branch patterns"
+      expected: "Include standard patterns: main, master, develop/*, feature/*"
+      reason: "Standard branch coverage without detection"
     
     - checkpoint: "SonarQube URL"
       expected: "https://sonarqube.mycompany.com"
@@ -87,7 +86,7 @@ assertions:
   - "web/fetch used to get latest documentation"
   - "Correct scanner selection (Gradle command)"
   - "Security practices applied (CI/CD variables, not hardcoded)"
-  - "Current branch included in triggers"
+  - "Standard branch patterns in triggers (main, master, develop/*, feature/*)"
   - "Variable setup instructions provided"
 
 scoring:

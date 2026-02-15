@@ -7,6 +7,12 @@ description: Bitbucket Pipelines integration for SonarQube Cloud and Server. Use
 
 This skill provides Bitbucket Pipelines-specific documentation and guidance for SonarQube integration.
 
+**IMPORTANT - Scope of This Skill:**
+- This skill is ONLY for Bitbucket Pipelines structure and platform-specific configuration
+- Provides pipeline examples, step syntax, triggers, repository variables setup, and Bitbucket Pipelines-specific features
+- For scanner parameters, properties, and configuration: Refer to scanner-* skills (scanner-maven, scanner-gradle, scanner-dotnet, scanner-cli)
+- Access pipeline examples from documentation, adapt scanner configuration from scanner skills
+
 ## Official Documentation
 
 ### SonarQube Cloud
@@ -19,9 +25,18 @@ This skill provides Bitbucket Pipelines-specific documentation and guidance for 
 - **Scan Pipe Repository**: https://bitbucket.org/sonarsource/sonarqube-scan/src/master/
 - **Quality Gate Pipe**: https://bitbucket.org/sonarsource/sonarqube-quality-gate/src/master/
 
-## Bitbucket Pipelines Implementation
+## Documentation Fetching Strategy
 
-**Use `web/fetch` to get current examples and versions from official documentation and pipe repositories.**
+**Invoke `web/fetch` TOOL to retrieve current examples and versions from official documentation and pipe repositories.**
+
+**Fallback Approach:**
+- If working with SonarQube Cloud, first fetch from the Cloud documentation URL
+- If the Cloud documentation lacks complete pipeline examples, also fetch from the Server documentation URL as a fallback
+- If working with SonarQube Server, first fetch from the Server documentation URL
+- If the Server documentation lacks complete pipeline examples, also fetch from the Cloud documentation URL as a fallback
+- Adapt any server-specific or cloud-specific details when using fallback documentation
+
+## Bitbucket Pipelines Implementation
 
 ### Scanner Implementation
 
@@ -87,7 +102,7 @@ Configure Bitbucket integration in SonarQube for automatic PR decoration.
 ## Best Practices
 
 1. **Use pipes when possible**: Simpler configuration for CLI scanner
-2. **Check pipe versions**: Use `web/fetch` to verify latest pipe versions
+2. **Check pipe versions**: Invoke `web/fetch` TOOL to verify latest pipe versions
 3. **Secure variables**: Always mark sensitive variables as Secured
 4. **Full clone**: Use `depth: full` for accurate blame information
 5. **Cache appropriately**: Cache `.sonar/cache` and build dependencies
@@ -101,7 +116,7 @@ Configure Bitbucket integration in SonarQube for automatic PR decoration.
 - Mention pipes vs direct scanner options
 
 **For SonarArchitectLight:**
-- Use `web/fetch` to check latest pipe versions
+- Invoke `web/fetch` TOOL to check latest pipe versions
 - Create or update `bitbucket-pipelines.yml` with appropriate scanner
 - Prefer pipes for CLI scanner projects
 - Do NOT include links in responses

@@ -13,7 +13,6 @@ input:
     - app.py
     - tests/test_app.py
     - models/user.py
-  git_branch: feature/api-improvements
   
   user_responses:
     - question: "CI/CD platform confirmation"
@@ -36,9 +35,9 @@ expected:
       expected: "Use sonar-scanner-cli (CLI scanner, NOT build integration)"
       reason: "Python project without build tool integration"
     
-    - checkpoint: "Branch trigger"
-      expected: "Include feature/api-improvements"
-      reason: "Current branch not main/master"
+    - checkpoint: "Branch patterns"
+      expected: "Include standard patterns: main, master, develop/*, feature/*"
+      reason: "Standard branch coverage without detection"
     
     - checkpoint: "SonarQube URL"
       expected: "https://sonarqube.internal.company.com"
@@ -102,7 +101,7 @@ assertions:
   - "web/fetch used to get latest versions"
   - "Correct scanner selection (CLI scanner for Python)"
   - "Security practices applied (secrets, not hardcoded)"
-  - "Current branch included in triggers"
+  - "Standard branch patterns in triggers (main, master, develop/*, feature/*)"
   - "Secrets setup instructions provided (including SONAR_HOST_URL)"
   - "sonar-project.properties created without credentials"
 
