@@ -314,9 +314,9 @@ fi
 # Look for patterns like "Fetched: https://docs.sonarsource.com/..."
 # Try session file first for more complete data, fall back to agent-output.txt
 if [[ -f "$AGENT_SHARE" ]]; then
-    DOC_FETCHES=$(grep -oE 'https?://[^ ]+' "$AGENT_SHARE" | grep -E '(docs\.sonarsource|github\.com|docs\.gitlab|learn\.microsoft|docs\.azure)' 2>/dev/null || true)
+    DOC_FETCHES=$(grep -oE 'https?://[^ "<>)]+' "$AGENT_SHARE" | grep -E '(docs\.sonarsource|github\.com|docs\.gitlab|learn\.microsoft|docs\.azure)' 2>/dev/null || true)
 else
-    DOC_FETCHES=$(grep -oE 'https?://[^ ]+' "$AGENT_OUTPUT" | grep -E '(docs\.sonarsource|github\.com|docs\.gitlab|learn\.microsoft|docs\.azure)' 2>/dev/null || true)
+    DOC_FETCHES=$(grep -oE 'https?://[^ "<>)]+' "$AGENT_OUTPUT" | grep -E '(docs\.sonarsource|github\.com|docs\.gitlab|learn\.microsoft|docs\.azure)' 2>/dev/null || true)
 fi
 if [[ -z "$DOC_FETCHES" ]]; then
     DOC_COUNT="0"
