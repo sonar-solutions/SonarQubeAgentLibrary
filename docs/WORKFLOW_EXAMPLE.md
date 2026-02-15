@@ -307,7 +307,7 @@ git rev-parse --abbrev-ref HEAD
 **Skill Reference:** `pipeline-creation` → Fetch Latest Versions
 
 **Decision Logic:**
-- ALWAYS use `web/fetch` to get current documentation
+- ALWAYS invoke `web/fetch` TOOL to obtain current documentation
 - Rule: "DO NOT guess or use outdated versions"
 - Ensures:
   - Latest action versions (`@v4` not `@v3`)

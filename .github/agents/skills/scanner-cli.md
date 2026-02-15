@@ -15,7 +15,7 @@ This skill provides SonarScanner CLI documentation and configuration guidance fo
 ### SonarQube Server
 - https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/scanners/sonarscanner
 
-## Documentation Fetching Strategy
+## Documentation Retrieval Strategy
 
 **CRITICAL: web/fetch is a TOOL, not a bash command:**
 - `web/fetch` is a TOOL you invoke directly (like `read`, `edit`, `search`)
@@ -179,7 +179,7 @@ The SonarScanner CLI is a standalone scanner for JavaScript, TypeScript, Python,
 6. **Define test patterns**: Use sonar.test.inclusions for accurate test detection
 7. **Set encoding**: Explicitly set sonar.sourceEncoding if not UTF-8
 8. **Version the scanner**: Pin scanner version in CI/CD for reproducibility
-9. **Check scanner version**: Use `web/fetch` to verify compatible scanner versions
+9. **Check scanner version**: Invoke `web/fetch` TOOL to verify compatible scanner versions
 10. **Enable debug for troubleshooting**: Use -X flag when investigating issues
 11. **Validate coverage paths**: Ensure coverage files exist before scanning
 12. **Use platform-specific actions**: Prefer official CI/CD integrations when available
@@ -225,7 +225,7 @@ See platform-specific skills for integration details.
 2. **Read properties file if exists**: Use `read` to view complete content
 3. **Check existing configuration**: Note what properties are already configured
 4. **Verify scanner version**: 
-   - Use `web/fetch` to get latest scanner version recommendation
+   - Invoke `web/fetch` TOOL to obtain latest scanner version recommendation
    - Note version for CI/CD setup
 5. **Update, don't duplicate**: 
    - If properties exist: Only add missing properties
@@ -244,7 +244,7 @@ See platform-specific skills for integration details.
 **For SonarArchitectLight:**
 - **Step 1**: Search for existing sonar-project.properties file
 - **Step 2**: If exists, read complete file to check configuration
-- **Step 3**: Use `web/fetch` to get latest scanner version and configuration examples
+- **Step 3**: ⛔ STOP - Invoke `web/fetch` TOOL (NOT curl) to obtain latest scanner version and configuration examples
 - **Step 4**: Note directory containing sonar-project.properties (working directory)
 - **Step 5**: Create or update properties file (don't duplicate existing properties)
 - **Step 6**: Include language-specific coverage configuration

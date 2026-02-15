@@ -22,7 +22,7 @@ This skill provides Maven-specific scanner documentation and configuration guida
 ### SonarQube Server
 - https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/scanners/sonarscanner-for-maven
 
-## Documentation Fetching Strategy
+## Documentation Retrieval Strategy
 
 **CRITICAL: web/fetch is a TOOL, not a bash command:**
 - `web/fetch` is a TOOL you invoke directly (like `read`, `edit`, `search`)
@@ -30,19 +30,19 @@ This skill provides Maven-specific scanner documentation and configuration guida
 - **DO NOT** use `execute` tool to run curl commands
 - Invoke the `web/fetch` tool directly with the documentation URL
 
-**CRITICAL: ONLY fetch from official SonarQube documentation URLs listed above.**
+**CRITICAL: ONLY retrieve from official SonarQube documentation URLs listed above.**
 
 **Mandatory Rules:**
 - **ONLY** use the `web/fetch` **TOOL** (not curl) on the official docs.sonarsource.com URLs listed above
-- **DO NOT** fetch from Maven Central, GitHub repositories, or any other websites
+- **DO NOT** retrieve from Maven Central, GitHub repositories, or any other websites
 - **DO NOT** search for version information outside official SonarQube documentation
 - **DO NOT** use general web search to find plugin versions
 
 **Fallback Approach for Missing Information:**
-- If working with SonarQube Cloud, first fetch from the Cloud documentation URL above
-- If the Cloud documentation lacks complete plugin version or configuration examples, also fetch from the Server documentation URL as a fallback
-- If working with SonarQube Server, first fetch from the Server documentation URL above
-- If the Server documentation lacks complete plugin version or configuration examples, also fetch from the Cloud documentation URL as a fallback
+- If working with SonarQube Cloud, first use web/fetch with the Cloud documentation URL above
+- If the Cloud documentation lacks complete plugin version or configuration examples, also use web/fetch with the Server documentation URL as a fallback
+- If working with SonarQube Server, first use web/fetch with the Server documentation URL above
+- If the Server documentation lacks complete plugin version or configuration examples, also use web/fetch with the Cloud documentation URL as a fallback
 - If NEITHER official documentation URL contains the needed information, STOP and inform the user that the information is not available in official documentation
 
 **What to Extract from Documentation:**
@@ -95,11 +95,11 @@ The Maven SonarQube scanner is a Maven plugin that integrates SonarQube analysis
 - Configure coverage report path using `sonar.coverage.jacoco.xmlReportPaths`
 - Run `verify` goal to execute tests and generate coverage before analysis
 
-**Use Documentation Fetching Strategy above to get JaCoCo configuration examples from official SonarQube documentation only.**
+**Use Documentation Retrieval Strategy above to get JaCoCo configuration examples from official SonarQube documentation only.**
 
 ## Common Configuration Properties
 
-**Use Documentation Fetching Strategy above to get current property examples from official SonarQube documentation only.**
+**Use Documentation Retrieval Strategy above to get current property examples from official SonarQube documentation only.**
 
 ### Key Properties:
 - **Project identification**: `sonar.projectKey`, `sonar.organization`, `sonar.projectName`
@@ -127,7 +127,7 @@ The Maven SonarQube scanner is a Maven plugin that integrates SonarQube analysis
 7. **Exclude generated code**: Configure exclusions for auto-generated code, build outputs
 8. **Run tests first**: Use `verify` goal to ensure tests run and coverage is collected
 9. **Multi-module setup**: Run from parent POM for consistent analysis across modules
-10. **Check versions**: Follow Documentation Fetching Strategy section to verify latest plugin versions from official SonarQube documentation only
+10. **Check versions**: Follow Documentation Retrieval Strategy section to verify latest plugin versions from official SonarQube documentation only
 
 ## Platform Integration
 
@@ -144,7 +144,7 @@ See platform-specific skills for CI/CD integration:
 1. **Read POM file completely**: Use `read` to view entire `pom.xml` file
 2. **Check for existing plugin**: Look for `sonar-maven-plugin` in `<plugins>` or `<pluginManagement>`
 3. **Verify plugin version**: 
-   - If plugin exists: Use the `web/fetch` **TOOL** (not curl) to get latest version, compare and UPDATE if needed
+   - If plugin exists: Invoke the `web/fetch` **TOOL** (not curl) to obtain latest version, compare and UPDATE if needed
    - If plugin missing: Maven uses default version, but explicit version recommended
 4. **Check for existing properties**: Look for `<sonar.*>` properties in `<properties>` section
 5. **Verify configuration is complete and correct**:
@@ -168,7 +168,7 @@ See platform-specific skills for CI/CD integration:
 **For SonarArchitectLight:**
 - **Step 1**: Read complete pom.xml file
 - **Step 2**: Check if `sonar-maven-plugin` exists and note its version
-- **Step 3**: Follow "Documentation Fetching Strategy" section above - ONLY use official SonarQube documentation URLs to get latest plugin version
+- **Step 3**: ⛔ STOP - Invoke `web/fetch` TOOL (NOT curl) - Follow "Documentation Retrieval Strategy" section above - ONLY use official SonarQube documentation URLs to obtain latest plugin version
 - **Step 4**: Check if `<sonar.*>` properties exist in `<properties>` section
 - **Step 5**: Update plugin version if needed, add if best practice
 - **Step 6**: Add or update SonarQube properties (don't duplicate existing ones)

@@ -20,7 +20,7 @@ This skill defines how to create and edit SonarQube configuration files.
 
 **If ANY prerequisite is missing: STOP and gather it first.**
 
-### Fetch Latest Versions
+### Retrieve Latest Versions
 
 **CRITICAL - web/fetch is a TOOL:**
 - `web/fetch` is a TOOL you invoke directly (like `read`, `edit`, `search`)
@@ -29,7 +29,7 @@ This skill defines how to create and edit SonarQube configuration files.
 - Invoke `web/fetch` tool directly with the documentation URL
 
 Before creating pipeline configuration files:
-1. Use the `web/fetch` **TOOL** (not curl) to retrieve official SonarQube documentation from the docs.sonarsource.com domain (any page under this domain)
+1. Invoke the `web/fetch` **TOOL** (not curl) to access official SonarQube documentation from the docs.sonarsource.com domain (any page under this domain)
 2. Check for latest action/task versions:
    - GitHub Actions: Check version in examples (e.g., `@v7`)
    - Azure DevOps: Check task versions

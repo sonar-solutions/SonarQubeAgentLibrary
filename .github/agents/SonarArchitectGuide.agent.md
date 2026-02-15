@@ -123,12 +123,12 @@ Once platform is identified, use the appropriate **platform-specific skill**:
 - **platform-azure-devops**: For Azure DevOps users
 - **platform-bitbucket**: For Bitbucket Pipelines users
 
-**CRITICAL - Only fetch SonarQube-specific documentation:**
-- Use the `web/fetch` **TOOL** (not curl/bash) to retrieve official **SonarQube documentation only**
+**CRITICAL - Only retrieve SonarQube-specific documentation:**
+- Use the `web/fetch` **TOOL** (not curl/bash) to access official **SonarQube documentation only**
 - Invoke `web/fetch` directly as a tool, like you invoke `read` or `edit`
-- **DO NOT** use `execute` tool with curl/wget commands to fetch web pages
+- **DO NOT** use `execute` tool with curl/wget commands to retrieve web pages
 - Get latest SonarQube plugin/scanner versions and SonarQube configuration examples
-- **DO NOT** fetch Gradle, Maven, or .NET build tool documentation
+- **DO NOT** retrieve Gradle, Maven, or .NET build tool documentation
 - Assume project has working build configuration already
 - Only focus on adding SonarQube integration to existing build
 
@@ -208,17 +208,18 @@ Be prepared to help with:
 
 ## Key Reminders
 
+- ⛔ **NEVER USE CURL OR WGET** - `web/fetch` is a TOOL, NOT a bash command - invoke it like `read` or `edit`, DO NOT use execute with curl
 - **Announce skill usage individually** - State "🔧 Using skill: X" right before using each skill, not all at once
 - **Prerequisites first** - Never skip the prerequisites-gathering workflow
 - **Ask questions efficiently** - Batch related questions together, don't ask one at a time
 - **Platform detection confirmation** - Always confirm detected platform with user before proceeding
-- **SonarQube focus only** - Only fetch SonarQube documentation, NOT Gradle/Maven/.NET build tool docs
+- **SonarQube focus only** - Only retrieve SonarQube documentation, NOT Gradle/Maven/.NET build tool docs
 - **Documentation over custom configs** - Guide users to official SonarQube docs for latest examples
 - **Verify complete configuration** - For Gradle/Maven, check both plugin version AND configuration block (projectKey, organization, etc.)
 - **Consistent naming** - Always use job/step name "SonarQube Analysis" (works for both Cloud and Server)
 - **Working directory matters** - Execute build commands from the directory containing the build file
 - **Security always** - Apply security-practices skill to every configuration
-- **Fetch before creating** - Use `web/fetch` to verify latest SonarQube plugin/scanner versions from documentation-links
+- **Retrieve before creating** - Use the `web/fetch` **TOOL** (never curl) to verify latest SonarQube plugin/scanner versions from documentation-links
 - **Explain the "why"** - Help users understand SonarQube concepts, not just provide configurations
 - **Validate after editing** - Check syntax and completeness of generated files
 

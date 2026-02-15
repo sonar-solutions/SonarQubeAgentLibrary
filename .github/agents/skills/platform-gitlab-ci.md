@@ -11,7 +11,7 @@ This skill provides GitLab CI-specific documentation and guidance for SonarQube 
 - This skill is ONLY for GitLab CI pipeline structure and platform-specific configuration
 - Provides pipeline examples, job syntax, triggers, variables setup, and GitLab CI-specific features
 - For scanner parameters, properties, and configuration: Refer to scanner-* skills (scanner-maven, scanner-gradle, scanner-dotnet, scanner-cli)
-- Fetch pipeline examples from documentation, adapt scanner configuration from scanner skills
+- Access pipeline examples from documentation, adapt scanner configuration from scanner skills
 
 ## Official Documentation
 
@@ -23,7 +23,7 @@ This skill provides GitLab CI-specific documentation and guidance for SonarQube 
 
 ## Documentation Fetching Strategy
 
-**Use `web/fetch` to get current examples and versions from official documentation.**
+**Invoke `web/fetch` TOOL to retrieve current examples and versions from official documentation.**
 
 **Fallback Approach:**
 - If working with SonarQube Cloud, first fetch from the Cloud documentation URL
@@ -108,6 +108,6 @@ Add a separate job to check quality gate status if needed.
 - Explain GitLab CI concepts when relevant
 
 **For SonarArchitectLight:**
-- Use `web/fetch` to check latest scanner versions
+- Invoke `web/fetch` TOOL to check latest scanner versions
 - Update or create `.gitlab-ci.yml` with appropriate scanner
 - Do NOT include links in responses

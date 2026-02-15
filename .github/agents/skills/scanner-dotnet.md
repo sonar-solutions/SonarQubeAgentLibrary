@@ -22,7 +22,7 @@ This skill provides .NET-specific scanner documentation and configuration guidan
 ### SonarQube Cloud
 - SonarQube Cloud uses the same .NET scanner as Server
 
-## Documentation Fetching Strategy
+## Documentation Retrieval Strategy
 
 **CRITICAL: web/fetch is a TOOL, not a bash command:**
 - `web/fetch` is a TOOL you invoke directly (like `read`, `edit`, `search`)
@@ -78,7 +78,7 @@ The .NET scanner is a command-line tool that integrates SonarQube analysis for C
 
 ## Scanner Usage
 
-**Fetch current command examples from official documentation.**
+**Retrieve current command examples from official documentation.**
 
 ### Three-Step Process
 
@@ -112,11 +112,11 @@ The .NET scanner is a command-line tool that integrates SonarQube analysis for C
 - Use `--collect:"XPlat Code Coverage"` with dotnet test
 - Configure coverage XML report paths in begin step
 
-**Fetch coverage configuration examples from official documentation.**
+**Retrieve coverage configuration examples from official documentation.**
 
 ## Common Configuration Parameters
 
-**Fetch current parameter examples from official documentation.**
+**Retrieve current parameter examples from official documentation.**
 
 ### Key Parameters:
 - **Project identification**: `/k:"project-key"`, `/n:"Project Name"`, `/v:"1.0"`
@@ -156,7 +156,7 @@ The .NET scanner is a command-line tool that integrates SonarQube analysis for C
 7. **Exclude generated code**: Exclude bin/, obj/, and auto-generated files
 8. **Solution-level analysis**: Analyze entire solution for multi-project setups
 9. **Test before analysis**: Run tests with coverage collection before end step
-10. **Check scanner version**: Use `web/fetch` to verify compatible scanner versions
+10. **Check scanner version**: Invoke `web/fetch` TOOL to verify compatible scanner versions
 
 ## Platform Integration
 
@@ -175,7 +175,7 @@ See platform-specific skills for CI/CD integration:
    - Example: If MySolution.sln is in `src/`, all three commands run from `src/`
 3. **Check for tool manifest**: Look for `.config/dotnet-tools.json` (indicates local tool setup)
 4. **Verify scanner version**: 
-   - If tool manifest exists: Use `web/fetch` to get latest version, update if outdated
+   - If tool manifest exists: Invoke `web/fetch` TOOL to obtain latest version, update if outdated
    - If no manifest: Commands will use globally installed scanner or need installation
 5. **Detect test projects**: Look for `*Test.csproj`, `*.Tests.csproj` files to enable coverage
 6. **Working directory in CI/CD**: Set to directory containing .sln file
@@ -201,7 +201,7 @@ See platform-specific skills for CI/CD integration:
 - **Step 1**: Search for .sln, .csproj files to locate solution/project
 - **Step 2**: Note directory containing solution file (working directory for commands)
 - **Step 3**: Check for .config/dotnet-tools.json
-- **Step 4**: Use `web/fetch` to get latest scanner version from official SonarQube documentation
+- **Step 4**: ⛔ STOP - Invoke `web/fetch` TOOL (NOT curl) to obtain latest scanner version from official SonarQube documentation
 - **Step 5**: Search for test projects (*Test.csproj, *.Tests.csproj)
 - **Step 6**: Create CI/CD with begin/build/end pattern, all from same working directory
 - **Step 7**: Include coverage collection if test projects found
