@@ -1,0 +1,111 @@
+name: javascript-bitbucket-cloud
+description: JavaScript/React project with Bitbucket Pipelines targeting SonarQube Cloud
+category: priority
+language: javascript
+platform: bitbucket
+sonarqube: cloud-us
+
+input:
+  project_structure:
+    - package.json
+    - package-lock.json
+    - bitbucket-pipelines.yml
+    - src/App.js
+    - src/components/Header.js
+    - public/index.html
+  
+  user_responses:
+    - question: "CI/CD platform confirmation"
+      answer: "Correct"
+    - question: "SonarQube information"
+      answer: "Cloud, my-js-app, my-team, US"
+
+expected:
+  skills_invoked:
+    - project-detection
+    - prerequisites-gathering
+    - platform-bitbucket
+    - scanner-javascript-typescript
+    - pipeline-creation
+    - security-practices
+    - devops-setup-instructions
+  
+  decisions:
+    - checkpoint: "Scanner selection"
+      expected: "Use sonar-scanner-cli (CLI scanner, NOT build integration)"
+      reason: "JavaScript project without build tool integration"
+    
+    - checkpoint: "Branch patterns"
+      expected: "Include standard patterns: main, master, develop/*, feature/*"
+      reason: "Standard branch coverage without detection"
+    
+    - checkpoint: "SonarQube URL"
+      expected: "https://sonarcloud.io"
+      reason: "US Cloud instance"
+  
+  documentation_fetches:
+    expected_domains:
+      - "docs.sonarsource.com"
+      - "support.atlassian.com"
+    expected_pages:
+      - pattern: "docs.sonarsource.com.*scanner-cli"
+        description: "CLI scanner documentation"
+      - pattern: "docs.sonarsource.com.*sonar-project-properties"
+        description: "sonar-project.properties documentation"
+      - pattern: "support.atlassian.com.*bitbucket.*pipelines"
+        description: "Bitbucket Pipelines documentation"
+    min_fetches: 2
+    max_fetches: 10
+  
+  files_created:
+    - path: "bitbucket-pipelines.yml"
+      must_contain:
+        - "sonarsource/sonar-scanner-cli"
+        - "depth: full"
+        - "$SONAR_TOKEN"
+        - "sonar.projectKey=my-js-app"
+        - "sonar.organization=my-team"
+        - "sonar.host.url=https://sonarcloud.io"
+        - "feature/new-ui"
+      must_not_contain:
+        - "npm run sonar"  # no npm integration for JS
+        - "squ_"  # hardcoded token
+        - "sqp_"  # hardcoded token
+  
+    - path: "sonar-project.properties"
+      must_contain:
+        - "sonar.projectKey=my-js-app"
+        - "sonar.organization=my-team"
+        - "sonar.sources=src"
+      must_not_contain:
+        - "sonar.login="  # token should be in pipeline, not here
+  
+  validation:
+    - type: "yaml_syntax"
+      file: "bitbucket-pipelines.yml"
+    - type: "properties_syntax"
+      file: "sonar-project.properties"
+    - type: "no_hardcoded_credentials"
+      files: ["**/*.yml", "**/*.yaml", "**/*.properties"]
+    - type: "version_currency"
+      check: "Bitbucket pipeline image versions"
+    - type: "security_compliance"
+      rules: ["security-practices"]
+    - type: "documentation_fetches"
+      rules: ["minimum-fetches", "official-sources", "relevant-pages"]
+
+assertions:
+  - "All prerequisites gathered before file creation"
+  - "web/fetch used to get latest documentation"
+  - "Correct scanner selection (CLI scanner for JS)"
+  - "Security practices applied (repository variables, not hardcoded)"
+  - "Standard branch patterns in triggers (main, master, develop/*, feature/*)"
+  - "Repository variable setup instructions provided"
+  - "sonar-project.properties created without credentials"
+
+scoring:
+  accuracy: 40
+  security: 20
+  efficiency: 15
+  currency: 15
+  usability: 10

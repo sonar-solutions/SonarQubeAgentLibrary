@@ -1,0 +1,97 @@
+name: dotnet-azure-devops-cloud
+description: .NET project with Azure DevOps targeting SonarQube Cloud EU instance
+category: priority
+language: dotnet
+platform: azure-devops
+sonarqube: cloud-eu
+
+input:
+  project_structure:
+    - MyApp.csproj
+    - MyApp.sln
+    - azure-pipelines.yml
+    - Program.cs
+    - Controllers/HomeController.cs
+  
+  user_responses:
+    - question: "CI/CD platform confirmation"
+      answer: "Yes"
+    - question: "SonarQube information"
+      answer: "Cloud, my-dotnet-project, my-organization, EU"
+
+expected:
+  skills_invoked:
+    - project-detection
+    - prerequisites-gathering
+    - platform-azure-devops
+    - scanner-dotnet
+    - pipeline-creation
+    - security-practices
+    - devops-setup-instructions
+  
+  decisions:
+    - checkpoint: "Scanner selection"
+      expected: "Use dotnet sonarscanner commands (NO scan task)"
+      reason: ".NET build tool integration"
+    
+    - checkpoint: "Branch patterns"
+      expected: "Include standard patterns: main, master, develop/*, feature/*"
+      reason: "Standard branch coverage without detection"
+    
+    - checkpoint: "SonarQube URL"
+      expected: "https://sonarcloud.io"
+      reason: "EU instance (still uses sonarcloud.io URL, region in organization)"
+  
+  documentation_fetches:
+    expected_domains:
+      - "docs.sonarsource.com"
+      - "learn.microsoft.com"
+    expected_pages:
+      - pattern: "docs.sonarsource.com.*(dotnet|scanner-dotnet)"
+        description: ".NET scanner documentation"
+      - pattern: "learn.microsoft.com.*azure.*pipelines"
+        description: "Azure Pipelines documentation"
+    min_fetches: 2
+    max_fetches: 10
+  
+  files_created:
+    - path: "azure-pipelines.yml"
+      must_contain:
+        - "DotNetCoreCLI@2"
+        - "command: 'custom'"
+        - "custom: 'sonarscanner'"
+        - "$(SONAR_TOKEN)"
+        - "/k:my-dotnet-project"
+        - "/o:my-organization"
+        - "/d:sonar.host.url=https://sonarcloud.io"
+        - "dotnet build"
+      must_not_contain:
+        - "SonarCloudPrepare@"  # deprecated task
+        - "squ_"  # hardcoded token
+        - "sqp_"  # hardcoded token
+  
+  validation:
+    - type: "yaml_syntax"
+      file: "azure-pipelines.yml"
+    - type: "no_hardcoded_credentials"
+      files: ["**/*.yml", "**/*.yaml"]
+    - type: "version_currency"
+      check: "Azure DevOps task versions"
+    - type: "security_compliance"
+      rules: ["security-practices"]
+    - type: "documentation_fetches"
+      rules: ["minimum-fetches", "official-sources", "relevant-pages"]
+
+assertions:
+  - "All prerequisites gathered before file creation"
+  - "web/fetch used to get latest documentation"
+  - "Correct scanner selection (.NET commands)"
+  - "Security practices applied (pipeline variables, not hardcoded)"
+  - "Pipeline variable setup instructions provided"
+
+scoring:
+  accuracy: 40
+  security: 20
+  efficiency: 15
+  currency: 15
+  usability: 10

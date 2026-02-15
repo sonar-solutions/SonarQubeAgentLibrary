@@ -1,0 +1,208 @@
+---
+name: scanner-dotnet
+description: .NET scanner configuration for SonarQube. Use this for C#, VB.NET, and F# projects.
+---
+
+# .NET Scanner Skill
+
+This skill provides .NET-specific scanner documentation and configuration guidance.
+
+**IMPORTANT - Scope of This Skill:**
+- This skill is ONLY for SonarQube integration with .NET projects
+- Assumes the project already has a working .NET build configuration
+- DO NOT use this skill to troubleshoot .NET build or compilation issues
+- DO NOT fetch .NET SDK documentation for general build problems
+- Focus exclusively on dotnet-sonarscanner installation and usage
+
+## Official Documentation
+
+### SonarQube Server
+- https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/scanners/dotnet/using
+
+### SonarQube Cloud
+- SonarQube Cloud uses the same .NET scanner as Server
+
+## Documentation Retrieval Strategy
+
+**CRITICAL: web/fetch is a TOOL, not a bash command:**
+- `web/fetch` is a TOOL you invoke directly (like `read`, `edit`, `search`)
+- **DO NOT** implement web/fetch using bash commands like `curl` or `wget`
+- **DO NOT** use `execute` tool to run curl commands
+- Invoke the `web/fetch` tool directly with the documentation URL
+
+**CRITICAL: ONLY fetch from official SonarQube documentation URLs listed above.**
+
+**Mandatory Rules:**
+- **ONLY** use the `web/fetch` **TOOL** (not curl) on the official docs.sonarsource.com URLs listed above
+- **DO NOT** fetch from NuGet, GitHub repositories, or any other websites
+- **DO NOT** search for scanner version information outside official SonarQube documentation
+- **DO NOT** use general web search to find scanner versions or installation methods
+
+**Fallback Approach for Missing Information:**
+- First fetch from the Server documentation URL above (primary source for .NET scanner)
+- If the Server documentation lacks complete installation or configuration examples, inform the user
+- If NEITHER official documentation URL contains the needed information, STOP and inform the user that the information is not available in official documentation
+
+**What to Extract from Documentation:**
+- Scanner installation methods (global/local tool)
+- Command syntax and parameters
+- Configuration examples
+- Integration patterns
+
+## Scanner Overview
+
+The .NET scanner is a command-line tool that integrates SonarQube analysis for C#, VB.NET, and F# projects.
+
+**CRITICAL: .NET projects do NOT use CI/CD scan actions/tasks (Azure DevOps is special case).**
+- GitHub Actions: Do NOT use `sonarsource/sonarqube-scan-action` - run dotnet sonarscanner begin/build/end directly
+- GitLab CI: Do NOT use sonar-scanner-cli Docker image - run dotnet sonarscanner begin/build/end directly
+- Azure DevOps: Use SonarQubePrepare task in MSBuild mode (special case - wraps dotnet sonarscanner)
+- Bitbucket: Do NOT use SonarQube/SonarCloud pipes - run dotnet sonarscanner begin/build/end directly
+
+### Key Concepts
+- Three-step process: begin analysis → build project → end analysis
+- Must be installed as .NET global or local tool
+- Works with .NET Core, .NET Framework, and .NET 5+
+- Supports solution files with multiple projects
+- Integrates with coverlet or VSTest for code coverage
+- Wraps MSBuild to collect analysis data during compilation
+
+### Installation Options
+- **Global tool**: Installed system-wide, accessible from any directory
+- **Local tool**: Installed per project using tool manifest (recommended for CI/CD)
+
+### Configuration Options
+- **Command-line parameters**: Pass configuration via `/k:`, `/d:` parameters
+- **Begin step**: Configure project key, host URL, organization, coverage paths
+- **End step**: Upload results to SonarQube server
+
+## Scanner Usage
+
+**Retrieve current command examples from official documentation.**
+
+### Three-Step Process
+
+1. **Begin Analysis**: Initialize scanner with project configuration
+   - Specify project key (`/k:`)
+   - Set host URL and token (`/d:sonar.host.url`, `/d:sonar.token`)
+   - Configure organization for Cloud (`/o:`)
+   - Set coverage report paths
+
+2. **Build Project**: Compile with dotnet build
+   - Scanner intercepts build to collect analysis data
+   - Must run between begin and end steps
+
+3. **End Analysis**: Upload results to SonarQube
+   - Pass token again for authentication
+   - Results uploaded to server for processing
+
+## Code Coverage
+
+### Coverage Tools
+- **coverlet**: Popular cross-platform coverage tool for .NET
+- **VSTest**: Built-in Visual Studio test coverage
+
+### Coverlet Integration
+- Install coverlet.msbuild package
+- Collect coverage during test execution
+- Configure OpenCover or Cobertura format
+- Specify coverage report path in begin step using `/d:sonar.cs.opencover.reportsPaths`
+
+### VSTest Integration
+- Use `--collect:"XPlat Code Coverage"` with dotnet test
+- Configure coverage XML report paths in begin step
+
+**Retrieve coverage configuration examples from official documentation.**
+
+## Common Configuration Parameters
+
+**Retrieve current parameter examples from official documentation.**
+
+### Key Parameters:
+- **Project identification**: `/k:"project-key"`, `/n:"Project Name"`, `/v:"1.0"`
+- **Organization** (Cloud only): `/o:"organization-key"`
+- **Host and auth**: `/d:sonar.host.url`, `/d:sonar.token`
+- **Coverage reports**: `/d:sonar.cs.opencover.reportsPaths`, `/d:sonar.cs.vscoveragexml.reportsPaths`
+- **Exclusions**: `/d:sonar.exclusions`, `/d:sonar.test.exclusions`
+- **Roslyn**: `/d:sonar.cs.roslyn.ignoreIssues`
+
+## Solution with Multiple Projects
+
+- Scanner automatically detects all projects in a solution
+- Run analysis on .sln file for multi-project solutions
+- Each project analyzed as part of the solution
+- Single quality gate for entire solution
+- Use same three-step process (begin → build solution → end)
+
+## Common Issues
+
+### Issue: Scanner not found
+**Solution:** Install globally or use local tool manifest
+
+### Issue: No coverage reported
+**Solution:** Ensure coverage format is correct and path matches
+
+### Issue: Build output not found
+**Solution:** Must run `dotnet build` between begin/end
+
+## Best Practices
+
+1. **Use local tool manifest**: Better for reproducible builds in CI/CD environments
+2. **Collect coverage**: Always include code coverage with coverlet or VSTest
+3. **Token security**: Use environment variables for tokens, never hardcode
+4. **Build before end**: Always run `dotnet build` between begin and end steps
+5. **Specify coverage paths**: Use explicit coverage report paths with wildcards
+6. **Update regularly**: Keep scanner tool updated with `dotnet tool update`
+7. **Exclude generated code**: Exclude bin/, obj/, and auto-generated files
+8. **Solution-level analysis**: Analyze entire solution for multi-project setups
+9. **Test before analysis**: Run tests with coverage collection before end step
+10. **Check scanner version**: Invoke `web/fetch` TOOL to verify compatible scanner versions
+
+## Platform Integration
+
+See platform-specific skills for CI/CD integration:
+- **platform-github-actions**: GitHub Actions with .NET
+- **platform-gitlab-ci**: GitLab CI with .NET
+- **platform-azure-devops**: Azure Pipelines with .NET
+- **platform-bitbucket**: Bitbucket Pipelines with .NET
+
+## Configuration Workflow
+
+**CRITICAL: Follow this workflow when setting up .NET projects:**
+
+1. **Locate solution/project files**: Use `search` to find `.sln`, `.csproj`, or `.vbproj` files
+2. **Note file location**: Scanner commands must run from directory containing solution/project file
+   - Example: If MySolution.sln is in `src/`, all three commands run from `src/`
+3. **Check for tool manifest**: Look for `.config/dotnet-tools.json` (indicates local tool setup)
+4. **Verify scanner version**: 
+   - If tool manifest exists: Invoke `web/fetch` TOOL to obtain latest version, update if outdated
+   - If no manifest: Commands will use globally installed scanner or need installation
+5. **Detect test projects**: Look for `*Test.csproj`, `*.Tests.csproj` files to enable coverage
+6. **Working directory in CI/CD**: Set to directory containing .sln file
+   - All three steps (begin/build/end) must run from same directory
+
+## Environment Variables
+
+**Required:**
+- `SONAR_TOKEN`: Authentication token
+
+**Optional:**
+- `SONAR_HOST_URL`: Can be passed as parameter instead
+- `SONAR_ORGANIZATION`: Can be passed as parameter instead
+
+## Usage Instructions
+
+**For SonarArchitectGuide:**
+- Include documentation link in responses
+- Explain .NET scanner three-step process
+- Mention code coverage setup
+
+**For SonarArchitectLight:**
+- **Step 1**: Search for .sln, .csproj files to locate solution/project
+- **Step 2**: Note directory containing solution file (working directory for commands)
+- **Step 3**: Check for .config/dotnet-tools.json
+- **Step 4**: ⛔ STOP - Invoke `web/fetch` TOOL (NOT curl) to obtain latest scanner version from official SonarQube documentation
+- **Step 5**: Search for test projects (*Test.csproj, *.Tests.csproj)
+- **Step 6**: Create CI/CD with begin/build/end pattern, all from same working directory
+- **Step 7**: Include coverage collection if test projects found
+- **IMPORTANT**: Only fetch SonarQube documentation, do NOT fetch .NET SDK documentation

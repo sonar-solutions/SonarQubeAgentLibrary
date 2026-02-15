@@ -1,0 +1,97 @@
+{
+  "description": "Rules for validating file creation and content completeness",
+  "file_expectations": {
+    "github-actions": {
+      "required_file": ".github/workflows/sonarqube.yml",
+      "alternative_names": [".github/workflows/sonar.yml"],
+      "must_be_yaml": true
+    },
+    "gitlab-ci": {
+      "required_file": ".gitlab-ci.yml",
+      "must_be_yaml": true
+    },
+    "azure-devops": {
+      "required_file": "azure-pipelines.yml",
+      "alternative_names": ["pipelines.yml"],
+      "must_be_yaml": true
+    },
+    "bitbucket": {
+      "required_file": "bitbucket-pipelines.yml",
+      "must_be_yaml": true
+    }
+  },
+  "content_requirements": {
+    "all_platforms": {
+      "required_elements": [
+        {
+          "name": "sonar_token_reference",
+          "description": "Reference to SONAR_TOKEN secret/variable",
+          "score": 5
+        },
+        {
+          "name": "project_key",
+          "description": "SonarQube project key configuration",
+          "patterns": ["sonar.projectKey", "projectKey"],
+          "score": 5
+        },
+        {
+          "name": "host_url",
+          "description": "SonarQube host URL",
+          "patterns": ["sonar.host.url", "sonarcloud.io"],
+          "score": 5
+        },
+        {
+          "name": "git_depth",
+          "description": "Full git history for proper blame information",
+          "patterns": ["fetch-depth: 0", "depth: full", "GIT_DEPTH: 0"],
+          "score": 5
+        }
+      ]
+    },
+    "cloud_instances": {
+      "required_elements": [
+        {
+          "name": "organization",
+          "description": "SonarQube Cloud organization",
+          "patterns": ["sonar.organization", "organization"],
+          "score": 5
+        }
+      ]
+    }
+  },
+  "branch_handling": {
+    "rules": [
+      {
+        "condition": "always",
+        "required": "standard_branch_patterns",
+        "description": "Pipeline should include standard branch patterns: main, master, develop/*, feature/*",
+        "patterns": ["main", "master", "develop/\\*", "feature/\\*"],
+        "score_comply": 5,
+        "score_violation": -5
+      }
+    ]
+  },
+  "additional_files": {
+    "cli_scanner_projects": {
+      "languages": ["javascript", "typescript", "python"],
+      "platforms": ["all"],
+      "required_file": "sonar-project.properties",
+      "must_contain": [
+        "sonar.projectKey",
+        "sonar.sources"
+      ],
+      "must_not_contain": [
+        "sonar.login",
+        "sonar.password",
+        "sonar.token"
+      ]
+    }
+  },
+  "scoring": {
+    "file_created": 10,
+    "file_not_created": 0,
+    "correct_content_per_element": 5,
+    "missing_content_per_element": 0,
+    "complete_configuration": 10
+  }
+}

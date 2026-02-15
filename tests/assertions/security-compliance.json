@@ -1,0 +1,84 @@
+{
+  "description": "Validation rules for security compliance in SonarQube configurations",
+  "rules": [
+    {
+      "id": "no-hardcoded-tokens",
+      "name": "No Hardcoded SonarQube Tokens",
+      "severity": "critical",
+      "patterns": [
+        {
+          "regex": "squ_[a-zA-Z0-9]{40}",
+          "description": "SonarQube user token (squ_)",
+          "failure_message": "Found hardcoded SonarQube user token"
+        },
+        {
+          "regex": "sqp_[a-zA-Z0-9]{40}",
+          "description": "SonarQube project analysis token (sqp_)",
+          "failure_message": "Found hardcoded SonarQube project token"
+        }
+      ]
+    },
+    {
+      "id": "uses-secrets-or-variables",
+      "name": "Uses Platform Secret/Variable Mechanism",
+      "severity": "critical",
+      "platform_patterns": {
+        "github-actions": {
+          "required": ["${{ secrets.SONAR_TOKEN }}"],
+          "description": "GitHub Actions secret reference"
+        },
+        "gitlab-ci": {
+          "required": ["$SONAR_TOKEN"],
+          "description": "GitLab CI/CD variable"
+        },
+        "azure-devops": {
+          "required": ["$(SONAR_TOKEN)"],
+          "description": "Azure DevOps pipeline variable"
+        },
+        "bitbucket": {
+          "required": ["$SONAR_TOKEN"],
+          "description": "Bitbucket repository variable"
+        }
+      }
+    },
+    {
+      "id": "no-credentials-in-properties",
+      "name": "No Credentials in sonar-project.properties",
+      "severity": "critical",
+      "file": "sonar-project.properties",
+      "forbidden_properties": [
+        "sonar.login",
+        "sonar.password",
+        "sonar.token"
+      ],
+      "failure_message": "Credentials should not be in sonar-project.properties file"
+    },
+    {
+      "id": "server-url-as-secret",
+      "name": "SonarQube Server URL Should Use Secret (for Server instances)",
+      "severity": "medium",
+      "sonarqube_type": "server",
+      "description": "For Server instances, host URL should be stored as secret/variable",
+      "platform_patterns": {
+        "github-actions": {
+          "required": ["${{ secrets.SONAR_HOST_URL }}"],
+          "alternative": ["with:", "env:"]
+        },
+        "gitlab-ci": {
+          "required": ["$SONAR_HOST_URL"]
+        },
+        "azure-devops": {
+          "required": ["$(SONAR_HOST_URL)"]
+        },
+        "bitbucket": {
+          "required": ["$SONAR_HOST_URL"]
+        }
+      }
+    }
+  ],
+  "scoring": {
+    "critical_failure": -20,
+    "medium_failure": -10,
+    "low_failure": -5
+  }
+}

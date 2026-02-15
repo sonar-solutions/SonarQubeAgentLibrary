@@ -3,14 +3,6 @@
 .AppleDouble
 .LSOverride
 
-# VS Code
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-*.code-workspace
-
 # Logs
 logs
 *.log
@@ -74,3 +66,6 @@ target/
 
 # OS
 Thumbs.db
+
+# Tests Results
+tests/results/**
