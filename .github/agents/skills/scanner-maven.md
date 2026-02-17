@@ -22,27 +22,41 @@ This skill provides Maven-specific scanner documentation and configuration guida
 ### SonarQube Server
 - https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/scanners/sonarscanner-for-maven
 
+## Scanner Version Information
+
+**Latest Maven Scanner Version:**
+- Version URL: https://downloads.sonarsource.com/sonarqube/update/scannermaven.json
+- **To get the latest version**: Make an HTTP GET request to the URL above
+- The response is a JSON file containing the latest version information
+- Extract the version number from the JSON response
+- Use this version when configuring the `sonar-maven-plugin` in your pom.xml
+
+**Example using curl:**
+```bash
+curl -s https://downloads.sonarsource.com/sonarqube/update/scannermaven.json
+```
+
 ## Documentation Retrieval Strategy
 
-**CRITICAL: web/fetch is a TOOL, not a bash command:**
-- `web/fetch` is a TOOL you invoke directly (like `read`, `edit`, `search`)
-- **DO NOT** implement web/fetch using bash commands like `curl` or `wget`
-- **DO NOT** use `execute` tool to run curl commands
-- Invoke the `web/fetch` tool directly with the documentation URL
+**How to retrieve documentation:**
+- Make HTTP GET requests to the official SonarQube documentation URLs listed above
+- Use standard HTTP clients (curl, wget, or language-specific HTTP libraries)
+- For version information, use the Scanner Version Information URL provided above
 
-**CRITICAL: ONLY retrieve from official SonarQube documentation URLs listed above.**
+**CRITICAL: ONLY retrieve from official SonarQube sources.**
 
 **Mandatory Rules:**
-- **ONLY** use the `web/fetch` **TOOL** (not curl) on the official docs.sonarsource.com URLs listed above
+- **ONLY** retrieve from the official docs.sonarsource.com URLs and downloads.sonarsource.com URLs listed above
 - **DO NOT** retrieve from Maven Central, GitHub repositories, or any other websites
-- **DO NOT** search for version information outside official SonarQube documentation
+- **DO NOT** search for version information outside official SonarQube sources
 - **DO NOT** use general web search to find plugin versions
 
 **Fallback Approach for Missing Information:**
-- If working with SonarQube Cloud, first use web/fetch with the Cloud documentation URL above
-- If the Cloud documentation lacks complete plugin version or configuration examples, also use web/fetch with the Server documentation URL as a fallback
-- If working with SonarQube Server, first use web/fetch with the Server documentation URL above
-- If the Server documentation lacks complete plugin version or configuration examples, also use web/fetch with the Cloud documentation URL as a fallback
+- If working with SonarQube Cloud, first retrieve from the Cloud documentation URL above
+- If the Cloud documentation lacks complete plugin version or configuration examples, also retrieve from the Server documentation URL as a fallback
+- If working with SonarQube Server, first retrieve from the Server documentation URL above
+- If the Server documentation lacks complete plugin version or configuration examples, also retrieve from the Cloud documentation URL as a fallback
+- For latest version information, always check the Scanner Version Information URL
 - If NEITHER official documentation URL contains the needed information, STOP and inform the user that the information is not available in official documentation
 
 **What to Extract from Documentation:**
@@ -144,7 +158,7 @@ See platform-specific skills for CI/CD integration:
 1. **Read POM file completely**: Use `read` to view entire `pom.xml` file
 2. **Check for existing plugin**: Look for `sonar-maven-plugin` in `<plugins>` or `<pluginManagement>`
 3. **Verify plugin version**: 
-   - If plugin exists: Invoke the `web/fetch` **TOOL** (not curl) to obtain latest version, compare and UPDATE if needed
+   - If plugin exists: Retrieve latest version from Scanner Version Information URL (https://downloads.sonarsource.com/sonarqube/update/scannermaven.json), compare and UPDATE if needed
    - If plugin missing: Maven uses default version, but explicit version recommended
 4. **Check for existing properties**: Look for `<sonar.*>` properties in `<properties>` section
 5. **Verify configuration is complete and correct**:
@@ -168,7 +182,7 @@ See platform-specific skills for CI/CD integration:
 **For SonarArchitectLight:**
 - **Step 1**: Read complete pom.xml file
 - **Step 2**: Check if `sonar-maven-plugin` exists and note its version
-- **Step 3**: ⛔ STOP - Invoke `web/fetch` TOOL (NOT curl) - Follow "Documentation Retrieval Strategy" section above - ONLY use official SonarQube documentation URLs to obtain latest plugin version
+- **Step 3**: ⛔ STOP - Retrieve latest version from Scanner Version Information URL - Follow "Documentation Retrieval Strategy" section above - ONLY use official SonarQube sources to obtain latest plugin version
 - **Step 4**: Check if `<sonar.*>` properties exist in `<properties>` section
 - **Step 5**: Update plugin version if needed, add if best practice
 - **Step 6**: Add or update SonarQube properties (don't duplicate existing ones)

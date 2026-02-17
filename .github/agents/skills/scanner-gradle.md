@@ -22,27 +22,41 @@ This skill provides Gradle-specific scanner documentation and configuration guid
 ### SonarQube Server
 - https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/scanners/sonarscanner-for-gradle
 
+## Scanner Version Information
+
+**Latest Gradle Scanner Version:**
+- Version URL: https://downloads.sonarsource.com/sonarqube/update/scannergradle.json
+- **To get the latest version**: Make an HTTP GET request to the URL above
+- The response is a JSON file containing the latest version information
+- Extract the version number from the JSON response
+- Use this version when configuring the SonarQube plugin in your build.gradle or build.gradle.kts
+
+**Example using curl:**
+```bash
+curl -s https://downloads.sonarsource.com/sonarqube/update/scannergradle.json
+```
+
 ## Documentation Retrieval Strategy
 
-**CRITICAL: web/fetch is a TOOL, not a bash command:**
-- `web/fetch` is a TOOL you invoke directly (like `read`, `edit`, `search`)
-- **DO NOT** implement web/fetch using bash commands like `curl` or `wget`
-- **DO NOT** use `execute` tool to run curl commands
-- Invoke the `web/fetch` tool directly with the documentation URL
+**How to retrieve documentation:**
+- Make HTTP GET requests to the official SonarQube documentation URLs listed above
+- Use standard HTTP clients (curl, wget, or language-specific HTTP libraries)
+- For version information, use the Scanner Version Information URL provided above
 
-**CRITICAL: ONLY retrieve from official SonarQube documentation URLs listed above.**
+**CRITICAL: ONLY retrieve from official SonarQube sources.**
 
 **Mandatory Rules:**
-- **ONLY** use the `web/fetch` **TOOL** (not curl) on the official docs.sonarsource.com URLs listed above
+- **ONLY** retrieve from the official docs.sonarsource.com URLs and downloads.sonarsource.com URLs listed above
 - **DO NOT** fetch from Gradle Plugin Portal, GitHub repositories, or any other websites
-- **DO NOT** search for plugin version information outside official SonarQube documentation
+- **DO NOT** search for plugin version information outside official SonarQube sources
 - **DO NOT** use general web search to find plugin versions
 
 **Fallback Approach for Missing Information:**
-- If working with SonarQube Cloud, first fetch from the Cloud documentation URL above
-- If the Cloud documentation lacks complete plugin version or configuration examples, also fetch from the Server documentation URL as a fallback
-- If working with SonarQube Server, first fetch from the Server documentation URL above
-- If the Server documentation lacks complete plugin version or configuration examples, also fetch from the Cloud documentation URL as a fallback
+- If working with SonarQube Cloud, first retrieve from the Cloud documentation URL above
+- If the Cloud documentation lacks complete plugin version or configuration examples, also retrieve from the Server documentation URL as a fallback
+- If working with SonarQube Server, first retrieve from the Server documentation URL above
+- If the Server documentation lacks complete plugin version or configuration examples, also retrieve from the Cloud documentation URL as a fallback
+- For latest version information, always check the Scanner Version Information URL
 - If NEITHER official documentation URL contains the needed information, STOP and inform the user that the information is not available in official documentation
 
 **What to Extract from Documentation:**
@@ -62,7 +76,7 @@ The Gradle SonarQube scanner is a Gradle plugin that integrates SonarQube analys
 - Bitbucket: Do NOT use SonarQube/SonarCloud pipes - run `./gradlew sonar` directly
 
 ### Plugin Version Management
-- **Always check latest version**: Invoke `web/fetch` TOOL to obtain the current plugin version from official documentation
+- **Always check latest version**: Retrieve the current plugin version from Scanner Version Information URL (https://downloads.sonarsource.com/sonarqube/update/scannergradle.json)
 - **Update existing versions**: If a project already has the plugin configured, compare with latest and update if outdated
 - **Version format**: Plugin follows format `id("org.sonarqube") version "X.Y.Z"` (Kotlin) or `id 'org.sonarqube' version 'X.Y.Z'` (Groovy)
 - **Compatibility**: Verify Gradle version compatibility (requires Gradle 7.3+)
@@ -134,7 +148,7 @@ The Gradle SonarQube scanner is a Gradle plugin that integrates SonarQube analys
 3. **Build first**: Run `build` task before `sonar` to ensure compilation and tests
 4. **Properties in build.gradle**: Store non-sensitive configuration in build file
 5. **Secrets as env vars**: Pass `SONAR_TOKEN` via environment variables, never hardcode
-6. **ALWAYS update plugin version**: Invoke `web/fetch` TOOL to obtain latest version and update build.gradle even if plugin already exists
+6. **ALWAYS update plugin version**: Retrieve latest version from Scanner Version Information URL and update build.gradle even if plugin already exists
 7. **Kotlin DSL**: Use .kts for type-safe configuration in Kotlin projects
 8. **Gradle version compatibility**: Ensure Gradle 7.3+ for latest SonarQube plugin
 9. **Exclude generated code**: Configure exclusions for auto-generated code, build outputs
@@ -156,8 +170,8 @@ See platform-specific skills for CI/CD integration:
 1. **Read build file completely**: Use `read` to view entire `build.gradle` or `build.gradle.kts` file
 2. **Check for existing plugin**: Look for `id("org.sonarqube")` or `id 'org.sonarqube'` in plugins block
 3. **Verify plugin version**: 
-   - If plugin exists: Invoke `web/fetch` TOOL to obtain latest version, compare and UPDATE if needed
-   - If plugin missing: Invoke `web/fetch` TOOL to obtain latest version before adding
+   - If plugin exists: Retrieve latest version from Scanner Version Information URL (https://downloads.sonarsource.com/sonarqube/update/scannergradle.json), compare and UPDATE if needed
+   - If plugin missing: Retrieve latest version from Scanner Version Information URL before adding
 4. **Check for existing sonarqube configuration block**: Look for `sonarqube {}` or `sonar {}` configuration blocks
 5. **Verify configuration is complete and correct**:
    - Check if `projectKey` is set (required)
@@ -180,14 +194,14 @@ See platform-specific skills for CI/CD integration:
 **For SonarArchitectLightWithSkills:**
 - **Step 1**: Read complete build.gradle/build.gradle.kts file
 - **Step 2**: Check if `org.sonarqube` plugin exists and note its version
-- **Step 3**: ⛔ STOP - Invoke `web/fetch` TOOL (NOT curl) to obtain latest SonarQube plugin version from official SonarQube documentation
+- **Step 3**: ⛔ STOP - Retrieve latest SonarQube plugin version from Scanner Version Information URL (https://downloads.sonarsource.com/sonarqube/update/scannergradle.json)
 - **Step 4**: Check if `sonarqube {}` configuration block exists
 - **Step 5**: Update plugin version if outdated, add if missing (use latest version)
 - **Step 6**: Add or update SonarQube configuration properties (don't duplicate existing ones)
 - **Step 7**: In CI/CD workflow, set working-directory to match build.gradle location
 - **IMPORTANT**: Only fetch SonarQube documentation, do NOT fetch Gradle build tool documentation
 - Add or update plugin declaration with latest version in build.gradle or build.gradle.kts
-- Invoke `web/fetch` TOOL to check latest JaCoCo version if adding coverage
+- Retrieve latest JaCoCo version if adding coverage
 - Configure sonarqube block with project properties
 - Configure CI/CD command: `./gradlew build sonar`
 - Do NOT include links in responses

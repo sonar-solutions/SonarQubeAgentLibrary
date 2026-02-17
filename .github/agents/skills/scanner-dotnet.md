@@ -22,24 +22,38 @@ This skill provides .NET-specific scanner documentation and configuration guidan
 ### SonarQube Cloud
 - SonarQube Cloud uses the same .NET scanner as Server
 
+## Scanner Version Information
+
+**Latest .NET Scanner Version:**
+- Version URL: https://downloads.sonarsource.com/sonarqube/update/scannermsbuild.json
+- **To get the latest version**: Make an HTTP GET request to the URL above
+- The response is a JSON file containing the latest version information
+- Extract the version number from the JSON response
+- Use this version when installing or updating the dotnet-sonarscanner tool
+
+**Example using curl:**
+```bash
+curl -s https://downloads.sonarsource.com/sonarqube/update/scannermsbuild.json
+```
+
 ## Documentation Retrieval Strategy
 
-**CRITICAL: web/fetch is a TOOL, not a bash command:**
-- `web/fetch` is a TOOL you invoke directly (like `read`, `edit`, `search`)
-- **DO NOT** implement web/fetch using bash commands like `curl` or `wget`
-- **DO NOT** use `execute` tool to run curl commands
-- Invoke the `web/fetch` tool directly with the documentation URL
+**How to retrieve documentation:**
+- Make HTTP GET requests to the official SonarQube documentation URLs listed above
+- Use standard HTTP clients (curl, wget, or language-specific HTTP libraries)
+- For version information, use the Scanner Version Information URL provided above
 
-**CRITICAL: ONLY fetch from official SonarQube documentation URLs listed above.**
+**CRITICAL: ONLY fetch from official SonarQube sources.**
 
 **Mandatory Rules:**
-- **ONLY** use the `web/fetch` **TOOL** (not curl) on the official docs.sonarsource.com URLs listed above
+- **ONLY** retrieve from the official docs.sonarsource.com URLs and downloads.sonarsource.com URLs listed above
 - **DO NOT** fetch from NuGet, GitHub repositories, or any other websites
-- **DO NOT** search for scanner version information outside official SonarQube documentation
+- **DO NOT** search for scanner version information outside official SonarQube sources
 - **DO NOT** use general web search to find scanner versions or installation methods
 
 **Fallback Approach for Missing Information:**
-- First fetch from the Server documentation URL above (primary source for .NET scanner)
+- First retrieve from the Server documentation URL above (primary source for .NET scanner)
+- For latest version information, always check the Scanner Version Information URL
 - If the Server documentation lacks complete installation or configuration examples, inform the user
 - If NEITHER official documentation URL contains the needed information, STOP and inform the user that the information is not available in official documentation
 
@@ -156,7 +170,7 @@ The .NET scanner is a command-line tool that integrates SonarQube analysis for C
 7. **Exclude generated code**: Exclude bin/, obj/, and auto-generated files
 8. **Solution-level analysis**: Analyze entire solution for multi-project setups
 9. **Test before analysis**: Run tests with coverage collection before end step
-10. **Check scanner version**: Invoke `web/fetch` TOOL to verify compatible scanner versions
+10. **Check scanner version**: Retrieve compatible scanner versions from Scanner Version Information URL (https://downloads.sonarsource.com/sonarqube/update/scannermsbuild.json)
 
 ## Platform Integration
 
@@ -175,7 +189,7 @@ See platform-specific skills for CI/CD integration:
    - Example: If MySolution.sln is in `src/`, all three commands run from `src/`
 3. **Check for tool manifest**: Look for `.config/dotnet-tools.json` (indicates local tool setup)
 4. **Verify scanner version**: 
-   - If tool manifest exists: Invoke `web/fetch` TOOL to obtain latest version, update if outdated
+   - If tool manifest exists: Retrieve latest version from Scanner Version Information URL (https://downloads.sonarsource.com/sonarqube/update/scannermsbuild.json), update if outdated
    - If no manifest: Commands will use globally installed scanner or need installation
 5. **Detect test projects**: Look for `*Test.csproj`, `*.Tests.csproj` files to enable coverage
 6. **Working directory in CI/CD**: Set to directory containing .sln file
@@ -201,7 +215,7 @@ See platform-specific skills for CI/CD integration:
 - **Step 1**: Search for .sln, .csproj files to locate solution/project
 - **Step 2**: Note directory containing solution file (working directory for commands)
 - **Step 3**: Check for .config/dotnet-tools.json
-- **Step 4**: ⛔ STOP - Invoke `web/fetch` TOOL (NOT curl) to obtain latest scanner version from official SonarQube documentation
+- **Step 4**: ⛔ STOP - Retrieve latest scanner version from Scanner Version Information URL (https://downloads.sonarsource.com/sonarqube/update/scannermsbuild.json)
 - **Step 5**: Search for test projects (*Test.csproj, *.Tests.csproj)
 - **Step 6**: Create CI/CD with begin/build/end pattern, all from same working directory
 - **Step 7**: Include coverage collection if test projects found

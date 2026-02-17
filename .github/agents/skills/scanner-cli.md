@@ -15,27 +15,41 @@ This skill provides SonarScanner CLI documentation and configuration guidance fo
 ### SonarQube Server
 - https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/scanners/sonarscanner
 
+## Scanner Version Information
+
+**Latest SonarScanner CLI Version:**
+- Version URL: https://downloads.sonarsource.com/sonarqube/update/scannercli.json
+- **To get the latest version**: Make an HTTP GET request to the URL above
+- The response is a JSON file containing the latest version information
+- Extract the version number from the JSON response
+- Use this version when configuring scanner installation in your CI/CD pipeline
+
+**Example using curl:**
+```bash
+curl -s https://downloads.sonarsource.com/sonarqube/update/scannercli.json
+```
+
 ## Documentation Retrieval Strategy
 
-**CRITICAL: web/fetch is a TOOL, not a bash command:**
-- `web/fetch` is a TOOL you invoke directly (like `read`, `edit`, `search`)
-- **DO NOT** implement web/fetch using bash commands like `curl` or `wget`
-- **DO NOT** use `execute` tool to run curl commands
-- Invoke the `web/fetch` tool directly with the documentation URL
+**How to retrieve documentation:**
+- Make HTTP GET requests to the official SonarQube documentation URLs listed above
+- Use standard HTTP clients (curl, wget, or language-specific HTTP libraries)
+- For version information, use the Scanner Version Information URL provided above
 
-**CRITICAL: ONLY fetch from official SonarQube documentation URLs listed above.**
+**CRITICAL: ONLY fetch from official SonarQube sources.**
 
 **Mandatory Rules:**
-- **ONLY** use the `web/fetch` **TOOL** (not curl) on the official docs.sonarsource.com URLs listed above
+- **ONLY** retrieve from the official docs.sonarsource.com URLs and downloads.sonarsource.com URLs listed above
 - **DO NOT** fetch from NPM registry, GitHub repositories, or any other websites
-- **DO NOT** search for scanner version information outside official SonarQube documentation
+- **DO NOT** search for scanner version information outside official SonarQube sources
 - **DO NOT** use general web search to find scanner versions or installation methods
 
 **Fallback Approach for Missing Information:**
-- If working with SonarQube Cloud, first fetch from the Cloud documentation URL above
-- If the Cloud documentation lacks complete installation or configuration examples, also fetch from the Server documentation URL as a fallback
-- If working with SonarQube Server, first fetch from the Server documentation URL above
-- If the Server documentation lacks complete installation or configuration examples, also fetch from the Cloud documentation URL as a fallback
+- If working with SonarQube Cloud, first retrieve from the Cloud documentation URL above
+- If the Cloud documentation lacks complete installation or configuration examples, also retrieve from the Server documentation URL as a fallback
+- If working with SonarQube Server, first retrieve from the Server documentation URL above
+- If the Server documentation lacks complete installation or configuration examples, also retrieve from the Cloud documentation URL as a fallback
+- For latest version information, always check the Scanner Version Information URL
 - If NEITHER official documentation URL contains the needed information, STOP and inform the user that the information is not available in official documentation
 
 **What to Extract from Documentation:**
@@ -179,7 +193,7 @@ The SonarScanner CLI is a standalone scanner for JavaScript, TypeScript, Python,
 6. **Define test patterns**: Use sonar.test.inclusions for accurate test detection
 7. **Set encoding**: Explicitly set sonar.sourceEncoding if not UTF-8
 8. **Version the scanner**: Pin scanner version in CI/CD for reproducibility
-9. **Check scanner version**: Invoke `web/fetch` TOOL to verify compatible scanner versions
+9. **Check scanner version**: Retrieve compatible scanner versions from Scanner Version Information URL (https://downloads.sonarsource.com/sonarqube/update/scannercli.json)
 10. **Enable debug for troubleshooting**: Use -X flag when investigating issues
 11. **Validate coverage paths**: Ensure coverage files exist before scanning
 12. **Use platform-specific actions**: Prefer official CI/CD integrations when available
@@ -225,7 +239,7 @@ See platform-specific skills for integration details.
 2. **Read properties file if exists**: Use `read` to view complete content
 3. **Check existing configuration**: Note what properties are already configured
 4. **Verify scanner version**: 
-   - Invoke `web/fetch` TOOL to obtain latest scanner version recommendation
+   - Retrieve latest scanner version from Scanner Version Information URL (https://downloads.sonarsource.com/sonarqube/update/scannercli.json)
    - Note version for CI/CD setup
 5. **Update, don't duplicate**: 
    - If properties exist: Only add missing properties
@@ -244,7 +258,7 @@ See platform-specific skills for integration details.
 **For SonarArchitectLight:**
 - **Step 1**: Search for existing sonar-project.properties file
 - **Step 2**: If exists, read complete file to check configuration
-- **Step 3**: ⛔ STOP - Invoke `web/fetch` TOOL (NOT curl) to obtain latest scanner version and configuration examples
+- **Step 3**: ⛔ STOP - Retrieve latest scanner version and configuration examples from Scanner Version Information URL (https://downloads.sonarsource.com/sonarqube/update/scannercli.json)
 - **Step 4**: Note directory containing sonar-project.properties (working directory)
 - **Step 5**: Create or update properties file (don't duplicate existing properties)
 - **Step 6**: Include language-specific coverage configuration

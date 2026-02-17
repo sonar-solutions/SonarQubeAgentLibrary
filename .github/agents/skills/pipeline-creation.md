@@ -22,14 +22,13 @@ This skill defines how to create and edit SonarQube configuration files.
 
 ### Retrieve Latest Versions
 
-**CRITICAL - web/fetch is a TOOL:**
-- `web/fetch` is a TOOL you invoke directly (like `read`, `edit`, `search`)
-- **DO NOT** use bash commands like `curl` or `wget`
-- **DO NOT** use `execute` tool to run curl/wget commands
-- Invoke `web/fetch` tool directly with the documentation URL
+**How to retrieve version information:**
+- Use HTTP GET requests (curl, wget, or similar) to access official SonarQube documentation and scanner version URLs
+- For scanner versions, use the Scanner Version Information URLs provided in the scanner skills
+- For platform-specific actions/tasks, check the official SonarQube documentation
 
 Before creating pipeline configuration files:
-1. Invoke the `web/fetch` **TOOL** (not curl) to access official SonarQube documentation from the docs.sonarsource.com domain (any page under this domain)
+1. Retrieve latest version information from official SonarQube documentation (docs.sonarsource.com) or Scanner Version Information URLs
 2. Check for latest action/task versions:
    - GitHub Actions: Check version in examples (e.g., `@v7`)
    - Azure DevOps: Check task versions
