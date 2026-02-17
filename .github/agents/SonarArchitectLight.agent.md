@@ -91,6 +91,9 @@ Then I'll create the configuration files and tell you what secrets/variables to 
 ## Core Workflow
 
 ### 1. Detect Project Structure
+
+**READ** `.github/agents/skills/project-detection.md` using the `read` tool.
+
 Use **project-detection** skill:
 - Identify project type and build system
 - Detect CI/CD platform from existing workflow files
@@ -102,6 +105,9 @@ Use **project-detection** skill:
 - Wait for user confirmation before proceeding
 
 ### 2. Gather Prerequisites (REQUIRED)
+
+**READ** `.github/agents/skills/prerequisites-gathering.md` using the `read` tool.
+
 Use **prerequisites-gathering** skill:
 - ✅ **ALWAYS use this skill** - even if info is provided upfront
 - ✅ In validation mode: Check prompt contains all required info
@@ -122,11 +128,11 @@ Use **prerequisites-gathering** skill:
 
 ### 3. Retrieve Latest Examples
 
-Once platform is identified, use the appropriate **platform-specific skill**:
-- **platform-github-actions**: For GitHub Actions
-- **platform-gitlab-ci**: For GitLab CI
-- **platform-azure-devops**: For Azure DevOps
-- **platform-bitbucket**: For Bitbucket Pipelines
+Once platform is identified, **READ** the appropriate **platform-specific skill** file using the `read` tool:
+- **platform-github-actions**: For GitHub Actions - READ `.github/agents/skills/platform-github-actions.md`
+- **platform-gitlab-ci**: For GitLab CI - READ `.github/agents/skills/platform-gitlab-ci.md`
+- **platform-azure-devops**: For Azure DevOps - READ `.github/agents/skills/platform-azure-devops.md`
+- **platform-bitbucket**: For Bitbucket Pipelines - READ `.github/agents/skills/platform-bitbucket.md`
 
 **CRITICAL - Only retrieve SonarQube-specific documentation:**
 - Use HTTP GET requests (curl, wget, or similar) to access official **SonarQube documentation only**
@@ -160,6 +166,11 @@ Also **READ** the appropriate **scanner-specific skill** file using the `read` t
 DO NOT include documentation links in user responses.
 
 ### 4. Create Configuration Files
+
+**CRITICAL - READ these skills using the `read` tool BEFORE creating files:**
+- **READ** `.github/agents/skills/pipeline-creation.md` - File creation guidelines and version retrieval
+- **READ** `.github/agents/skills/security-practices.md` - Security requirements (use secrets, never hardcode)
+
 Use **pipeline-creation** skill:
 - Create files immediately with latest versions
 - Apply **security-practices** skill (use secrets, never hardcode)
@@ -180,6 +191,9 @@ Files created based on project type:
 - Update or add missing configuration, don't just check plugin version
 
 ### 5. Inform About Setup
+
+**READ** `.github/agents/skills/devops-setup-instructions.md` using the `read` tool for platform-specific guidance.
+
 Use **devops-setup-instructions** skill:
 - Provide concise, platform-specific secret configuration steps
 - Tell user exactly where to add secrets/variables

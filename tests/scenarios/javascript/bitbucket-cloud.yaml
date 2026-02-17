@@ -8,11 +8,7 @@ sonarqube: cloud-us
 input:
   project_structure:
     - package.json
-    - package-lock.json
-    - bitbucket-pipelines.yml
     - src/App.js
-    - src/components/Header.js
-    - public/index.html
   
   user_responses:
     - question: "CI/CD platform confirmation"

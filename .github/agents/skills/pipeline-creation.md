@@ -9,6 +9,16 @@ This skill defines how to create and edit SonarQube configuration files.
 
 ## File Creation Guidelines
 
+### File Location Rules
+
+**CRITICAL - Project Workspace Boundaries:**
+- ✅ Create files within the project workspace only
+- ✅ Use relative paths appropriate for each platform (see platform-specific skills)
+- ❌ DO NOT create files in parent directories outside the project
+- ❌ DO NOT use absolute paths that escape the project workspace
+
+**Platform-specific file locations are defined in the platform skills** (e.g., GitHub Actions uses `.github/workflows/`, GitLab uses root)
+
 ### Before Creating ANY Files
 
 **PREREQUISITES CHECK:**

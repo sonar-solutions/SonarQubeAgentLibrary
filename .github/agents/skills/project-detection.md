@@ -7,6 +7,15 @@ description: Identifies project type, build system, and CI/CD platform. Use this
 
 This skill helps identify the project type, build system, and CI/CD platform.
 
+## Execution Guidelines
+
+**IMPORTANT**: Do NOT confirm your findings with the user. This skill is for autonomous detection only. If user confirmation is needed, the `prerequisites-gathering` skill will handle it separately.
+
+Your job is to:
+1. Analyze the project structure
+2. Identify the technology stack
+3. Return your findings programmatically
+
 ## Technology Stack Analysis
 
 Use `search` and `read` tools to identify:

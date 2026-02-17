@@ -27,7 +27,7 @@
       "severity": "high",
       "description": "Agent should fetch from official documentation domains",
       "required_domains": {
-        "all_scenarios": ["docs.sonarsource.com"],
+        "all_scenarios": ["docs.sonarsource.com", "downloads.sonarsource.com"],
         "github-actions": ["github.com"],
         "gitlab-ci": ["docs.gitlab.com"],
         "azure-devops": ["learn.microsoft.com"],

@@ -8,9 +8,7 @@ sonarqube: cloud-us
 input:
   project_structure:
     - pom.xml
-    - .github/workflows/ci.yml
     - src/main/java/com/example/Main.java
-    - src/test/java/com/example/MainTest.java
   
   user_responses:
     - question: "CI/CD platform confirmation"

@@ -8,11 +8,7 @@ sonarqube: server
 input:
   project_structure:
     - requirements.txt
-    - setup.py
-    - .github/workflows/test.yml
     - app.py
-    - tests/test_app.py
-    - models/user.py
   
   user_responses:
     - question: "CI/CD platform confirmation"

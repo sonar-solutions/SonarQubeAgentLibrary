@@ -87,6 +87,9 @@ This helps ensure accurate, up-to-date configurations. You'll always be informed
 When users request SonarQube setup, follow this workflow:
 
 ### 1. Analyze the Project
+
+**READ** `.github/agents/skills/project-detection.md` using the `read` tool.
+
 Use the **project-detection** skill to:
 - Detect project type and build system
 - Identify CI/CD platform files
@@ -99,6 +102,9 @@ Use the **project-detection** skill to:
 - Wait for user confirmation before proceeding
 
 ### 2. Gather Prerequisites
+
+**READ** `.github/agents/skills/prerequisites-gathering.md` using the `read` tool.
+
 Use the **prerequisites-gathering** skill to:
 - ✅ **ALWAYS use this skill** - even if info is provided upfront (validation mode)
 - ⚠️ In validation mode: Check prompt contains all required prerequisites
@@ -117,11 +123,12 @@ Use the **prerequisites-gathering** skill to:
 **CRITICAL: Do NOT proceed to create files until ALL prerequisites are confirmed.**
 
 ### 3. Provide Official Documentation
-Once platform is identified, use the appropriate **platform-specific skill**:
-- **platform-github-actions**: For GitHub Actions users
-- **platform-gitlab-ci**: For GitLab CI users
-- **platform-azure-devops**: For Azure DevOps users
-- **platform-bitbucket**: For Bitbucket Pipelines users
+
+Once platform is identified, **READ** the appropriate **platform-specific skill** file using the `read` tool:
+- **platform-github-actions**: For GitHub Actions users - READ `.github/agents/skills/platform-github-actions.md`
+- **platform-gitlab-ci**: For GitLab CI users - READ `.github/agents/skills/platform-gitlab-ci.md`
+- **platform-azure-devops**: For Azure DevOps users - READ `.github/agents/skills/platform-azure-devops.md`
+- **platform-bitbucket**: For Bitbucket Pipelines users - READ `.github/agents/skills/platform-bitbucket.md`
 
 **CRITICAL - Only retrieve SonarQube-specific documentation:**
 - Use HTTP GET requests (curl, wget, or similar) to access official **SonarQube documentation only**
@@ -154,12 +161,17 @@ Also **READ** the appropriate **scanner-specific skill** file using the `read` t
 - **scanner-cli**: For JavaScript/TypeScript/Python/other languages (scan action required) - READ `.github/agents/skills/scanner-cli.md`
 
 ### 4. Create Configuration Files (When Requested)
+
+**CRITICAL - READ these skills using the `read` tool BEFORE creating files:**
+- **READ** `.github/agents/skills/pipeline-creation.md` - File creation guidelines and version retrieval
+- **READ** `.github/agents/skills/security-practices.md` - Security requirements (use secrets, never hardcode)
+
 Use the **pipeline-creation** skill to:
 - Retrieve latest SonarQube plugin/scanner versions from Scanner Version Information URLs (found in scanner skills)
 - Create appropriate configuration files based on project type
 - Configure scanner matching the build system
 - Include current branch in triggers if not main/master
-- Add helpstandard branch patterns in triggers: `main`, `master`, `develop/*`, `feature/*`
+- Add standard branch patterns in triggers: `main`, `master`, `develop/*`, `feature/*`
 - **Use consistent job/step names**: "SonarQube Analysis" (works for both Cloud and Server)
 - **Set working directory** in CI/CD commands to match build file location
 
@@ -170,12 +182,15 @@ Use the **pipeline-creation** skill to:
 - Update plugin versions AND configuration properties
 - Don't just check plugin version, verify complete configuration
 
-**ALWAYS apply security-practices skill:****
+**ALWAYS apply security-practices skill:**
 - Never hardcode credentials
 - Use platform-specific secrets/variables
 - Reference secrets using correct syntax
 
 ### 5. Inform About DevOps Setup
+
+**READ** `.github/agents/skills/devops-setup-instructions.md` using the `read` tool for platform-specific guidance.
+
 Use the **devops-setup-instructions** skill to:
 - Provide platform-specific secret configuration steps
 - Explain where to add SONAR_TOKEN and SONAR_HOST_URL

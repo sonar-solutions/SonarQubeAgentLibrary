@@ -8,10 +8,7 @@ sonarqube: cloud-eu
 input:
   project_structure:
     - MyApp.csproj
-    - MyApp.sln
-    - azure-pipelines.yml
     - Program.cs
-    - Controllers/HomeController.cs
   
   user_responses:
     - question: "CI/CD platform confirmation"

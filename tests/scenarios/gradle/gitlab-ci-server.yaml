@@ -9,9 +9,7 @@ input:
   project_structure:
     - build.gradle.kts
     - settings.gradle.kts
-    - .gitlab-ci.yml
     - src/main/kotlin/com/example/Application.kt
-    - src/test/kotlin/com/example/ApplicationTest.kt
   
   user_responses:
     - question: "CI/CD platform confirmation"
