@@ -39,9 +39,8 @@ curl -s https://downloads.sonarsource.com/sonarqube/update/scannermsbuild.json
 ## Documentation Retrieval Strategy
 
 **How to retrieve documentation:**
-- Make HTTP GET requests to the official SonarQube documentation URLs listed above
-- Use standard HTTP clients (curl, wget, or language-specific HTTP libraries)
-- For version information, use the Scanner Version Information URL provided above
+- **Documentation pages** (docs.sonarsource.com): Use a browser-capable fetch tool — these pages require JavaScript rendering and cannot be retrieved with curl or wget. Use whichever tool in your environment supports this (e.g., web/fetch, WebFetch, url_context, or equivalent).
+- **Version JSON endpoints** (downloads.sonarsource.com): curl or wget work fine — these are static JSON files.
 
 **CRITICAL: ONLY fetch from official SonarQube sources.**
 

@@ -25,7 +25,12 @@ This skill provides GitHub Actions-specific documentation and guidance for Sonar
 
 ## Documentation Fetching Strategy
 
-**Invoke `web/fetch` TOOL to retrieve current examples and versions from official documentation.**
+**IMPORTANT - SonarQube documentation pages require JavaScript rendering:**
+SonarQube documentation pages are dynamically rendered. A raw HTTP request (curl, wget) will NOT return the actual page content.
+
+Use your environment's browser-capable fetch tool to access these URLs:
+- ❌ Do NOT use curl or wget for docs.sonarsource.com pages
+- ✅ USE whichever tool in your environment can render JavaScript pages (e.g., web/fetch, WebFetch, url_context, or equivalent)
 
 **Fallback Approach:**
 - If working with SonarQube Cloud, first fetch from the Cloud documentation URL
@@ -106,6 +111,6 @@ The action automatically fails the workflow if quality gate fails.
 - Explain GitHub Actions concepts when relevant
 
 **For SonarArchitectLight:**
-- ⛔ STOP - Invoke `web/fetch` TOOL (NOT curl) to check latest action version before creating workflows
+- ⛔ STOP - Use a browser-capable fetch tool (NOT curl) to check latest action version in official documentation
 - Create `.github/workflows/sonarqube.yml` with appropriate scanner
 - Do NOT include links in responses

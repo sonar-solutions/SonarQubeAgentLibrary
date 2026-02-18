@@ -116,10 +116,14 @@ if [[ -z "$PLATFORM" || -z "$SONARQUBE_TYPE" ]]; then
     exit 1
 fi
 
-# Create temporary workspace for test
-TEST_WORKSPACE="$RESULTS_DIR/.workspace-${SCENARIO_NAME}-$$"
+# Create temporary workspace for test OUTSIDE the repository
+# This prevents copilot from detecting the main repo's .git and using WORKSPACE_ROOT
+TEST_WORKSPACE="/tmp/sonar-test-workspace-${SCENARIO_NAME}-$$"
 mkdir -p "$TEST_WORKSPACE"
 echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Created test workspace: $TEST_WORKSPACE"
+
+# We'll copy workspace to results directory before cleanup (see end of script)
+# Cleanup happens automatically via trap at script exit
 
 # Copy project fixture if it exists
 FIXTURE_DIR="$TESTS_DIR/fixtures/projects/${LANGUAGE}-simple"
@@ -128,10 +132,11 @@ if [[ -d "$FIXTURE_DIR" ]]; then
     echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Copied project fixture for $LANGUAGE"
 fi
 
-# Copy .github directory with agents and skills for the agent to access
+# Copy .github directory with agents and skills to TEST_WORKSPACE
+# This ensures copilot loads the agent from TEST_WORKSPACE and works there
 if [[ -d "$WORKSPACE_ROOT/.github" ]]; then
     cp -r "$WORKSPACE_ROOT/.github" "$TEST_WORKSPACE/"
-    echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Copied agent and skills to workspace"
+    echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Copied agent and skills to test workspace"
 fi
 
 # Build prompt for agent - include expected responses directly
@@ -199,6 +204,19 @@ AGENT_SHARE="$(cd "$RESULTS_DIR" && pwd)/${LANGUAGE}-${SCENARIO_NAME}.session.md
 # Change to test workspace where .github/agents/ and skills are now available
 cd "$TEST_WORKSPACE"
 
+# Verify we're in the correct directory
+CURRENT_DIR=$(pwd)
+echo -e "${BLUE}Current working directory:${NC} $CURRENT_DIR"
+echo -e "${BLUE}Expected directory:${NC} $TEST_WORKSPACE"
+if [[ "$CURRENT_DIR" != "$TEST_WORKSPACE" ]]; then
+    echo -e "${RED}ERROR: Not in test workspace!${NC}"
+    exit 1
+fi
+
+# List contents to verify setup
+echo -e "${BLUE}Test workspace contents:${NC}"
+ls -la "$TEST_WORKSPACE"
+
 echo -e "${BLUE}Executing command:${NC}"
 echo "  cd $TEST_WORKSPACE"
 echo "  copilot --agent=SonarArchitectLight \\"
@@ -206,25 +224,22 @@ echo "          --prompt \"$AGENT_PROMPT\" \\"
 echo "          --allow-all-tools \\"
 echo "          --no-ask-user \\"
 echo "          --share \"$AGENT_SHARE\" \\"
-echo "          --add-dir . \\"
-echo "          --add-dir \"$WORKSPACE_ROOT\""
+echo "          --add-dir ."
 echo ""
 
 # Use non-interactive mode with auto-approval
-# --agent: Use custom agent (loads from .github/agents/SonarArchitectLight.agent.md in current dir)
+# --agent: Use custom agent (loads from TEST_WORKSPACE/.github/agents/ - copied locally)
 # --allow-all-tools: Allow tools to run without confirmation
 # --no-ask-user: Don't ask questions, work autonomously
 # --share: Output full session transcript to markdown file (includes prompts, responses, tool calls)
-# --add-dir .: Grant explicit access to current directory (test workspace)
-# --add-dir WORKSPACE_ROOT: Grant access to original workspace (for reading docs, etc.)
-# The agent now has direct access to skills/ directory in its working context
+# --add-dir .: Only grant access to TEST_WORKSPACE - agent loads and works entirely in this isolated directory
+# NOTE: .github is copied to TEST_WORKSPACE so agent finds it locally, preventing it from using WORKSPACE_ROOT
 if copilot --agent=SonarArchitectLight \
           --prompt "$AGENT_PROMPT" \
           --allow-all-tools \
           --no-ask-user \
           --share "$AGENT_SHARE" \
           --add-dir . \
-          --add-dir "$WORKSPACE_ROOT" \
           > "$AGENT_OUTPUT" 2>&1; then
     AGENT_STATUS="success"
     echo -e "${GREEN}✓${NC} Agent execution completed"
@@ -398,12 +413,32 @@ else
     echo ""
     echo -e "${RED}✗${NC} Validation failed"
 fi
-Session transcript:${NC} $AGENT_SHARE"
-echo -e "${BLUE}
+
+# Copy test workspace to results directory for manual inspection
+WORKSPACE_SNAPSHOT="$RESULTS_DIR/.workspace-${SCENARIO_NAME}-snapshot"
+echo ""
+echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Copying test workspace to results directory..."
+if [[ -d "$TEST_WORKSPACE" ]]; then
+    # Remove old snapshot if exists
+    rm -rf "$WORKSPACE_SNAPSHOT"
+    # Copy entire workspace
+    cp -r "$TEST_WORKSPACE" "$WORKSPACE_SNAPSHOT"
+    echo -e "${GREEN}✓${NC} Workspace snapshot saved to: $WORKSPACE_SNAPSHOT"
+else
+    echo -e "${YELLOW}!${NC} Test workspace not found (already cleaned up or never created)"
+fi
+
+# Clean up temporary workspace
+if [[ -d "$TEST_WORKSPACE" ]]; then
+    echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Cleaning up temporary workspace..."
+    rm -rf "$TEST_WORKSPACE"
+fi
+
 echo ""
 echo "$SEPARATOR"
-echo -e "${BLUE}Test workspace:${NC} $TEST_WORKSPACE"
+echo -e "${BLUE}Test workspace snapshot:${NC} $WORKSPACE_SNAPSHOT"
 echo -e "${BLUE}Agent output:${NC} $AGENT_OUTPUT"
+echo -e "${BLUE}Session transcript:${NC} $AGENT_SHARE"
 echo -e "${BLUE}Result file:${NC} $RESULT_FILE"
 echo -e "${BLUE}Duration:${NC} ${DURATION}s"
 echo "$SEPARATOR"

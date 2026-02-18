@@ -27,7 +27,12 @@ This skill provides Bitbucket Pipelines-specific documentation and guidance for 
 
 ## Documentation Fetching Strategy
 
-**Invoke `web/fetch` TOOL to retrieve current examples and versions from official documentation and pipe repositories.**
+**IMPORTANT - SonarQube documentation pages require JavaScript rendering:**
+SonarQube documentation pages are dynamically rendered. A raw HTTP request (curl, wget) will NOT return the actual page content.
+
+Use your environment's browser-capable fetch tool to access these URLs (including pipe repository pages):
+- ❌ Do NOT use curl or wget for docs.sonarsource.com pages
+- ✅ USE whichever tool in your environment can render JavaScript pages (e.g., web/fetch, WebFetch, url_context, or equivalent)
 
 **Fallback Approach:**
 - If working with SonarQube Cloud, first fetch from the Cloud documentation URL
@@ -102,7 +107,7 @@ Configure Bitbucket integration in SonarQube for automatic PR decoration.
 ## Best Practices
 
 1. **Use pipes when possible**: Simpler configuration for CLI scanner
-2. **Check pipe versions**: Invoke `web/fetch` TOOL to verify latest pipe versions
+2. **Check pipe versions**: Use a browser-capable fetch tool to verify latest pipe versions in official documentation
 3. **Secure variables**: Always mark sensitive variables as Secured
 4. **Full clone**: Use `depth: full` for accurate blame information
 5. **Cache appropriately**: Cache `.sonar/cache` and build dependencies
@@ -116,7 +121,7 @@ Configure Bitbucket integration in SonarQube for automatic PR decoration.
 - Mention pipes vs direct scanner options
 
 **For SonarArchitectLight:**
-- Invoke `web/fetch` TOOL to check latest pipe versions
+- Use a browser-capable fetch tool to check latest pipe versions in official documentation
 - Create or update `bitbucket-pipelines.yml` with appropriate scanner
 - Prefer pipes for CLI scanner projects
 - Do NOT include links in responses

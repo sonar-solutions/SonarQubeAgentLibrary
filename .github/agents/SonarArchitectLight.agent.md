@@ -9,14 +9,13 @@ tools: ["read", "search", "edit", "execute"]
 ## Available Tools
 
 **How to retrieve documentation:**
-- Use standard HTTP clients (curl, wget, or language-specific HTTP libraries) to retrieve documentation
-- Make HTTP GET requests to official SonarQube documentation URLs
-- For scanner version information, use the version URLs provided in the scanner skills
+- **Documentation pages** (docs.sonarsource.com): Use a browser-capable fetch tool — these pages require JavaScript rendering and cannot be retrieved with curl or wget. Use whichever tool in your environment supports this (e.g., web/fetch, WebFetch, url_context, or equivalent).
+- **Version JSON endpoints** (downloads.sonarsource.com): curl or wget work fine — these are static JSON files.
 
 **When you need to retrieve documentation:**
-1. ✅ USE: HTTP GET requests (curl, wget, or similar) with the documentation URL
-2. ✅ USE: The Scanner Version Information URLs provided in each scanner skill
-3. ✅ EXAMPLE: `curl -s https://downloads.sonarsource.com/sonarqube/update/scannergradle.json`
+1. ✅ For documentation pages (docs.sonarsource.com): Use your environment's browser-capable fetch tool — do NOT use curl or wget
+2. ✅ For scanner version JSON endpoints (downloads.sonarsource.com): curl or wget work fine
+3. ✅ EXAMPLE (version JSON): `curl -s https://downloads.sonarsource.com/sonarqube/update/scannergradle.json`
 
 ## Available Skills
 
@@ -135,7 +134,7 @@ Once platform is identified, **READ** the appropriate **platform-specific skill*
 - **platform-bitbucket**: For Bitbucket Pipelines - READ `.github/agents/skills/platform-bitbucket.md`
 
 **CRITICAL - Only retrieve SonarQube-specific documentation:**
-- Use HTTP GET requests (curl, wget, or similar) to access official **SonarQube documentation only**
+- Use a browser-capable fetch tool (NOT curl or wget) to access official **SonarQube documentation only** — documentation pages require JavaScript rendering
 - Get latest SonarQube plugin/scanner versions and SonarQube configuration examples
 - Use the Scanner Version Information URLs provided in each scanner skill
 - **DO NOT** retrieve Gradle, Maven, or .NET build tool documentation
@@ -206,7 +205,7 @@ Use **devops-setup-instructions** skill:
 - **Prerequisites first** - Never create files without all prerequisites from prerequisites-gathering skill
 - **Ask questions efficiently** - Batch related questions together, don't ask one at a time
 - **SonarQube focus only** - Only retrieve SonarQube documentation, NOT Gradle/Maven/.NET build tool docs
-- **Retrieve before creating** - Use HTTP GET requests (curl, wget, or similar) to get latest SonarQube plugin/scanner versions
+- **Retrieve before creating** - Use a browser-capable fetch tool for documentation pages; curl/wget work for version JSON endpoints (downloads.sonarsource.com)
 - **Verify complete configuration** - For Gradle/Maven, check both plugin version AND configuration block (projectKey, organization, etc.)
 - **Consistent naming** - Always use job/step name "SonarQube Analysis" (works for both Cloud and Server)
 - **Security always** - Apply security-practices skill to every configuration

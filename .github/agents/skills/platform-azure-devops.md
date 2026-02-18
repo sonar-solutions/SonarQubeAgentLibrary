@@ -29,7 +29,12 @@ This skill provides Azure DevOps-specific documentation and guidance for SonarQu
 
 ## Documentation Fetching Strategy
 
-**Invoke `web/fetch` TOOL to retrieve current examples and versions from official documentation.**
+**IMPORTANT - SonarQube documentation pages require JavaScript rendering:**
+SonarQube documentation pages are dynamically rendered. A raw HTTP request (curl, wget) will NOT return the actual page content.
+
+Use your environment's browser-capable fetch tool to access these URLs:
+- ❌ Do NOT use curl or wget for docs.sonarsource.com pages
+- ✅ USE whichever tool in your environment can render JavaScript pages (e.g., web/fetch, WebFetch, url_context, or equivalent)
 
 **Fallback Approach:**
 - If working with SonarQube Cloud, first fetch from the Cloud documentation URL
@@ -114,7 +119,7 @@ Configure Azure DevOps integration in SonarQube for automatic PR decoration.
 ## Task Versions
 
 **Check latest versions before use:**
-- Invoke `web/fetch` TOOL to verify current task versions in documentation
+- Use a browser-capable fetch tool to verify current task versions in official documentation
 - Typical format: `SonarQubePrepare@5`, `SonarQubeAnalyze@5`, `SonarQubePublish@5`
 
 ## Usage Instructions
@@ -125,7 +130,7 @@ Configure Azure DevOps integration in SonarQube for automatic PR decoration.
 - Mention service connection setup
 
 **For SonarArchitectLight:**
-- Invoke `web/fetch` TOOL to check latest task versions
+- Use a browser-capable fetch tool to check latest task versions in official documentation
 - Update or create `azure-pipelines.yml` with appropriate scanner
 - Remind users to install extension and set up service connection
 - Do NOT include links in responses

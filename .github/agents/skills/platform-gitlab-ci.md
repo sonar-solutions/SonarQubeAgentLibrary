@@ -23,7 +23,12 @@ This skill provides GitLab CI-specific documentation and guidance for SonarQube 
 
 ## Documentation Fetching Strategy
 
-**Invoke `web/fetch` TOOL to retrieve current examples and versions from official documentation.**
+**IMPORTANT - SonarQube documentation pages require JavaScript rendering:**
+SonarQube documentation pages are dynamically rendered. A raw HTTP request (curl, wget) will NOT return the actual page content.
+
+Use your environment's browser-capable fetch tool to access these URLs:
+- ❌ Do NOT use curl or wget for docs.sonarsource.com pages
+- ✅ USE whichever tool in your environment can render JavaScript pages (e.g., web/fetch, WebFetch, url_context, or equivalent)
 
 **Fallback Approach:**
 - If working with SonarQube Cloud, first fetch from the Cloud documentation URL
@@ -108,6 +113,6 @@ Add a separate job to check quality gate status if needed.
 - Explain GitLab CI concepts when relevant
 
 **For SonarArchitectLight:**
-- Invoke `web/fetch` TOOL to check latest scanner versions
+- Use a browser-capable fetch tool to check latest scanner versions in official documentation
 - Update or create `.gitlab-ci.yml` with appropriate scanner
 - Do NOT include links in responses
