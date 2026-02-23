@@ -51,22 +51,16 @@ Use `sonarsource/sonarqube-scan-action` for **CLI scanner projects only**:
 - JavaScript/TypeScript/Python/PHP/Go/Ruby (without Maven/Gradle/.NET)
 - Projects that require `sonar-project.properties`
 - See: scanner-cli skill for configuration
-
-**Example:**
-```yaml
-- uses: sonarsource/sonarqube-scan-action@v7  # Check latest version
-  env:
-    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-```
+- To get the latest version use **Main Documentation** link and check in the **Setting up your workflow file** section example. Use the version used in this example. 
 
 ### Build Tool Integration
 
-**For Maven/Gradle/.NET projects, run scanner commands directly in workflow:**
-- **Maven**: Run `mvn sonar:sonar` (see: scanner-maven skill)
-- **Gradle**: Run `./gradlew sonar` (see: scanner-gradle skill)
-- **.NET**: Run `dotnet sonarscanner begin/build/end` (see: scanner-dotnet skill)
+**For Maven/Gradle/.NET projects**, fetch the official docs page and use the examples in the **Configuring the build.yml file** section:
+- **Maven**: `SonarScanner for Maven` example
+- **Gradle**: `SonarScanner for Gradle` example
+- **.NET**: `SonarScanner for .NET` example
 
-Access examples from official documentation to obtain latest versions and configuration. 
+See: https://docs.sonarsource.com/sonarqube-server/devops-platform-integration/github-integration/adding-analysis-to-github-actions-workflow
 
 ## Platform-Specific Configuration
 
@@ -106,11 +100,10 @@ The action automatically fails the workflow if quality gate fails.
 
 ## Usage Instructions
 
-**For SonarArchitectGuide:**
-- Include documentation links in responses
-- Explain GitHub Actions concepts when relevant
+⚠️ Reminder: This skill contains docs.sonarsource.com URLs — fetch them with a browser-capable tool (NOT curl), as instructed in your agent configuration.
 
-**For SonarArchitectLight:**
-- ⛔ STOP - Use a browser-capable fetch tool (NOT curl) to check latest action version in official documentation
-- Create `.github/workflows/sonarqube.yml` with appropriate scanner
-- Do NOT include links in responses
+Create `.github/workflows/sonarqube.yml` (or the filename specified by the user) with the appropriate scanner configuration and any other files or changes required for the pipeline to work.
+
+**For SonarArchitectGuide:** Include documentation links in responses. Explain GitHub Actions concepts when relevant.
+
+**For SonarArchitectLight:** Do NOT include documentation links or explanations in responses.

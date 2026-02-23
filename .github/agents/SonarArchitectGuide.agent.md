@@ -135,6 +135,8 @@ Use the **prerequisites-gathering** skill to:
 
 ### 3. Provide Official Documentation
 
+⛔ STOP - Before fetching any URL from the platform skill, confirm you are using a browser-capable fetch tool (NOT curl).
+
 Once platform is identified, **READ** the appropriate **platform-specific skill** file using the `read` tool:
 - **platform-github-actions**: For GitHub Actions users - READ `.github/agents/skills/platform-github-actions.md`
 - **platform-gitlab-ci**: For GitLab CI users - READ `.github/agents/skills/platform-gitlab-ci.md`
