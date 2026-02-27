@@ -1,109 +1,92 @@
 ---
 name: prerequisites-gathering
-description: Defines critical prerequisites required before creating SonarQube configurations. Use this to gather SonarQube type, CI/CD platform, branch info, project key, organization, and Cloud instance.
+description: Validates or collects all required inputs before any file creation. ALWAYS run this skill after project-detection and before any platform or scanner skill.
 ---
 
 # Prerequisites Gathering Skill
 
-This skill defines the critical information needed before creating any SonarQube configuration files.
+## Purpose
 
-## ⚠️ CRITICAL: ALWAYS USE THIS SKILL
+Validate or collect all required inputs before creating any SonarQube configuration files. This skill runs in two modes:
 
-**This skill MUST be used in EVERY scenario, whether information needs to be gathered OR validated:**
+- **Validation Mode** — all prerequisites were provided upfront (e.g., automated testing); verify they are all present and correct
+- **Interactive Mode** — some prerequisites are missing; ask for all missing values in a single interaction
 
-- **Interactive Mode** (can ask questions): Use this skill to ASK for missing prerequisites
-- **Validation Mode** (automated/testing with all info provided): Use this skill to VALIDATE all prerequisites are present
+Never skip this skill. Never create files before this skill has confirmed every required field.
 
-**DO NOT skip this skill even if all information appears to be provided upfront. Always validate prerequisites before proceeding.**
+## CRITICAL: Always Run
 
-## ⚠️ CRITICAL PREREQUISITES
+Run this skill after project-detection in every scenario, regardless of how much information was already provided. In validation mode it serves as a checklist; in interactive mode it drives the question sequence.
 
-**You MUST collect ALL of the following before creating ANY pipeline configuration files:**
+## Required Prerequisites
 
 ### 1. SonarQube Type (REQUIRED)
-- **If not specified by the user**, STOP and ask:
-  - "Are you connecting to **SonarQube Cloud** or **SonarQube Server**?"
-- This is critical as documentation links and configuration differ between Cloud and Server
-- DO NOT proceed until you have this information
+- **Cloud** or **Server**
+- This is critical: documentation links, configuration properties, and required fields differ between Cloud and Server
+- Do not proceed without this value
 
 ### 2. CI/CD Platform (REQUIRED)
-- Detect from project structure OR ask the user if unclear
-- Supported platforms:
-  - GitHub Actions
-  - GitLab CI
-  - Azure DevOps
-  - Bitbucket Pipelines
-  - Jenkins
-- DO NOT proceed without confirming the platform
+- Detected by project-detection skill, then confirmed by the user
+- Supported values: GitHub Actions, GitLab CI, Azure DevOps, Bitbucket Pipelines
+- Jenkins is not supported — if the user requests Jenkins, explain it is out of scope and ask them to choose a supported platform
 
-### 3. SonarQube Cloud Specific Information (REQUIRED if using Cloud)
+### 3. Project Key (REQUIRED)
+- The unique identifier for the project in SonarQube
+- Cloud format: often `organization_repository` or custom
+- Server format: custom string, typically the project name
 
-**If the user is using SonarQube Cloud, collect:**
+### 4. Organization Key (REQUIRED for Cloud only)
+- The organization identifier in SonarQube Cloud
+- Format: lowercase slug (e.g., `my-org`, `company-name`)
+- Not applicable for Server
 
-**3a. Organization Key (REQUIRED for Cloud)**
-- Ask user: "What is your SonarQube Cloud organization key?"
-- This is the organization identifier in SonarCloud
-- Format: lowercase organization name (e.g., `my-org`, `company-name`)
-- DO NOT proceed without this for Cloud users
+### 5. Cloud Instance (REQUIRED for Cloud only)
+- Which SonarQube Cloud instance the user is on
+- **Only two valid values — present these exactly:**
+  - **US:** `sonarqube.us` (full URL: `https://sonarqube.us`)
+  - **EU:** `sonarcloud.io` (full URL: `https://sonarcloud.io`)
+- Default if user is unsure: EU (`sonarcloud.io`)
+- This value determines the `SONAR_HOST_URL`
 
-**3b. SonarQube Cloud Instance (REQUIRED for Cloud)**
-- **CRITICAL**: Ask user: "Which SonarQube Cloud instance are you using?"
-- **ONLY these two options exist - use them exactly as shown**:
-  - **US**: `sonarqube.us` (full URL: https://sonarqube.us)
-  - **EU**: `sonarcloud.io` (full URL: https://sonarcloud.io)
-- When asking the user, you MUST present these exact values: "US: sonarqube.us or EU: sonarcloud.io"
-- Default is EU (`sonarcloud.io`) if user is unsure
-- This determines the SONAR_HOST_URL value
-- **DO NOT** use any other URLs or variations
-
-### 4. Project Key (REQUIRED)
-- Ask user for their SonarQube project key
-- This uniquely identifies the project in SonarQube
-- Format varies by platform:
-  - Cloud: Often matches project name or custom format
-  - Server: `projectname` or custom format
-
-### 5. Project Type/Build System (REQUIRED)
-- Identified through project detection skill
-- Determines which scanner to use:
-  - Maven projects → Maven plugin
-  - Gradle projects → Gradle plugin
-  - Other projects → SonarScanner CLI
-
-## Validation Rules
-
-**Two Modes of Operation:**
-
-1. **Interactive Mode** (when you can ask questions):
-   - ✅ ASK multiple related questions in a single interaction when possible
-   - ✅ Group SonarQube-related questions together (type, project key, organization)
-   - ❌ DON'T ask questions one at a time when they can be batched
-   - **If ANY prerequisite is missing:**
-     - ❌ STOP immediately
-     - ❌ DO NOT create files with placeholder values
-     - ❌ DO NOT assume or guess values
-     - ✅ ASK the user for the missing information
-     - ✅ WAIT for their response before proceeding
-
-2. **Validation Mode** (when all info is provided upfront, e.g., automated testing):
-   - ✅ Use this skill to VALIDATE (not skip it)
-   - ✅ Check that the initial prompt contains ALL required prerequisites:
-     - SonarQube type (Cloud or Server)
-     - CI/CD platform
-     - Project key
-     - If Cloud: Organization key and instance (US/EU)
-     - If Server: Server URL
-   - ❌ If ANY prerequisite is missing from the prompt, you cannot proceed
-   - ✅ Once validated, extract the values and proceed with file creation
-
-**In BOTH modes, this skill serves as your checklist - DO NOT skip it.**
+### 6. Server URL (REQUIRED for Server only)
+- The full URL of the SonarQube Server instance
+- Example: `https://sonar.yourcompany.com`
+- Must include the scheme (`https://`)
+- This value is used as `SONAR_HOST_URL` in all configuration files
 
 ## Order of Operations
 
-1. Analyze project structure (use project-detection skill)
-2. Confirm detected CI/CD platform with user
-3. **Ask all remaining prerequisites in a single interaction when possible:**
-   - SonarQube type (Cloud or Server)?
-   - SonarQube project key?
-   - If Cloud: Organization key and instance (US/EU)?
-4. Proceed to file creation only when all prerequisites are confirmed
+1. **Check what is already provided** — review the conversation context for any of the 6 fields above
+2. **Confirm the CI/CD platform** — based on project-detection output, ask the user to confirm (or correct) the detected platform
+3. **Batch all remaining questions in ONE interaction** — do not ask field by field; compose a single message listing all missing values needed
+4. **Validate all confirmed values** — verify formats are correct (e.g., URL starts with `https://`, project key is not empty)
+5. **Block until complete** — do not proceed to any platform or scanner skill until all required fields for the detected SonarQube type are confirmed
+
+## Validation Mode Checklist
+
+When all information is provided upfront, verify each field is present:
+
+- [ ] SonarQube type: Cloud or Server
+- [ ] CI/CD platform: github-actions | gitlab-ci | azure-devops | bitbucket
+- [ ] Project key: non-empty string
+- [ ] Organization key: non-empty string *(Cloud only)*
+- [ ] Cloud instance: `sonarqube.us` or `sonarcloud.io` *(Cloud only)*
+- [ ] Server URL: starts with `https://` *(Server only)*
+
+If any required field is missing, switch to Interactive Mode immediately.
+
+## Interactive Mode Question Template
+
+When prerequisites are missing, ask all questions in a single message. Example for a Gradle + GitHub Actions project where SonarQube type is unknown:
+
+```
+To set up your SonarQube analysis, I need a few details:
+
+1. Are you using **SonarQube Cloud** or **SonarQube Server**?
+2. What is your **SonarQube project key**?
+3. *(If Cloud)* What is your **organization key**?
+4. *(If Cloud)* Which instance are you on — **US: sonarqube.us** or **EU: sonarcloud.io**?
+5. *(If Server)* What is your **SonarQube Server URL**? (e.g., https://sonar.yourcompany.com)
+```
+
+Adjust which questions appear based on what is already known. Never ask a question that has already been answered.

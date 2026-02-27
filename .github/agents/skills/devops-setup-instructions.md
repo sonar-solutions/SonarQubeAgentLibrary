@@ -1,209 +1,121 @@
 ---
 name: devops-setup-instructions
-description: Platform-specific instructions for configuring secrets and variables in CI/CD platforms. Use this to guide users in setting up SONAR_TOKEN and SONAR_HOST_URL.
+description: Platform-specific instructions for configuring secrets and variables in CI/CD platforms after pipeline files have been created.
 ---
 
 # DevOps Setup Instructions Skill
 
-This skill provides concise, platform-specific instructions for configuring secrets and variables in CI/CD platforms.
+## GitHub Actions
 
-## GitHub Actions Setup
+**Location:** Repository → Settings → Secrets and variables → Actions → New repository secret
 
-### Secret Configuration
+**Required secrets:**
 
-**Location:** Repository → Settings → Secrets and variables → Actions
+| Secret name | Value | When required |
+|---|---|---|
+| `SONAR_TOKEN` | SonarQube analysis token | Always |
+| `SONAR_HOST_URL` | `https://sonarcloud.io` (EU) or `https://sonarqube.us` (US) or your Server URL | Cloud (use the instance URL) and Server |
 
-**Required Secrets:**
-
-**For SonarQube Cloud:**
-```
-SONAR_TOKEN: [your SonarQube Cloud token with analysis permissions]
-SONAR_HOST_URL: [https://sonarcloud.io for EU or https://sonarqube.us for US instance]
-SONAR_ORGANIZATION: [your organization key]
-```
-
-**For SonarQube Server:**
-```
-SONAR_TOKEN: [your SonarQube Server token with analysis permissions]
-SONAR_HOST_URL: [your SonarQube Server URL, e.g., https://sonar.yourcompany.com]
-```
-
-### Additional Setup
-- Ensure GitHub Actions is enabled for the repository
-- Check workflow permissions: Settings → Actions → General → Workflow permissions
-- For PR decoration: Configure SonarQube GitHub App integration
+**Notes:**
+- The organization key goes in your configuration files (`sonar.organization`), **not** in secrets
+- Ensure GitHub Actions is enabled: Settings → Actions → General → Allow all actions
 
 ---
 
-## GitLab CI Setup
+## GitLab CI
 
-### Variable Configuration
+**Location:** Project → Settings → CI/CD → Variables → Add variable
 
-**Location:** Project → Settings → CI/CD → Variables
+**Required variables:**
 
-**Required Variables:**
+| Variable name | Value | Flags | When required |
+|---|---|---|---|
+| `SONAR_TOKEN` | SonarQube analysis token | Masked, Protected | Always |
+| `SONAR_HOST_URL` | Cloud instance URL or Server URL | Protected | Always |
 
-**For SonarQube Cloud:**
-```
-SONAR_TOKEN: [your SonarQube Cloud token] - Mark as "Masked" and "Protected"
-SONAR_HOST_URL: [https://sonarcloud.io for EU or https://sonarqube.us for US] - Mark as "Protected"
-```
-
-**For SonarQube Server:**
-```
-SONAR_TOKEN: [your SonarQube Server token] - Mark as "Masked" and "Protected"
-SONAR_HOST_URL: [your SonarQube Server URL] - Mark as "Protected"
-```
-
-### Additional Setup
-- Ensure CI/CD pipelines are enabled
-- For protected branches, mark variables as "Protected"
-- For PR decoration: Configure SonarQube GitLab integration
+**Notes:**
+- Mark `SONAR_TOKEN` as **Masked** so it never appears in job logs
+- Mark both variables as **Protected** so they are available on protected branches only
+- For merge request pipelines, ensure variables are available on unprotected branches if needed
 
 ---
 
-## Azure DevOps Setup
+## Azure DevOps
 
-### Variable Configuration
+**Option A — Variable Group (recommended):**
 
-**Location:** Pipelines → Library → Variable groups
+**Location:** Pipelines → Library → + Variable group
 
-**Create a Variable Group named "SonarQube" with:**
+Create a group named `SonarQube` with:
 
-**For SonarQube Cloud:**
-```
-SONAR_TOKEN: [your SonarQube Cloud token] - Mark as "Secret" (lock icon)
-(SONAR_HOST_URL is not needed for Cloud)
-```
+| Variable name | Value | Flags | When required |
+|---|---|---|---|
+| `SONAR_TOKEN` | SonarQube analysis token | Secret (lock icon) | Always |
+| `SONAR_HOST_URL` | Cloud instance URL or Server URL | — | Always |
 
-**For SonarQube Server:**
-```
-SONAR_TOKEN: [your SonarQube Server token] - Mark as "Secret"
-SONAR_HOST_URL: [your SonarQube Server URL]
-```
+Then link the group to your pipeline: Pipeline → Edit → Variables → Variable groups → Link variable group.
 
-**Alternative: Pipeline Variables**
-Configure in Pipeline → Edit → Variables
+**Option B — Pipeline Variables:**
 
-### Additional Setup
-- Install SonarQube extension from Azure DevOps Marketplace
-- Link variable group to your pipeline
-- For SonarQube Server: Create a Service Connection (Project Settings → Service connections → SonarQube)
-- For PR decoration: Configure SonarQube Azure DevOps integration
+Pipeline → Edit → Variables → add `SONAR_TOKEN` (mark as secret) and `SONAR_HOST_URL`.
+
+**Additional setup for Server:**
+- Project Settings → Service connections → New service connection → SonarQube
+- Enter your Server URL and token; name the connection (e.g., `SonarQube-Connection`)
+- Reference this connection name in `SonarQubePrepare@6` task configuration
+
+**Extension required:**
+- Install the **SonarQube** extension from Azure DevOps Marketplace before running the pipeline
 
 ---
 
-## Bitbucket Pipelines Setup
-
-### Variable Configuration
+## Bitbucket Pipelines
 
 **Location:** Repository settings → Pipelines → Repository variables
 
-**Required Variables:**
+**Required variables:**
 
-**For SonarQube Cloud:**
-```
-SONAR_TOKEN: [your SonarQube Cloud token] - Mark as "Secured"
-```
+| Variable name | Value | Flags | When required |
+|---|---|---|---|
+| `SONAR_TOKEN` | SonarQube analysis token | Secured | Always |
+| `SONAR_HOST_URL` | Cloud instance URL or Server URL | Secured | Always |
 
-**For SonarQube Server:**
-```
-SONAR_TOKEN: [your SonarQube Server token] - Mark as "Secured"
-SONAR_HOST_URL: [your SonarQube Server URL]
-```
-
-### Additional Setup
-- Ensure Pipelines are enabled for the repository
-- For workspace-level variables: Settings → Pipelines → Workspace variables
-- For PR decoration: Configure SonarQube Bitbucket integration
+**Notes:**
+- Mark all variables as **Secured** so they are masked in logs
+- For workspace-level variables: Workspace settings → Pipelines → Workspace variables
 
 ---
 
-## Jenkins Setup
+## Token Generation
 
-### Credentials Configuration
+### SonarQube Cloud — Scoped Organization Token
 
-**Location:** Manage Jenkins → Manage Credentials
+1. Log in to your SonarQube Cloud instance (sonarcloud.io or sonarqube.us)
+2. Go to your organization → Administration → Scoped Organization Tokens
+3. Click **Create token**
+4. Enter a descriptive name (e.g., `GitHub Actions CI — my-project`)
+5. Set an expiration date
+6. Under "Projects this token can access," select **All current and future projects** (for shared CI) or a custom selection
+7. Click **Generate token**
+8. Copy the token immediately — it will not be shown again
 
-**Required Credentials:**
-
-**For SonarQube Cloud or Server:**
-```
-Kind: Secret text
-ID: sonarqube-token
-Secret: [your SonarQube token]
-```
-
-### SonarQube Server Configuration
-
-**Location:** Manage Jenkins → Configure System → SonarQube servers
-
-**Add SonarQube Server:**
-```
-Name: SonarQube (or SonarCloud)
-Server URL: [your SonarQube URL or https://sonarcloud.io (EU) / https://sonarqube.us (US)]
-Server authentication token: Select the credential created above
-```
-
-### Additional Setup
-- Install SonarQube Scanner plugin from Jenkins Plugin Manager
-- Configure SonarQube Scanner: Manage Jenkins → Global Tool Configuration
-- For PR decoration: Install SonarQube Quality Gates plugin
-
----
-
-## Token Generation Instructions
-
-### SonarQube Cloud (Scoped Organization Tokens)
-1. Log in to SonarCloud
-2. Retrieve your organization
-3. Go to Administration → Scoped Organization Tokens
-4. Click the "Create token" button in the top right corner
-5. Enter the token name and description (e.g., "GitHub Actions CI")
-6. Select "Expires in" duration or "No expiration"
-7. Choose "Projects this token can access":
-   - **All current and future projects** - Recommended for CI/CD pipelines
-   - **Custom selection of projects** - Select specific projects using the "Select projects" button
-8. Click "Generate token"
-9. Copy the token immediately from the notification (it won't be shown again)
-
-**Note:** Scoped Organization Tokens are identified by the `sqco_` prefix and are available in Team and Enterprise plans.
+*Scoped Organization Tokens are prefixed with `sqco_` and require Team or Enterprise plan.*
 
 ### SonarQube Server
-1. Log in to your SonarQube Server
+
+1. Log in to your SonarQube Server instance
 2. Go to My Account → Security → Generate Tokens
-3. Enter token name (e.g., "CI Pipeline")
-4. Select token type: "Global Analysis Token" or "Project Analysis Token"
-5. Click "Generate"
-6. Copy the token immediately (it won't be shown again)
+3. Enter a descriptive token name (e.g., `CI Pipeline — my-project`)
+4. Select token type: **Global Analysis Token** or **Project Analysis Token**
+5. Set an expiration date
+6. Click **Generate**
+7. Copy the token immediately — it will not be shown again
 
 ---
 
-## Post-Setup Validation
+## Post-Setup Checklist
 
-After configuring secrets/variables, verify:
-- [ ] Secrets/variables are marked as protected/secured
-- [ ] Token has analysis permissions only (minimal privilege)
-- [ ] SONAR_HOST_URL is correct (Server only)
-- [ ] Pipeline has access to secrets/variables
-- [ ] Run a test pipeline to verify authentication
-
----
-
-## Instructions Format for Users
-
-When providing setup instructions to users, use this concise format:
-
-```
-✅ Configuration files created successfully!
-
-🔐 Next Steps - Configure Secrets in [Platform]:
-
-1. Go to: [exact path in UI]
-2. Add the following secrets/variables:
-   - SONAR_TOKEN: [description] - [special settings]
-   - SONAR_HOST_URL: [description] - [special settings if Server]
-3. [Any additional setup steps]
-
-📝 Push your changes and the pipeline will run automatically.
-```
+- [ ] `SONAR_TOKEN` is stored as a secret/masked variable — never visible in logs
+- [ ] `SONAR_HOST_URL` is set correctly (Cloud instance URL or Server URL)
+- [ ] Token has analysis-only permissions
+- [ ] Pipeline has access to the secrets (variable group linked, branch policies allow it)
