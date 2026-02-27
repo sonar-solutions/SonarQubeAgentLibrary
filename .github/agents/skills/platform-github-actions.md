@@ -101,6 +101,7 @@ The action automatically fails the workflow if quality gate fails.
 1. **Use latest action version**: Always access https://github.com/SonarSource/sonarqube-scan-action to check latest version
 2. **Matrix builds**: Run analysis only once, not in matrix strategy
 3. **Branch protection**: Don't require SonarQube check on protected branches until setup is complete
+4. **Permissions**: Ensure workflow has necessary permissions for PR comments
 
 ## Output Contract
 
@@ -116,7 +117,6 @@ After processing this skill, provide the following to pipeline-creation:
 - `required_secrets`:
   - `SONAR_TOKEN` (always)
   - `SONAR_HOST_URL` (Server only)
-4. **Permissions**: Ensure workflow has necessary permissions for PR comments
 
 ## Usage Instructions
 
