@@ -171,6 +171,24 @@ The .NET scanner is a command-line tool that integrates SonarQube analysis for C
 9. **Test before analysis**: Run tests with coverage collection before end step
 10. **Check scanner version**: Retrieve compatible scanner versions from Scanner Version Information URL (https://downloads.sonarsource.com/sonarqube/update/scannermsbuild.json)
 
+## Output Contract
+
+After processing this skill, provide the following to pipeline-creation:
+
+- `build_commands` (three-step sequence):
+  1. `dotnet sonarscanner begin /k:"<projectKey>" /o:"<org>" /d:sonar.host.url="<url>" /d:sonar.token="$SONAR_TOKEN"` (plus coverage paths if applicable)
+  2. `dotnet build`
+  3. `dotnet test` with coverage collection (if test projects found)
+  4. `dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"`
+- `scanner_parameters`:
+  - `/k:` project key (required)
+  - `/o:` organization (Cloud only)
+  - `/d:sonar.cs.opencover.reportsPaths` or `/d:sonar.cs.vscoveragexml.reportsPaths` (if coverage configured)
+- `required_files`: `.config/dotnet-tools.json` if using local tool manifest
+- `working_directory`: directory containing `.sln` or `.csproj` file
+- `runtime_requirements`: .NET SDK version required by the project
+- `tool_version`: latest `dotnet-sonarscanner` version — fetch from Scanner Version Information URL
+
 ## Platform Integration
 
 See platform-specific skills for CI/CD integration:

@@ -39,9 +39,14 @@ Use your environment's browser-capable fetch tool to access these URLs:
 
 ## GitLab CI Implementation
 
-### Scanner Implementation
+### Scanner Approach Determination
 
-**Scanner selection is defined in pipeline-creation skill. This section covers GitLab CI-specific implementation.**
+Based on the project type identified in prerequisites-gathering, determine the scanner approach **before** invoking pipeline-creation:
+
+- **Maven project** → `scanner_approach: maven` — use `maven` Docker image, run `mvn sonar:sonar` directly, do NOT use `sonar-scanner-cli` image
+- **Gradle project** → `scanner_approach: gradle` — use `gradle` Docker image, run `./gradlew sonar` directly, do NOT use `sonar-scanner-cli` image
+- **.NET project** → `scanner_approach: dotnet` — use `mcr.microsoft.com/dotnet/sdk` image, run `dotnet sonarscanner` begin/build/end directly
+- **All others (JavaScript/TypeScript/Python/PHP/Go/Ruby...)** → `scanner_approach: docker-image` — use `sonarsource/sonar-scanner-cli` Docker image
 
 ### When to Use sonar-scanner-cli Docker Image
 
@@ -105,6 +110,20 @@ Add a separate job to check quality gate status if needed.
 3. **Protect variables**: Mark `SONAR_TOKEN` as Masked and Protected
 4. **Full git history**: Always set `GIT_DEPTH: "0"`
 5. **Merge request analysis**: Include `merge_requests` in `only` clause
+
+## Output Contract
+
+After processing this skill, provide the following to pipeline-creation:
+
+- `scanner_approach`: one of `docker-image`, `maven`, `gradle`, `dotnet`
+- `tool_version`: latest tag of `sonarsource/sonar-scanner-cli` image (only when `scanner_approach` is `docker-image`) — fetch from Main Documentation
+- `workflow_structure`:
+  - Git depth: `GIT_DEPTH: "0"`
+  - Trigger: branches + merge requests
+  - Cache: `.sonar/cache`
+- `required_secrets`:
+  - `SONAR_TOKEN` (always, mark as Masked and Protected)
+  - `SONAR_HOST_URL` (Server only, mark as Protected)
 
 ## Usage Instructions
 

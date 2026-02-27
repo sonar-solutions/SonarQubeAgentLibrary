@@ -197,6 +197,26 @@ The SonarScanner CLI is a standalone scanner for JavaScript, TypeScript, Python,
 11. **Validate coverage paths**: Ensure coverage files exist before scanning
 12. **Use platform-specific actions**: Prefer official CI/CD integrations when available
 
+## Output Contract
+
+After processing this skill, provide the following to pipeline-creation:
+
+- `build_commands`: any test/coverage commands that must run **before** the scanner (language-specific)
+  - JavaScript/TypeScript: e.g. `npm test -- --coverage`
+  - Python: e.g. `pytest --cov --cov-report=xml`
+  - Go: e.g. `go test -coverprofile=coverage.out ./...`
+- `scanner_parameters`: n/a (configuration lives in `sonar-project.properties`)
+- `required_files`: `sonar-project.properties` with full content including:
+  - `sonar.projectKey`
+  - `sonar.organization` (Cloud only)
+  - `sonar.sources`
+  - `sonar.tests` (if applicable)
+  - `sonar.exclusions`
+  - Language-specific coverage path property
+- `working_directory`: directory containing `sonar-project.properties` (if not project root)
+- `runtime_requirements`: none (scanner is provided by the platform action/image/pipe)
+- `tool_version`: n/a — version is resolved by the platform skill (action/image/pipe version)
+
 ## Platform Integration
 
 Most CI/CD platforms provide official actions/pipes for CLI scanner:

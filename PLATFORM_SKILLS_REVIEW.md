@@ -38,7 +38,7 @@ All `platform-*` skills should follow this section order:
 
 ---
 
-### Scope Block (under `IMPORTANT - Scope of This Skill`)
+### Scope Block (under `IMPORTANT - Scope of This Skill`) (done)
 
 | Skill | 4th bullet wording |
 |-------|--------------------|
@@ -51,7 +51,7 @@ All `platform-*` skills should follow this section order:
 
 ---
 
-### Official Documentation
+### Official Documentation (reviewed, no need to add)
 
 | Skill | Extra links |
 |-------|-------------|
@@ -64,7 +64,7 @@ All `platform-*` skills should follow this section order:
 
 ---
 
-### `## Prerequisites` Section
+### `## Prerequisites` Section (done)
 
 | Skill | Has Prerequisites section |
 |-------|--------------------------|
@@ -77,7 +77,7 @@ All `platform-*` skills should follow this section order:
 
 ---
 
-### Documentation Fetching Strategy
+### Documentation Fetching Strategy (done)
 
 | Skill | Differences |
 |-------|-------------|
@@ -100,6 +100,10 @@ All `platform-*` skills should follow this section order:
 | `platform-gitlab-ci` | Documents `sonarsource/sonar-scanner-cli` Docker image with a YAML example |
 
 GitHub Actions is the only one that embeds version-finding instructions inline in this section instead of a dedicated `## [Tool] Versions` section. Azure DevOps has the best pattern for version guidance — a dedicated `## Task Versions` section at the end.
+
+Just noticed in the gh_actions skill doc, that it looks like it says that the scanner selection is done in pipeline creation. But this is a later skill used. Shouldnt we already have decided what scanner to use? Instead of showing the options and then in the pipeline-creation decide. 
+**Scanner selection is defined in pipeline-creation skill. This section covers GitHub Actions-specific implementation.**
+
 
 ---
 

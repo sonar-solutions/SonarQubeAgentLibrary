@@ -43,9 +43,14 @@ Use your environment's browser-capable fetch tool to access these URLs (includin
 
 ## Bitbucket Pipelines Implementation
 
-### Scanner Implementation
+### Scanner Approach Determination
 
-**Scanner selection is defined in pipeline-creation skill. This section covers Bitbucket-specific implementation.**
+Based on the project type identified in prerequisites-gathering, determine the scanner approach **before** invoking pipeline-creation:
+
+- **Maven project** → `scanner_approach: maven` — run `mvn sonar:sonar` directly in a step, do NOT use pipes
+- **Gradle project** → `scanner_approach: gradle` — run `./gradlew sonar` directly in a step, do NOT use pipes
+- **.NET project** → `scanner_approach: dotnet` — run `dotnet sonarscanner` begin/build/end directly in a step, do NOT use pipes
+- **All others (JavaScript/TypeScript/Python/PHP/Go/Ruby...)** → `scanner_approach: pipe` — use official SonarCloud/SonarQube scan pipe
 
 ### When to Use SonarQube Pipes
 
@@ -112,6 +117,22 @@ Configure Bitbucket integration in SonarQube for automatic PR decoration.
 4. **Full clone**: Use `depth: full` for accurate blame information
 5. **Cache appropriately**: Cache `.sonar/cache` and build dependencies
 6. **Quality gate step**: Add separate step for quality gate check
+
+## Output Contract
+
+After processing this skill, provide the following to pipeline-creation:
+
+- `scanner_approach`: one of `pipe`, `maven`, `gradle`, `dotnet`
+- `tool_version`: latest version of the scan pipe (only when `scanner_approach` is `pipe`):
+  - SonarQube Cloud: `sonarsource/sonarcloud-scan` version — fetch from Scan Pipe Repository
+  - SonarQube Server: `sonarsource/sonarqube-scan` version — fetch from Scan Pipe Repository
+- `workflow_structure`:
+  - Clone depth: `full`
+  - Branch and PR pipeline config
+  - Cache: `.sonar/cache`
+- `required_secrets`:
+  - `SONAR_TOKEN` (always, mark as Secured)
+  - `SONAR_HOST_URL` (Server only, mark as Secured)
 
 ## Usage Instructions
 

@@ -154,6 +154,20 @@ The Gradle SonarQube scanner is a Gradle plugin that integrates SonarQube analys
 10. **Multi-module setup**: Configure plugin at root level for consistent analysis
 11. **Check compatibility**: Verify Gradle and plugin version compatibility in documentation
 
+## Output Contract
+
+After processing this skill, provide the following to pipeline-creation:
+
+- `build_commands`: `./gradlew build sonar` (or with JaCoCo: `./gradlew test jacocoTestReport sonar`)
+- `scanner_parameters`:
+  - `sonar.projectKey` (required)
+  - `sonar.organization` (Cloud only)
+  - `sonar.coverage.jacoco.xmlReportPaths` (if JaCoCo configured)
+- `required_files`: changes needed in `build.gradle` or `build.gradle.kts` (plugin declaration + `sonarqube {}` block)
+- `working_directory`: directory containing `build.gradle` (if not project root)
+- `runtime_requirements`: JDK version required by the project
+- `tool_version`: latest `org.sonarqube` plugin version — fetch from Scanner Version Information URL
+
 ## Platform Integration
 
 See platform-specific skills for CI/CD integration:

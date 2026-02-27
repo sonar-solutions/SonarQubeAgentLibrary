@@ -28,7 +28,7 @@ This skill provides GitHub Actions-specific documentation and guidance for Sonar
 **IMPORTANT - SonarQube documentation pages require JavaScript rendering:**
 SonarQube documentation pages are dynamically rendered. A raw HTTP request (curl, wget) will NOT return the actual page content.
 
-Use your environment's browser-capable fetch tool to access these URLs:
+Use your environment's browser-capable fetch tool to access these URLs (including github actions documentation pages):
 - ❌ Do NOT use curl or wget for docs.sonarsource.com pages
 - ✅ USE whichever tool in your environment can render JavaScript pages (e.g., web/fetch, WebFetch, url_context, or equivalent)
 
@@ -41,9 +41,14 @@ Use your environment's browser-capable fetch tool to access these URLs:
 
 ## GitHub Actions Implementation
 
-### Scanner Implementation
+### Scanner Approach Determination
 
-**Scanner selection is defined in pipeline-creation skill. This section covers GitHub Actions-specific implementation.**
+Based on the project type identified in prerequisites-gathering, determine the scanner approach **before** invoking pipeline-creation:
+
+- **Maven project** → `scanner_approach: maven` — run `mvn sonar:sonar` directly, do NOT use `sonarqube-scan-action`
+- **Gradle project** → `scanner_approach: gradle` — run `./gradlew sonar` directly, do NOT use `sonarqube-scan-action`
+- **.NET project** → `scanner_approach: dotnet` — run `dotnet sonarscanner` begin/build/end directly, do NOT use `sonarqube-scan-action`
+- **All others (JavaScript/TypeScript/Python/PHP/Go/Ruby...)** → `scanner_approach: sonarqube-scan-action` — use `sonarsource/sonarqube-scan-action`
 
 ### When to Use SonarQube Scan Action
 
@@ -96,6 +101,21 @@ The action automatically fails the workflow if quality gate fails.
 1. **Use latest action version**: Always access https://github.com/SonarSource/sonarqube-scan-action to check latest version
 2. **Matrix builds**: Run analysis only once, not in matrix strategy
 3. **Branch protection**: Don't require SonarQube check on protected branches until setup is complete
+
+## Output Contract
+
+After processing this skill, provide the following to pipeline-creation:
+
+- `scanner_approach`: one of `sonarqube-scan-action`, `maven`, `gradle`, `dotnet`
+- `tool_version`: latest version of `sonarsource/sonarqube-scan-action` (only when `scanner_approach` is `sonarqube-scan-action`) — fetch from Main Documentation
+- `workflow_structure`:
+  - Trigger branches: `main`, `master`, `develop/*`, `feature/*`
+  - Pull request trigger: yes
+  - Checkout: `actions/checkout@v4` with `fetch-depth: 0`
+  - Cache: `~/.sonar/cache` using `actions/cache@v4`
+- `required_secrets`:
+  - `SONAR_TOKEN` (always)
+  - `SONAR_HOST_URL` (Server only)
 4. **Permissions**: Ensure workflow has necessary permissions for PR comments
 
 ## Usage Instructions

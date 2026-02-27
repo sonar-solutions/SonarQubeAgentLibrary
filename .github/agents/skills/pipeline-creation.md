@@ -101,45 +101,24 @@ Before creating pipeline configuration files:
 - Configure sonarqube block with properties
 - No need for separate sonar-project.properties
 
-### Scanner Selection Rules
+### Input Contract
 
-**By Build System/Project Type:**
+**pipeline-creation assembles files from decisions already made by platform and scanner skills. Before creating any files, verify the following have been determined:**
 
-1. **Maven Projects**
-   - Use Maven SonarQube plugin
-   - Run `mvn sonar:sonar` command
-   - Configuration in `pom.xml` or command line parameters
-   - No separate `sonar-project.properties` needed
-   - See: scanner-maven skill
+**From platform-* skill:**
+- `scanner_approach`: Which execution method the platform uses (e.g. `sonarqube-scan-action`, `maven`, `gradle`, `dotnet`, `docker-image`, `pipe`)
+- `tool_version`: Latest version of the platform action/task/image/pipe (if applicable)
+- `workflow_structure`: Triggers, job/stage structure, checkout config, cache config
+- `required_secrets`: List of secrets/variables the user must configure
 
-2. **Gradle Projects**
-   - Use Gradle SonarQube plugin
-   - Run `./gradlew sonar` command
-   - Configuration in `build.gradle` or `build.gradle.kts`
-   - No separate `sonar-project.properties` needed
-   - See: scanner-gradle skill
+**From scanner-* skill:**
+- `build_commands`: Exact commands to run (including test/coverage steps)
+- `scanner_parameters`: Key `sonar.*` properties or command-line parameters
+- `required_files`: Any files to create or modify (e.g. `sonar-project.properties`, `pom.xml` changes)
+- `working_directory`: Directory from which scanner commands must run
+- `runtime_requirements`: JDK version, .NET SDK version, etc. (if applicable)
 
-3. **.NET Projects**
-   - Use SonarScanner for .NET
-   - Run begin/build/end pattern
-   - Configuration via command line parameters
-   - See: scanner-dotnet skill
-
-4. **CLI Scanner Projects** (JavaScript/TypeScript/Python/PHP/Go/Ruby/Other)
-   - Use SonarScanner CLI
-   - Requires `sonar-project.properties` file
-   - Platform-specific execution:
-     - GitHub Actions: Use `sonarsource/sonarqube-scan-action`
-     - GitLab CI: Use `sonarsource/sonar-scanner-cli` Docker image
-     - Azure DevOps: Use SonarQube extension tasks
-     - Bitbucket: Use SonarCloud/SonarQube pipes
-   - See: scanner-cli skill
-
-**Platform Implementation Details:**
-- Each platform has specific ways to execute scanners
-- Maven/Gradle/.NET: Run build tool commands directly in pipeline
-- CLI Scanner: Use platform-specific actions/images/tasks/pipes
-- See platform-specific skills for implementation
+**If any of these are missing: invoke the appropriate platform or scanner skill first before proceeding.**
 
 ### Configuration Best Practices
 

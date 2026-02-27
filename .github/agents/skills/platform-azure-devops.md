@@ -11,7 +11,7 @@ This skill provides Azure DevOps-specific documentation and guidance for SonarQu
 - This skill is ONLY for Azure Pipelines structure and platform-specific configuration
 - Provides pipeline examples, task syntax, triggers, service connections, and Azure DevOps-specific features
 - For scanner parameters, properties, and configuration: Refer to scanner-* skills (scanner-maven, scanner-gradle, scanner-dotnet, scanner-cli)
-- Fetch pipeline examples from documentation, adapt scanner configuration from scanner skills
+- Access pipeline examples from documentation, adapt scanner configuration from scanner skills
 
 ## Official Documentation
 
@@ -20,12 +20,6 @@ This skill provides Azure DevOps-specific documentation and guidance for SonarQu
 
 ### SonarQube Server
 - **Main Documentation**: https://docs.sonarsource.com/sonarqube-server/devops-platform-integration/azure-devops-integration/adding-analysis-to-pipeline
-
-## Prerequisites
-
-**Required Extension:**
-- Install **SonarQube** extension from Azure DevOps Marketplace
-- Extension provides tasks: `SonarQubePrepare`, `SonarQubeAnalyze`, `SonarQubePublish`
 
 ## Documentation Fetching Strategy
 
@@ -45,9 +39,20 @@ Use your environment's browser-capable fetch tool to access these URLs:
 
 ## Azure DevOps Implementation
 
-### Scanner Implementation
+## Prerequisites
 
-**Scanner selection is defined in pipeline-creation skill. This section covers Azure DevOps-specific implementation.**
+**Required Extension:**
+- Install **SonarQube** extension from Azure DevOps Marketplace
+- Extension provides tasks: `SonarQubePrepare`, `SonarQubeAnalyze`, `SonarQubePublish`, `SonarCloudPrepare`, `SonarCloudAnalyze`, `SonarCloudPublish`
+
+### Scanner Approach Determination
+
+Based on the project type identified in prerequisites-gathering, determine the scanner mode **before** invoking pipeline-creation. Azure DevOps uses SonarQube extension tasks for ALL project types — the mode passed to `SonarQubePrepare` determines how the scanner runs:
+
+- **Maven project** → `scanner_approach: maven` — `SonarQubePrepare` in Maven mode + Maven task + `SonarQubePublish`
+- **Gradle project** → `scanner_approach: gradle` — `SonarQubePrepare` in Gradle mode + Gradle task + `SonarQubePublish`
+- **.NET project** → `scanner_approach: dotnet` — `SonarQubePrepare` in MSBuild mode + build task + `SonarQubeAnalyze` + `SonarQubePublish`
+- **All others (JavaScript/TypeScript/Python/PHP/Go/Ruby...)** → `scanner_approach: cli` — `SonarQubePrepare` in CLI mode + `SonarQubeAnalyze` + `SonarQubePublish`
 
 **IMPORTANT: Azure DevOps uses SonarQube extension tasks for ALL project types.**
 The extension tasks adapt based on the scanner mode selected:
@@ -121,6 +126,21 @@ Configure Azure DevOps integration in SonarQube for automatic PR decoration.
 **Check latest versions before use:**
 - Use a browser-capable fetch tool to verify current task versions in official documentation
 - Typical format: `SonarQubePrepare@5`, `SonarQubeAnalyze@5`, `SonarQubePublish@5`
+
+## Output Contract
+
+After processing this skill, provide the following to pipeline-creation:
+
+- `scanner_approach`: one of `maven`, `gradle`, `dotnet`, `cli`
+- `tool_version`: latest version numbers for `SonarQubePrepare`, `SonarQubeAnalyze`, `SonarQubePublish` tasks — fetch from Main Documentation
+- `workflow_structure`:
+  - Trigger branches and PR config
+  - Checkout: `fetchDepth: 0`
+  - Service connection name
+- `required_secrets`:
+  - Service connection configured in Project Settings (always)
+  - `SONAR_TOKEN` as pipeline variable (alternative if no service connection)
+  - `SONAR_HOST_URL` (Server only)
 
 ## Usage Instructions
 

@@ -142,6 +142,20 @@ The Maven SonarQube scanner is a Maven plugin that integrates SonarQube analysis
 9. **Multi-module setup**: Run from parent POM for consistent analysis across modules
 10. **Check versions**: Follow Documentation Retrieval Strategy section to verify latest plugin versions from official SonarQube documentation only
 
+## Output Contract
+
+After processing this skill, provide the following to pipeline-creation:
+
+- `build_commands`: `mvn clean verify sonar:sonar` (or `./mvnw clean verify sonar:sonar` if Maven wrapper present)
+- `scanner_parameters`:
+  - `sonar.projectKey` (required)
+  - `sonar.organization` (Cloud only)
+  - `sonar.coverage.jacoco.xmlReportPaths` (if JaCoCo configured)
+- `required_files`: any changes needed in `pom.xml` (plugin declaration, properties block)
+- `working_directory`: directory containing `pom.xml` (if not project root)
+- `runtime_requirements`: JDK version required by the project
+- `tool_version`: latest `sonar-maven-plugin` version — fetch from Scanner Version Information URL
+
 ## Platform Integration
 
 See platform-specific skills for CI/CD integration:
