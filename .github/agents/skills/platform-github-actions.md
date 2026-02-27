@@ -103,12 +103,25 @@ The action automatically fails the workflow if quality gate fails.
 3. **Branch protection**: Don't require SonarQube check on protected branches until setup is complete
 4. **Permissions**: Ensure workflow has necessary permissions for PR comments
 
+## Processing Steps
+
+**Execute these steps in order before handing off to pipeline-creation:**
+
+1. Determine `scanner_approach` from the project type (see Scanner Approach Determination above)
+2. ⛔ STOP — Fetch the **Main Documentation** URL now:
+   - If `scanner_approach` is `sonarqube-scan-action`: extract the action version from the **Setting up your workflow file** example — this is the `tool_version` to report and use in the pipeline
+   - If `scanner_approach` is `maven`, `gradle`, or `dotnet`: extract the corresponding workflow example from the **Configuring the build.yml file** section — use this as the reference template when creating the pipeline. No action version applies.
+   Do NOT proceed until the documentation has been fetched.
+3. Collect workflow structure details (triggers, checkout, cache) per Platform-Specific Configuration section above
+4. List required secrets based on SonarQube type (Cloud vs Server)
+5. Pass all collected values to pipeline-creation via the Output Contract below
+
 ## Output Contract
 
 After processing this skill, provide the following to pipeline-creation:
 
 - `scanner_approach`: one of `sonarqube-scan-action`, `maven`, `gradle`, `dotnet`
-- `tool_version`: latest version of `sonarsource/sonarqube-scan-action` (only when `scanner_approach` is `sonarqube-scan-action`) — fetch from Main Documentation
+- `tool_version`: latest version of `sonarsource/sonarqube-scan-action` (only when `scanner_approach` is `sonarqube-scan-action`) — **must be fetched in Processing Steps above before reporting**
 - `workflow_structure`:
   - Trigger branches: `main`, `master`, `develop/*`, `feature/*`
   - Pull request trigger: yes
@@ -117,6 +130,9 @@ After processing this skill, provide the following to pipeline-creation:
 - `required_secrets`:
   - `SONAR_TOKEN` (always)
   - `SONAR_HOST_URL` (Server only)
+- `reference_docs`: documentation URLs fetched during processing — for use by pipeline-creation if additional detail is needed:
+  - SonarQube Cloud: https://docs.sonarsource.com/sonarqube-cloud/advanced-setup/ci-based-analysis/github-actions-for-sonarcloud
+  - SonarQube Server: https://docs.sonarsource.com/sonarqube-server/devops-platform-integration/github-integration/adding-analysis-to-github-actions-workflow
 
 ## Usage Instructions
 

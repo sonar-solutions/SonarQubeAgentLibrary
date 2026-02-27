@@ -30,20 +30,14 @@ This skill defines how to create and edit SonarQube configuration files.
 
 **If ANY prerequisite is missing: STOP and gather it first.**
 
-### Retrieve Latest Versions
+### Version Information
 
-**How to retrieve version information:**
-- Use HTTP GET requests (curl, wget, or similar) to access official SonarQube documentation and scanner version URLs
-- For scanner versions, use the Scanner Version Information URLs provided in the scanner skills
-- For platform-specific actions/tasks, check the official SonarQube documentation
+**Use versions from the platform skill Output Contract. Only fetch if not already provided.**
 
-Before creating pipeline configuration files:
-1. Retrieve latest version information from official SonarQube documentation (docs.sonarsource.com) or Scanner Version Information URLs
-2. Check for latest action/task versions:
-   - GitHub Actions: Check version in examples (e.g., `@v7`)
-   - Azure DevOps: Check task versions
-   - GitLab/Bitbucket: Check image versions
-3. DO NOT guess or use outdated versions
+- If the platform skill Output Contract includes `tool_version`: use that value directly — it was already fetched during platform skill processing
+- If `tool_version` is missing or unknown: fetch it now using the `reference_docs` URLs provided in the Output Contract (use a browser-capable fetch tool for docs.sonarsource.com pages)
+- For scanner-specific versions (Maven plugin, Gradle plugin, .NET scanner): use the `tool_version` from the scanner skill Output Contract, or fetch from the Scanner Version Information URL in the relevant scanner skill if missing
+- DO NOT guess or use hardcoded versions — always use a confirmed value from either the Output Contract or a live fetch
 
 ### Files You Can Create/Edit
 

@@ -111,12 +111,25 @@ Add a separate job to check quality gate status if needed.
 4. **Full git history**: Always set `GIT_DEPTH: "0"`
 5. **Merge request analysis**: Include `merge_requests` in `only` clause
 
+## Processing Steps
+
+**Execute these steps in order before handing off to pipeline-creation:**
+
+1. Determine `scanner_approach` from the project type (see Scanner Approach Determination above)
+2. ⛔ STOP — Fetch the **Main Documentation** URL now:
+   - If `scanner_approach` is `docker-image`: extract the latest `sonarsource/sonar-scanner-cli` image tag from the examples — this is the `tool_version` to report and use in the pipeline
+   - If `scanner_approach` is `maven`, `gradle`, or `dotnet`: extract the corresponding job example from the documentation — use this as the reference template when creating the pipeline. No image version applies.
+   Do NOT proceed until the documentation has been fetched.
+3. Collect pipeline structure details (git depth, triggers, cache) per Platform-Specific Configuration section above
+4. List required variables based on SonarQube type (Cloud vs Server)
+5. Pass all collected values to pipeline-creation via the Output Contract below
+
 ## Output Contract
 
 After processing this skill, provide the following to pipeline-creation:
 
 - `scanner_approach`: one of `docker-image`, `maven`, `gradle`, `dotnet`
-- `tool_version`: latest tag of `sonarsource/sonar-scanner-cli` image (only when `scanner_approach` is `docker-image`) — fetch from Main Documentation
+- `tool_version`: latest tag of `sonarsource/sonar-scanner-cli` image (only when `scanner_approach` is `docker-image`) — **must be fetched in Processing Steps above before reporting**
 - `workflow_structure`:
   - Git depth: `GIT_DEPTH: "0"`
   - Trigger: branches + merge requests
@@ -124,6 +137,9 @@ After processing this skill, provide the following to pipeline-creation:
 - `required_secrets`:
   - `SONAR_TOKEN` (always, mark as Masked and Protected)
   - `SONAR_HOST_URL` (Server only, mark as Protected)
+- `reference_docs`: documentation URLs fetched during processing — for use by pipeline-creation if additional detail is needed:
+  - SonarQube Cloud: https://docs.sonarsource.com/sonarqube-cloud/advanced-setup/ci-based-analysis/gitlab-ci
+  - SonarQube Server: https://docs.sonarsource.com/sonarqube-server/devops-platform-integration/gitlab-integration/adding-analysis-to-gitlab-ci-cd
 
 ## Usage Instructions
 

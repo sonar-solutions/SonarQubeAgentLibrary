@@ -121,18 +121,22 @@ Configure Azure DevOps integration in SonarQube for automatic PR decoration.
 4. **Version tasks**: Use specific task versions (e.g., `@5`)
 5. **Separate jobs**: Run analysis in dedicated job for clarity
 
-## Task Versions
+## Processing Steps
 
-**Check latest versions before use:**
-- Use a browser-capable fetch tool to verify current task versions in official documentation
-- Typical format: `SonarQubePrepare@5`, `SonarQubeAnalyze@5`, `SonarQubePublish@5`
+**Execute these steps in order before handing off to pipeline-creation:**
+
+1. Determine `scanner_approach` from the project type (see Scanner Approach Determination above)
+2. ⛔ STOP — Fetch the **Main Documentation** URL and extract the latest version numbers for `SonarQubePrepare`, `SonarQubeAnalyze`, and `SonarQubePublish` tasks (applies to ALL scanner approaches — Azure DevOps always uses extension tasks). Do NOT proceed until these versions are known.
+3. Collect pipeline structure details (triggers, checkout, service connection) per Platform-Specific Configuration section above
+4. List required secrets/variables based on SonarQube type (Cloud vs Server)
+5. Pass all collected values to pipeline-creation via the Output Contract below
 
 ## Output Contract
 
 After processing this skill, provide the following to pipeline-creation:
 
 - `scanner_approach`: one of `maven`, `gradle`, `dotnet`, `cli`
-- `tool_version`: latest version numbers for `SonarQubePrepare`, `SonarQubeAnalyze`, `SonarQubePublish` tasks — fetch from Main Documentation
+- `tool_version`: version numbers for `SonarQubePrepare`, `SonarQubeAnalyze`, `SonarQubePublish` tasks — **must be fetched in Processing Steps above before reporting**
 - `workflow_structure`:
   - Trigger branches and PR config
   - Checkout: `fetchDepth: 0`
@@ -141,6 +145,9 @@ After processing this skill, provide the following to pipeline-creation:
   - Service connection configured in Project Settings (always)
   - `SONAR_TOKEN` as pipeline variable (alternative if no service connection)
   - `SONAR_HOST_URL` (Server only)
+- `reference_docs`: documentation URLs fetched during processing — for use by pipeline-creation if additional detail is needed:
+  - SonarQube Cloud: https://docs.sonarsource.com/sonarqube-cloud/advanced-setup/ci-based-analysis/azure-pipelines/adding-analysis-to-build-pipeline
+  - SonarQube Server: https://docs.sonarsource.com/sonarqube-server/devops-platform-integration/azure-devops-integration/adding-analysis-to-pipeline
 
 ## Usage Instructions
 

@@ -118,12 +118,25 @@ Configure Bitbucket integration in SonarQube for automatic PR decoration.
 5. **Cache appropriately**: Cache `.sonar/cache` and build dependencies
 6. **Quality gate step**: Add separate step for quality gate check
 
+## Processing Steps
+
+**Execute these steps in order before handing off to pipeline-creation:**
+
+1. Determine `scanner_approach` from the project type (see Scanner Approach Determination above)
+2. ⛔ STOP — Fetch the **Main Documentation** URL now:
+   - If `scanner_approach` is `pipe`: also fetch the appropriate **Scan Pipe Repository** URL and extract the latest pipe version — this is the `tool_version` to report and use in the pipeline
+   - If `scanner_approach` is `maven`, `gradle`, or `dotnet`: extract the corresponding step example from the documentation — use this as the reference template when creating the pipeline. No pipe version applies.
+   Do NOT proceed until the documentation has been fetched.
+3. Collect pipeline structure details (clone depth, branch config, cache) per Platform-Specific Configuration section above
+4. List required repository variables based on SonarQube type (Cloud vs Server)
+5. Pass all collected values to pipeline-creation via the Output Contract below
+
 ## Output Contract
 
 After processing this skill, provide the following to pipeline-creation:
 
 - `scanner_approach`: one of `pipe`, `maven`, `gradle`, `dotnet`
-- `tool_version`: latest version of the scan pipe (only when `scanner_approach` is `pipe`):
+- `tool_version`: latest version of the scan pipe (only when `scanner_approach` is `pipe`) — **must be fetched in Processing Steps above before reporting**:
   - SonarQube Cloud: `sonarsource/sonarcloud-scan` version — fetch from Scan Pipe Repository
   - SonarQube Server: `sonarsource/sonarqube-scan` version — fetch from Scan Pipe Repository
 - `workflow_structure`:
@@ -133,6 +146,9 @@ After processing this skill, provide the following to pipeline-creation:
 - `required_secrets`:
   - `SONAR_TOKEN` (always, mark as Secured)
   - `SONAR_HOST_URL` (Server only, mark as Secured)
+- `reference_docs`: documentation URLs fetched during processing — for use by pipeline-creation if additional detail is needed:
+  - SonarQube Cloud: https://docs.sonarsource.com/sonarqube-cloud/advanced-setup/ci-based-analysis/bitbucket-pipelines-for-sonarcloud
+  - SonarQube Server: https://docs.sonarsource.com/sonarqube-server/devops-platform-integration/bitbucket-integration/bitbucket-cloud-integration/bitbucket-pipelines
 
 ## Usage Instructions
 
