@@ -67,9 +67,9 @@ Execute these steps in order. Do not skip any step.
 
 Wait for the scanner skill's Output Contract before completing this skill's Output Contract.
 
-**Step 5:** Populate the Output Contract below with all resolved values.
+**Step 5:** Populate the Output Contract below with all resolved values. Use the **Reference: Platform-Specific Configuration Defaults** section below for git depth, caching, pipeline triggers, and variables.
 
-## Platform-Specific Configuration
+## Reference: Platform-Specific Configuration Defaults
 
 ### Git Depth
 ```yaml
