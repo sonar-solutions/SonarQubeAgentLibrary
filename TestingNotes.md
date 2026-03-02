@@ -66,3 +66,11 @@ Need to check the checkpoints, since we might need to redefine them in the tests
 
 
 Tested with python project, but for some reason it used v5 of the version of the action instead of the v7.
+
+
+
+
+March/2
+Python project test:
+    GH Actions/SQ-C - Worked very nice
+    

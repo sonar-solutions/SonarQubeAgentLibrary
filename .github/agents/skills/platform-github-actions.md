@@ -26,10 +26,8 @@ This skill does **not** explain concepts or include documentation links in respo
 
 | URL pattern | Required tool |
 |---|---|
-| `docs.sonarsource.com` | Use your environment's **browser-capable fetch tool** (e.g., web/fetch, WebFetch, url_context, or equivalent). **NOT curl.** |
+| `docs.sonarsource.com` | Append `.md` to the URL and fetch with **curl** (e.g., `curl "https://docs.sonarsource.com/...page.md"`) — returns the full page content as Markdown |
 | `downloads.sonarsource.com` JSON files | curl or wget is acceptable |
-
-**Never use curl to access docs.sonarsource.com or github.com.** Those pages require JavaScript rendering; only a browser-capable fetch tool can retrieve them correctly.
 
 ## Scanner Approach Determination
 
@@ -50,9 +48,9 @@ Execute these steps in order. Do not skip any step.
 
 **Step 1:** Determine scanner approach from the table above using the project-detection Output.
 
-**Step 2:** ⛔ STOP — Fetch the appropriate documentation page NOW using your environment's browser-capable fetch tool.
-- For Cloud: fetch the Cloud documentation URL above
-- For Server: fetch the Server documentation URL above
+**Step 2:** ⛔ STOP — Fetch the appropriate documentation page NOW using curl with `.md` appended to the URL.
+- For Cloud: fetch the Cloud documentation URL above with `.md` appended
+- For Server: fetch the Server documentation URL above with `.md` appended
 - If the primary URL lacks complete examples, fetch the other URL as fallback and adapt
 - **Do not proceed until you have fetched the documentation page.**
 

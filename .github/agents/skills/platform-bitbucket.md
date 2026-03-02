@@ -34,11 +34,11 @@ This skill does **not** explain concepts or include documentation links in respo
 
 | URL pattern | Required tool |
 |---|---|
-| `docs.sonarsource.com` | Use your environment's **browser-capable fetch tool** (e.g., web/fetch, WebFetch, url_context, or equivalent). **NOT curl.** |
+| `docs.sonarsource.com` | Append `.md` to the URL and fetch with **curl** (e.g., `curl "https://docs.sonarsource.com/...page.md"`) — returns the full page content as Markdown |
 | `bitbucket.org` pages | Use your environment's **browser-capable fetch tool**. **NOT curl.** |
 | `downloads.sonarsource.com` JSON files | curl or wget is acceptable |
 
-**Never use curl to access docs.sonarsource.com or bitbucket.org.** Those pages require JavaScript rendering; only a browser-capable fetch tool can retrieve them correctly.
+**Never use curl to access bitbucket.org.** Those pages require JavaScript rendering; only a browser-capable fetch tool can retrieve them correctly.
 
 ## Scanner Approach Determination
 
@@ -63,9 +63,9 @@ Execute these steps in order. Do not skip any step.
 
 **Step 1:** Determine scanner approach from the table above using the project-detection output.
 
-**Step 2:** ⛔ STOP — Fetch the appropriate documentation page and pipe repository page NOW using your environment's browser-capable fetch tool.
-- Fetch the documentation URL for the detected SonarQube type (Cloud or Server)
-- If scanner approach is `cli`: also fetch the appropriate pipe repository page to get the latest version tag
+**Step 2:** ⛔ STOP — Fetch the appropriate documentation page and pipe repository page NOW.
+- Fetch the documentation URL for the detected SonarQube type (Cloud or Server) using curl with `.md` appended to the URL
+- If scanner approach is `cli`: also fetch the appropriate pipe repository page (bitbucket.org) using your environment's browser-capable fetch tool
 - **Do not proceed until you have fetched at least the documentation page.**
 
 **Step 3:** From the fetched pages, extract:
