@@ -1,157 +1,192 @@
 ---
 name: pipeline-creation
-description: Guidelines for creating and editing SonarQube configuration files. Use this to generate pipeline files, sonar-project.properties, and build configurations.
+description: Assembles configuration files from platform and scanner Output Contracts. Assembly only — makes zero decisions. Use this after both platform and scanner Output Contracts are complete.
 ---
 
 # Pipeline Creation Skill
 
-This skill defines how to create and edit SonarQube configuration files.
+## Assembly Contract (CRITICAL)
 
-## File Creation Guidelines
+**pipeline-creation makes zero decisions.** It assembles files using values from Output Contracts.
 
-### Before Creating ANY Files
+Before running this skill, verify:
+- Platform skill Output Contract is **complete** (no placeholders, no TODOs)
+- Scanner skill Output Contract is **complete** (no placeholders, no TODOs)
 
-**PREREQUISITES CHECK:**
-- ✅ All prerequisites from prerequisites-gathering skill are confirmed
-- ✅ SonarQube type (Cloud/Server) is known
-- ✅ CI/CD platform is identified
-- ✅ Project type/build system is identified
-- ✅ Project key is provided
+**If `scanner_approach`, `tool_version`, or `build_commands` are missing from the Output Contracts: STOP and invoke the appropriate platform or scanner skill first.**
 
-**If ANY prerequisite is missing: STOP and gather it first.**
+Do not re-derive any values. Do not re-fetch any URLs. Every value in created files comes verbatim from an Output Contract or the prerequisites.
 
-### Retrieve Latest Versions
+## Input Requirements
 
-**CRITICAL - web/fetch is a TOOL:**
-- `web/fetch` is a TOOL you invoke directly (like `read`, `edit`, `search`)
-- **DO NOT** use bash commands like `curl` or `wget`
-- **DO NOT** use `execute` tool to run curl/wget commands
-- Invoke `web/fetch` tool directly with the documentation URL
+This skill requires both contracts to be present and fully populated:
 
-Before creating pipeline configuration files:
-1. Invoke the `web/fetch` **TOOL** (not curl) to access official SonarQube documentation from the docs.sonarsource.com domain (any page under this domain)
-2. Check for latest action/task versions:
-   - GitHub Actions: Check version in examples (e.g., `@v7`)
-   - Azure DevOps: Check task versions
-   - GitLab/Bitbucket: Check image versions
-3. DO NOT guess or use outdated versions
+**From platform skill Output Contract:**
+- `platform`
+- `scanner_approach`
+- `tool_version` (or `task_version` for Azure DevOps)
+- `workflow_file` / `pipeline_file`
+- `build_commands`
+- `sonar_project_key`
+- `sonar_organization`
+- `sonar_host_url`
+- `required_secrets` / `required_variables`
 
-### Files You Can Create/Edit
+**From scanner skill Output Contract:**
+- `scanner`
+- `build_commands`
+- `working_directory`
+- `required_files`
+- Coverage configuration (if applicable)
+- For CLI scanner: `sonar_project_properties_content`
 
-#### Base Configuration Files
+## File Creation Map
 
-**sonar-project.properties**
-- Required for: CLI scanner projects (JavaScript/TypeScript/Python)
-- Not required for: Maven/Gradle projects (they use their own config)
-- Include:
-  - `sonar.projectKey`
-  - `sonar.organization` (Cloud only)
-  - `sonar.sources`
-  - `sonar.tests` (if applicable)
-  - `sonar.exclusions` (node_modules, build directories)
-  - Coverage report paths (if applicable)
+| Platform | Files to create or modify |
+|---|---|
+| GitHub Actions | `.github/workflows/sonarqube.yml` (create); `pom.xml` / `build.gradle` / `build.gradle.kts` (modify if scanner is maven/gradle); `sonar-project.properties` (create if scanner is cli) |
+| GitLab CI | `.gitlab-ci.yml` (create or add stage); build files as above |
+| Azure DevOps | `azure-pipelines.yml` (create or modify); build files as above |
+| Bitbucket | `bitbucket-pipelines.yml` (create or modify); build files as above |
 
-#### CI/CD Pipeline Files
+## Security Rules
 
-**GitHub Actions: `.github/workflows/sonarqube.yml`**
-- Set trigger branches to `main`, `master`, `develop/*`, `feature/*` for comprehensive coverage
-- Checkout with `fetch-depth: 0` for full git history
-- Configure appropriate scanner based on project type
-- Use secrets for `SONAR_TOKEN` and `SONAR_HOST_URL`
-- Add caching for SonarQube packages
-- Include test coverage steps if applicable
+Before creating any file, apply these rules (from security-practices skill):
+- Never write a literal token value — always use the platform secret syntax
+- Confirm the correct secret syntax for the platform (from the platform's Output Contract)
 
-**GitLab CI: `.gitlab-ci.yml` (add SonarQube stage)**
-- Create or update with SonarQube job
-- Set `GIT_DEPTH: "0"` for full git history
-- Configure caching
-- Use CI/CD variables for secrets
-- Include test coverage in script
+| Platform | Token syntax | URL syntax |
+|---|---|---|
+| GitHub Actions | `${{ secrets.SONAR_TOKEN }}` | `${{ secrets.SONAR_HOST_URL }}` |
+| GitLab CI | `$SONAR_TOKEN` | `$SONAR_HOST_URL` |
+| Azure DevOps | `$(SONAR_TOKEN)` | `$(SONAR_HOST_URL)` |
+| Bitbucket | `$SONAR_TOKEN` | `$SONAR_HOST_URL` |
 
-**Azure DevOps: `azure-pipelines.yml`**
-- Add SonarQube tasks (prepare, run, publish)
-- Configure service connection
-- Use pipeline variables for secrets
-- Include coverage tasks if applicable
+## Editing Workflow
 
-**Bitbucket: `bitbucket-pipelines.yml`**
-- Add SonarQube scan pipe
-- Configure repository variables
-- Set clone depth
-- Include quality gate step if needed
+1. State the files that will be created or modified (no explanations, just the list)
+2. Create or edit each file using the `edit` tool, using verbatim values from Output Contracts
+3. Validate YAML syntax and properties file syntax
+4. Do **not** explain configuration options — this skill assembles files, not explanations
 
-#### Build Configuration Files
+## File Structural Notes
 
-**Maven: `pom.xml`**
-- Add SonarQube Maven plugin to `<build><plugins>`
-- No need for separate sonar-project.properties
-- Properties can be set in pom.xml or passed via command line
+### GitHub Actions (`.github/workflows/sonarqube.yml`)
 
-**Gradle: `build.gradle` or `build.gradle.kts`**
-- Add SonarQube Gradle plugin
-- Configure sonarqube block with properties
-- No need for separate sonar-project.properties
+```yaml
+name: SonarQube Analysis
 
-### Scanner Selection Rules
+on:
+  push:
+    branches: [main, master, "develop/**", "feature/**"]
+  pull_request:
+    branches: [main, master]
 
-**By Build System/Project Type:**
+jobs:
+  sonarqube:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@[checkout_action_version from contract]
+        with:
+          fetch-depth: 0
 
-1. **Maven Projects**
-   - Use Maven SonarQube plugin
-   - Run `mvn sonar:sonar` command
-   - Configuration in `pom.xml` or command line parameters
-   - No separate `sonar-project.properties` needed
-   - See: scanner-maven skill
+      # --- cache step (from contract) ---
+      # --- build/scan steps (from scanner build_commands) ---
+```
 
-2. **Gradle Projects**
-   - Use Gradle SonarQube plugin
-   - Run `./gradlew sonar` command
-   - Configuration in `build.gradle` or `build.gradle.kts`
-   - No separate `sonar-project.properties` needed
-   - See: scanner-gradle skill
+For `cli` scanner approach, the scan step uses the action version from the platform Output Contract:
+```yaml
+      - uses: sonarsource/sonarqube-scan-action@[tool_version from contract]
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+```
 
-3. **.NET Projects**
-   - Use SonarScanner for .NET
-   - Run begin/build/end pattern
-   - Configuration via command line parameters
-   - See: scanner-dotnet skill
+---
 
-4. **CLI Scanner Projects** (JavaScript/TypeScript/Python/PHP/Go/Ruby/Other)
-   - Use SonarScanner CLI
-   - Requires `sonar-project.properties` file
-   - Platform-specific execution:
-     - GitHub Actions: Use `sonarsource/sonarqube-scan-action`
-     - GitLab CI: Use `sonarsource/sonar-scanner-cli` Docker image
-     - Azure DevOps: Use SonarQube extension tasks
-     - Bitbucket: Use SonarCloud/SonarQube pipes
-   - See: scanner-cli skill
+### GitLab CI (`.gitlab-ci.yml`)
 
-**Platform Implementation Details:**
-- Each platform has specific ways to execute scanners
-- Maven/Gradle/.NET: Run build tool commands directly in pipeline
-- CLI Scanner: Use platform-specific actions/images/tasks/pipes
-- See platform-specific skills for implementation
+```yaml
+sonarqube-check:
+  image: [docker_image from contract]
+  variables:
+    SONAR_TOKEN: $SONAR_TOKEN
+    SONAR_HOST_URL: $SONAR_HOST_URL
+    GIT_DEPTH: "0"
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script:
+    - [build_commands from scanner contract]
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+```
 
-### Configuration Best Practices
+---
 
-**Always:**
-- Add comments explaining configuration options
-- Use environment variables/secrets for sensitive values (see: security-practices skill)
-- Never hardcode tokens or URLs
-- Preserve existing file structure when editing
-- Include standard branch patterns in triggers: `main`, `master`, `develop/*`, `feature/*`
-- Fetch full git history for accurate blame information
-- Validate YAML/properties syntax after creation
+### Azure DevOps (`azure-pipelines.yml`)
 
-**Coverage Configuration:**
-- JavaScript/TypeScript: Include `sonar.javascript.lcov.reportPaths`
-- Python: Include `sonar.python.coverage.reportPaths`
-- Java: Coverage handled by Maven/Gradle plugins automatically
+```yaml
+trigger:
+  branches:
+    include: [main, master, develop/*, feature/*]
+pr:
+  branches:
+    include: [main, master]
 
-### Editing Workflow
+pool:
+  vmImage: ubuntu-latest
 
-1. Show user what will be created/changed
-2. Explain key configuration options
-3. Create or edit the file using `edit` tools
-4. Validate syntax
-5. Inform user about next steps (secrets configuration)
+steps:
+  - checkout: self
+    fetchDepth: 0
+
+  - task: SonarQubePrepare@[task_version from contract]
+    inputs:
+      SonarQube: '[service_connection_name from contract]'
+      scannerMode: '[mode from contract]'
+      projectKey: '[sonar_project_key from contract]'
+
+  # --- build step ---
+
+  - task: SonarQubeAnalyze@[task_version from contract]   # .NET and CLI only
+
+  - task: SonarQubePublish@[task_version from contract]
+    inputs:
+      pollingTimeoutSec: '300'
+```
+
+---
+
+### Bitbucket (`bitbucket-pipelines.yml`)
+
+```yaml
+clone:
+  depth: full
+
+definitions:
+  caches:
+    sonar: ~/.sonar/cache
+
+pipelines:
+  default:
+    - step:
+        name: SonarQube Analysis
+        caches:
+          - sonar
+        script:
+          # For CLI scanner:
+          - pipe: [pipe_name from contract]:[tool_version from contract]
+            variables:
+              SONAR_TOKEN: $SONAR_TOKEN
+          # For build-tool scanners: use build_commands from scanner contract
+```
+
+---
+
+### sonar-project.properties
+
+Use the exact `sonar_project_properties_content` from the scanner (CLI) Output Contract. Do not alter any property values.

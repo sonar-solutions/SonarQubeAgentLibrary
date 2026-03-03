@@ -1,56 +1,75 @@
 ---
 name: project-detection
-description: Identifies project type, build system, and CI/CD platform. Use this to analyze project structure and detect technology stack.
+description: Autonomously detects project type, build system, and CI/CD platform from project files. Use this first in every workflow to analyze the project structure before asking the user anything.
 ---
 
 # Project Detection Skill
 
-This skill helps identify the project type, build system, and CI/CD platform.
+## Purpose
+
+Autonomously detect the project's build system, language, CI/CD platform, and existing SonarQube configuration from file analysis alone. This skill asks no questions — it only reads and reports findings.
+
+## Execution Guidelines
+
+Use your environment's file search and read tools (e.g., file search, glob, read) to inspect the repository. Do not ask the user what build system they use — detect it from files.
+
+Look for:
+- Build descriptor files (pom.xml, build.gradle, etc.)
+- CI/CD pipeline files (.github/workflows/, .gitlab-ci.yml, etc.)
+- Existing SonarQube configuration files (sonar-project.properties, sonar.* properties)
+- Test and coverage configuration files
 
 ## Technology Stack Analysis
 
-Use `search` and `read` tools to identify:
+Inspect these files to determine the build system:
 
-### Java Projects
-- **Maven**: Look for `pom.xml`
-- **Gradle**: Look for `build.gradle` or `build.gradle.kts`
-- **Ant**: Look for `build.xml`
+| Build System | Files to Detect |
+|---|---|
+| Maven | `pom.xml` |
+| Gradle | `build.gradle`, `build.gradle.kts` |
+| .NET | `*.csproj`, `*.sln`, `*.vbproj`, `*.fsproj` |
+| JavaScript / TypeScript | `package.json`, `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml` |
+| Python | `requirements.txt`, `setup.py`, `pyproject.toml`, `Pipfile` |
+| Go | `go.mod` |
+| Ruby | `Gemfile` |
+| PHP | `composer.json` |
 
-### JavaScript/TypeScript Projects
-- **npm**: Look for `package.json` and `package-lock.json`
-- **Yarn**: Look for `package.json` and `yarn.lock`
-- **pnpm**: Look for `pnpm-lock.yaml`
-
-### Python Projects
-- Look for `requirements.txt`, `setup.py`, `pyproject.toml`, `Pipfile`
-
-### .NET Projects
-- Look for `.csproj`, `.sln`, `*.vbproj`
-
-### Other Languages
-- **Go**: `go.mod`
-- **Ruby**: `Gemfile`
-- **PHP**: `composer.json`
+**Priority rule:** If `pom.xml` is present, the scanner is Maven. If `build.gradle` or `build.gradle.kts` is present (and no `pom.xml`), the scanner is Gradle. If `.csproj` or `.sln` is present, the scanner is .NET. All others use the CLI scanner.
 
 ## CI/CD Platform Detection
 
-Check for the following files:
-- **GitHub Actions**: `.github/workflows/*.yml`
-- **GitLab CI**: `.gitlab-ci.yml`
-- **Azure DevOps**: `azure-pipelines.yml`
-- **Bitbucket**: `bitbucket-pipelines.yml`
-- **Jenkins**: `Jenkinsfile`
+Check for these files to identify the CI/CD platform:
+
+| Platform | Files to Detect |
+|---|---|
+| GitHub Actions | `.github/workflows/*.yml` or `.github/workflows/*.yaml` |
+| GitLab CI | `.gitlab-ci.yml` |
+| Azure DevOps | `azure-pipelines.yml` |
+| Bitbucket Pipelines | `bitbucket-pipelines.yml` |
+
+**Note:** Jenkins is not supported. If a `Jenkinsfile` is detected, report it but do not select Jenkins as the target platform — ask the user to choose a supported platform.
 
 ## Existing SonarQube Configuration Detection
 
-Check for:
-- `sonar-project.properties`
-- `pom.xml` with SonarQube Maven plugin
-- `build.gradle` with SonarQube Gradle plugin
+Check for existing SonarQube configuration:
 
-## Test and Coverage Configuration
+- `sonar-project.properties` — CLI scanner properties file
+- `pom.xml` — look for `sonar-maven-plugin` in `<plugins>` or `sonar.*` in `<properties>`
+- `build.gradle` / `build.gradle.kts` — look for `id("org.sonarqube")` or `id 'org.sonarqube'`
+- Existing CI/CD files — look for `sonarqube-scan-action`, `SonarQubePrepare`, `sonar-scanner-cli`, or `SONAR_TOKEN` references
 
-Look for:
-- Test directories: `test/`, `tests/`, `__tests__/`, `spec/`
-- Coverage configuration in `package.json`, `pytest.ini`, `.coveragerc`
-- Coverage report paths: `coverage/`, `target/site/jacoco/`
+## Detection Output
+
+After running this skill, report findings using these fields:
+
+```
+project_type: [Maven | Gradle | .NET | JavaScript | TypeScript | Python | Go | Ruby | PHP | Other]
+build_system_file: [path to detected build descriptor, e.g., pom.xml, build.gradle]
+scanner_approach: [maven | gradle | dotnet | cli]
+ci_platform: [github-actions | gitlab-ci | azure-devops | bitbucket | none-detected]
+ci_platform_file: [path to detected CI/CD file, or "none"]
+existing_sonar_config: [yes | no]
+existing_sonar_config_file: [path to detected sonar config, or "none"]
+```
+
+Report these findings to the user and ask them to confirm the CI/CD platform before proceeding to prerequisites-gathering.

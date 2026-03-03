@@ -35,9 +35,9 @@ code --install-extension yzhang.markdown-all-in-one
 
 2. **Interact with an agent:**
    ```
-   @SonarArchitectLight Set up SonarQube for my project
+   @SonarArchitect Set up SonarQube for my project
    # or
-   @SonarArchitectGuide Explain SonarQube setup for GitHub Actions
+   @SonarArchitect Explain SonarQube setup for GitHub Actions
    ```
 
 3. **Common prompts:**
@@ -78,7 +78,7 @@ You can customize agents to fit your organization's specific needs without modif
 
 1. **Clone an existing agent:**
    ```bash
-   cp .github/agents/SonarArchitectLight.agent.md \
+   cp .github/agents/SonarArchitect.agent.md \
       .github/agents/MyCompanySonarSetup.agent.md
    ```
 
@@ -340,7 +340,7 @@ Same Skills → Different Personalities
 - **Location**: `.github/agents/`
 - **Pattern**: `AgentName.agent.md` or `AgentName.md`
 - **Examples**:
-  - `SonarArchitectLight.agent.md` → `@SonarArchitectLight`
+  - `SonarArchitect.agent.md` → `@SonarArchitect`
   - `DockerExpert.agent.md` → `@DockerExpert`
   - `TerraformGuide.agent.md` → `@TerraformGuide`
 

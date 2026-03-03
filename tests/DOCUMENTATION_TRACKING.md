@@ -1,6 +1,6 @@
 # Documentation Fetch Tracking Guide
 
-This guide explains how to capture and track which documentation pages the SonarArchitectLight agent fetches during test execution.
+This guide explains how to capture and track which documentation pages the SonarArchitect agent fetches during test execution.
 
 ## Why Track Documentation Fetches?
 

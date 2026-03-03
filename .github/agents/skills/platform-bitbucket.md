@@ -1,122 +1,155 @@
 ---
 name: platform-bitbucket
-description: Bitbucket Pipelines integration for SonarQube Cloud and Server. Use this when setting up SonarQube analysis with Bitbucket Cloud Pipelines.
+description: Bitbucket Pipelines integration for SonarQube Cloud and Server. Determines scanner approach, fetches current pipe versions, and produces an Output Contract for pipeline-creation.
 ---
 
 # Bitbucket Pipelines Platform Skill
 
-This skill provides Bitbucket Pipelines-specific documentation and guidance for SonarQube integration.
+## IMPORTANT — Scope
 
-**IMPORTANT - Scope of This Skill:**
-- This skill is ONLY for Bitbucket Pipelines structure and platform-specific configuration
-- Provides pipeline examples, step syntax, triggers, repository variables setup, and Bitbucket Pipelines-specific features
-- For scanner parameters, properties, and configuration: Refer to scanner-* skills (scanner-maven, scanner-gradle, scanner-dotnet, scanner-cli)
-- Access pipeline examples from documentation, adapt scanner configuration from scanner skills
+This skill is responsible for:
+1. **Determining** the scanner approach for Bitbucket Pipelines based on build system
+2. **Fetching** current pipe versions from official documentation or pipe repositories
+3. **Producing** a complete Output Contract before pipeline-creation runs
+
+This skill does **not** explain concepts or include documentation links in responses. It acts.
 
 ## Official Documentation
 
-### SonarQube Cloud
-- **Main Documentation**: https://docs.sonarsource.com/sonarqube-cloud/advanced-setup/ci-based-analysis/bitbucket-pipelines-for-sonarcloud
-- **Scan Pipe Repository**: https://bitbucket.org/sonarsource/sonarcloud-scan/src/master/
-- **Quality Gate Pipe**: https://bitbucket.org/sonarsource/sonarcloud-quality-gate/src/master/
+| SonarQube Type | Documentation URL |
+|---|---|
+| Cloud | `https://docs.sonarsource.com/sonarqube-cloud/advanced-setup/ci-based-analysis/bitbucket-pipelines-for-sonarcloud` |
+| Server | `https://docs.sonarsource.com/sonarqube-server/devops-platform-integration/bitbucket-integration/bitbucket-cloud-integration/bitbucket-pipelines` |
 
-### SonarQube Server
-- **Main Documentation**: https://docs.sonarsource.com/sonarqube-server/devops-platform-integration/bitbucket-integration/bitbucket-cloud-integration/bitbucket-pipelines
-- **Scan Pipe Repository**: https://bitbucket.org/sonarsource/sonarqube-scan/src/master/
-- **Quality Gate Pipe**: https://bitbucket.org/sonarsource/sonarqube-quality-gate/src/master/
+**Pipe repositories** (version tags are listed on these pages):
+
+| Pipe | Repository |
+|---|---|
+| Cloud scan | `https://bitbucket.org/sonarsource/sonarcloud-scan/src/master/` |
+| Cloud quality gate | `https://bitbucket.org/sonarsource/sonarcloud-quality-gate/src/master/` |
+| Server scan | `https://bitbucket.org/sonarsource/sonarqube-scan/src/master/` |
+| Server quality gate | `https://bitbucket.org/sonarsource/sonarqube-quality-gate/src/master/` |
 
 ## Documentation Fetching Strategy
 
-**Invoke `web/fetch` TOOL to retrieve current examples and versions from official documentation and pipe repositories.**
+| URL pattern | Required tool |
+|---|---|
+| `docs.sonarsource.com` | Append `.md` to the URL and fetch with **curl** (e.g., `curl "https://docs.sonarsource.com/...page.md"`) — returns the full page content as Markdown |
+| `bitbucket.org` pages | Use your environment's **browser-capable fetch tool**. **NOT curl.** |
+| `downloads.sonarsource.com` JSON files | curl or wget is acceptable |
 
-**Fallback Approach:**
-- If working with SonarQube Cloud, first fetch from the Cloud documentation URL
-- If the Cloud documentation lacks complete pipeline examples, also fetch from the Server documentation URL as a fallback
-- If working with SonarQube Server, first fetch from the Server documentation URL
-- If the Server documentation lacks complete pipeline examples, also fetch from the Cloud documentation URL as a fallback
-- Adapt any server-specific or cloud-specific details when using fallback documentation
+**Never use curl to access bitbucket.org.** Those pages require JavaScript rendering; only a browser-capable fetch tool can retrieve them correctly.
 
-## Bitbucket Pipelines Implementation
+## Scanner Approach Determination
 
-### Scanner Implementation
+| Build system | Scanner approach | How the scan runs |
+|---|---|---|
+| Maven (`pom.xml`) | maven | `mvn clean verify sonar:sonar` — run directly in pipeline step |
+| Gradle (`build.gradle` / `build.gradle.kts`) | gradle | `./gradlew test jacocoTestReport sonar` — run directly in pipeline step |
+| .NET (`.csproj` / `.sln`) | dotnet | `dotnet sonarscanner begin/build/end` — run directly in pipeline step |
+| Everything else (JS, TS, Python, Go, PHP, Ruby, etc.) | cli | Official SonarQube pipe |
 
-**Scanner selection is defined in pipeline-creation skill. This section covers Bitbucket-specific implementation.**
+**For Maven, Gradle, and .NET:** Run commands directly in Bitbucket pipeline steps. Do **not** use the scan pipe.
 
-### When to Use SonarQube Pipes
+**For CLI scanner projects:** Use the official pipe:
+- Cloud: `sonarsource/sonarcloud-scan`
+- Server: `sonarsource/sonarqube-scan`
 
-Use official SonarCloud/SonarQube pipes for **CLI scanner projects only**:
-- JavaScript/TypeScript/Python/PHP/Go/Ruby (without Maven/Gradle/.NET)
-- Projects that require `sonar-project.properties`
-- **Pipes available**:
-  - SonarQube Cloud: `sonarsource/sonarcloud-scan` and `sonarsource/sonarcloud-quality-gate`
-  - SonarQube Server: `sonarsource/sonarqube-scan` and `sonarsource/sonarqube-quality-gate`
-- See: scanner-cli skill
+**Scanner approach is decided here, not in pipeline-creation.**
 
-**Example:**
+## Processing Steps
+
+Execute these steps in order. Do not skip any step.
+
+**Step 1:** Determine scanner approach from the table above using the project-detection output.
+
+**Step 2:** ⛔ STOP — Fetch the appropriate documentation page and pipe repository page NOW.
+- Fetch the documentation URL for the detected SonarQube type (Cloud or Server) using curl with `.md` appended to the URL
+- If scanner approach is `cli`: also fetch the appropriate pipe repository page (bitbucket.org) using your environment's browser-capable fetch tool
+- **Do not proceed until you have fetched at least the documentation page.**
+
+**Step 3:** From the fetched pages, extract:
+- For `cli` approach: fetch the appropriate **Scan Pipe Repository** URL (from the table above) and extract the latest pipe version tag — this is the `tool_version`. Use the version tag shown in the repository, not `:latest`.
+- For `maven`, `gradle`, or `dotnet` approach: extract the corresponding step example from the documentation — use this as the reference template when creating the pipeline. No pipe version applies.
+
+**Completion condition:** Do not proceed to Step 4 until you have extracted a specific pipe version tag for `cli`, or the step template for build-tool approaches. If the page could not be fetched, stop and inform the user.
+
+**Step 4:** Read the corresponding scanner skill file to get scanner-specific configuration details.
+
+Wait for the scanner skill's Output Contract before completing this skill's Output Contract.
+
+**Step 5:** Populate the Output Contract below with all resolved values. Use the **Reference: Platform-Specific Configuration Defaults** section below for clone configuration, caching, variables, and pipeline structure.
+
+## Reference: Platform-Specific Configuration Defaults
+
+### Clone Configuration (full depth for accurate blame)
 ```yaml
-- pipe: sonarsource/sonarcloud-scan:1.0.0
-  variables:
-    SONAR_TOKEN: $SONAR_TOKEN
+clone:
+  depth: full  # Required for accurate blame information and new code detection
 ```
 
-### Build Tool Integration
-
-**For Maven/Gradle/.NET projects, run scanner commands directly in Bitbucket steps:**
-- **Maven**: Run `mvn sonar:sonar` in step (see: scanner-maven skill)
-- **Gradle**: Run `./gradlew sonar` in step (see: scanner-gradle skill)
-- **.NET**: Run `dotnet sonarscanner begin/build/end` in step (see: scanner-dotnet skill)
-
-Check pipe repositories for latest versions.
-
-## Platform-Specific Configuration
+### Caching
+```yaml
+definitions:
+  caches:
+    sonar: ~/.sonar/cache
+```
 
 ### Repository Variables
-- **Location**: Repository settings → Pipelines → Repository variables
-- **Required variables**:
-  - `SONAR_TOKEN` (mark as Secured)
-  - `SONAR_HOST_URL` (Server only, mark as Secured)
-  - `SONAR_PROJECT_KEY` (optional, can be in sonar-project.properties)
-- See: security-practices and devops-setup-instructions skills
 
-### Clone Configuration
-- Bitbucket Pipelines uses shallow clone by default
-- For better analysis, use `clone.depth: full`
+| Variable | Flags | When required |
+|---|---|---|
+| `$SONAR_TOKEN` | Secured | Always |
+| `$SONAR_HOST_URL` | Secured | Always |
 
-### Caching
-- Define caches in `definitions.caches` section
-- Cache `.sonar/cache` and build dependencies
+Mark all variables as **Secured** so they are masked in pipeline logs.
 
-### Branch Configuration
-- Use `pipelines.branches` for branch-specific pipelines
-- Use `pipelines.pull-requests` for PR analysis
+### Pipeline Structure (CLI scanner with pipe)
+```yaml
+pipelines:
+  default:
+    - step:
+        name: SonarQube Analysis
+        caches:
+          - sonar
+        script:
+          - pipe: sonarsource/sonarcloud-scan:X.Y.Z   # version resolved from pipe repo
+            variables:
+              SONAR_TOKEN: $SONAR_TOKEN
+```
 
-## Common Configurations
+### Pipeline Structure (Maven/Gradle/.NET — direct commands)
+```yaml
+pipelines:
+  default:
+    - step:
+        name: SonarQube Analysis
+        caches:
+          - sonar
+        script:
+          - [build and scan commands from scanner skill Output Contract]
+```
 
-### Pull Request Decoration
-Configure Bitbucket integration in SonarQube for automatic PR decoration.
+## Output Contract
 
-### Using Pipes vs Direct Scanner
-- **Pipes**: Easier for JavaScript/TypeScript/Python, less configuration
-- **Direct scanner**: More control, better for Java/Gradle/Maven
+This contract must be fully populated before pipeline-creation runs. No field may contain "TODO", "fetch from docs", or a placeholder.
 
-## Best Practices
+```
+platform: bitbucket
+scanner_approach: [maven | gradle | dotnet | cli]       ← resolved in Step 1
+tool_version: [exact pipe version tag, or "N/A" for build-tool scanners]  ← resolved in Step 3
+pipe_name: [e.g., "sonarsource/sonarcloud-scan", or "N/A"]  ← resolved in Step 1+3
+pipeline_file: bitbucket-pipelines.yml
+build_commands: [exact commands or pipe config]          ← resolved from scanner skill Output Contract
+sonar_project_key: [value from prerequisites]
+sonar_organization: [value from prerequisites, or "N/A" for Server]
+sonar_host_url: [resolved instance URL or Server URL]
+required_variables: [SONAR_TOKEN, SONAR_HOST_URL]
+required_files: [list of files to create or modify]
+```
 
-1. **Use pipes when possible**: Simpler configuration for CLI scanner
-2. **Check pipe versions**: Invoke `web/fetch` TOOL to verify latest pipe versions
-3. **Secure variables**: Always mark sensitive variables as Secured
-4. **Full clone**: Use `depth: full` for accurate blame information
-5. **Cache appropriately**: Cache `.sonar/cache` and build dependencies
-6. **Quality gate step**: Add separate step for quality gate check
+`tool_version` MUST be a specific version tag fetched from the pipe repository page. Do not use `:latest` or guess a version.
 
 ## Usage Instructions
 
-**For SonarArchitectGuide:**
-- Include documentation links in responses
-- Explain Bitbucket Pipelines concepts when relevant
-- Mention pipes vs direct scanner options
-
-**For SonarArchitectLight:**
-- Invoke `web/fetch` TOOL to check latest pipe versions
-- Create or update `bitbucket-pipelines.yml` with appropriate scanner
-- Prefer pipes for CLI scanner projects
-- Do NOT include links in responses
+**For SonarArchitect:** Execute all Processing Steps silently. Produce the Output Contract. Do not include links or explanations in responses.

@@ -1,6 +1,6 @@
-# SonarArchitectLight Automated Test Framework
+# SonarArchitect Automated Test Framework
 
-This is a combined **Option B (Automated Test Suite)** and **Option C (Model Comparison)** testing framework for the SonarArchitectLight agent.
+This is a combined **Option B (Automated Test Suite)** and **Option C (Model Comparison)** testing framework for the SonarArchitect agent.
 
 ## 📁 Directory Structure
 
@@ -380,4 +380,4 @@ WheDOCUMENTATION_TRACKING.md](DOCUMENTATION_TRACKING.md) - Guide to tracking doc
 
 **Ready to test!** 🚀
 
-The framework is set up and ready. The next step is implementing the actual agent invocation logic in `run-scenario.sh` to execute the SonarArchitectLight agent with the test scenarios and capture results.
+The framework is set up and ready. The next step is implementing the actual agent invocation logic in `run-scenario.sh` to execute the SonarArchitect agent with the test scenarios and capture results.

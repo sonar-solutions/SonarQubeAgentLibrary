@@ -1,193 +1,157 @@
 ---
 name: scanner-gradle
-description: Gradle scanner configuration for SonarQube. Use this for Java/Kotlin projects using Gradle build system.
+description: Gradle scanner configuration for SonarQube. Use this for Java/Kotlin projects using Gradle build system. Fetches current plugin version and produces an Output Contract.
 ---
 
 # Gradle Scanner Skill
 
-This skill provides Gradle-specific scanner documentation and configuration guidance.
+## Purpose
 
-**IMPORTANT - Scope of This Skill:**
-- This skill is ONLY for SonarQube integration with Gradle projects
-- Assumes the project already has a working Gradle build configuration
-- DO NOT use this skill to troubleshoot Gradle build issues
-- DO NOT fetch Gradle documentation for general build problems
-- Focus exclusively on adding/updating SonarQube plugin and configuration
+Configure SonarQube integration for Gradle projects. This skill reads the `build.gradle` or `build.gradle.kts`, fetches the latest plugin version, verifies or adds required configuration, and produces an Output Contract for the platform skill and pipeline-creation.
 
 ## Official Documentation
 
-### SonarQube Cloud
-- https://docs.sonarsource.com/sonarqube-cloud/advanced-setup/ci-based-analysis/sonarscanner-for-gradle
+| SonarQube Type | Documentation URL |
+|---|---|
+| Cloud | `https://docs.sonarsource.com/sonarqube-cloud/advanced-setup/ci-based-analysis/sonarscanner-for-gradle` |
+| Server | `https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/scanners/sonarscanner-for-gradle` |
 
-### SonarQube Server
-- https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/scanners/sonarscanner-for-gradle
+**Version JSON:**
+`https://downloads.sonarsource.com/sonarqube/update/scannergradle.json`
 
-## Documentation Retrieval Strategy
+## Documentation Fetching Strategy
 
-**CRITICAL: web/fetch is a TOOL, not a bash command:**
-- `web/fetch` is a TOOL you invoke directly (like `read`, `edit`, `search`)
-- **DO NOT** implement web/fetch using bash commands like `curl` or `wget`
-- **DO NOT** use `execute` tool to run curl commands
-- Invoke the `web/fetch` tool directly with the documentation URL
+| URL pattern | Required tool |
+|---|---|
+| `docs.sonarsource.com` | Use your environment's **browser-capable fetch tool** (e.g., web/fetch, WebFetch, url_context, or equivalent). **NOT curl.** |
+| `downloads.sonarsource.com/sonarqube/update/scannergradle.json` | **curl or wget is acceptable** |
 
-**CRITICAL: ONLY retrieve from official SonarQube documentation URLs listed above.**
+## Processing Steps
 
-**Mandatory Rules:**
-- **ONLY** use the `web/fetch` **TOOL** (not curl) on the official docs.sonarsource.com URLs listed above
-- **DO NOT** fetch from Gradle Plugin Portal, GitHub repositories, or any other websites
-- **DO NOT** search for plugin version information outside official SonarQube documentation
-- **DO NOT** use general web search to find plugin versions
+Execute these steps in order. Do not skip any step.
 
-**Fallback Approach for Missing Information:**
-- If working with SonarQube Cloud, first fetch from the Cloud documentation URL above
-- If the Cloud documentation lacks complete plugin version or configuration examples, also fetch from the Server documentation URL as a fallback
-- If working with SonarQube Server, first fetch from the Server documentation URL above
-- If the Server documentation lacks complete plugin version or configuration examples, also fetch from the Cloud documentation URL as a fallback
-- If NEITHER official documentation URL contains the needed information, STOP and inform the user that the information is not available in official documentation
+**Step 1:** Read the complete build file using the `read` tool.
+- Use `build.gradle` (Groovy DSL) or `build.gradle.kts` (Kotlin DSL), whichever is present
+- If both exist, use `build.gradle.kts`
 
-**What to Extract from Documentation:**
-- Plugin version and syntax
-- Configuration examples
-- Property definitions
-- Integration patterns
+**Step 2:** Check for existing SonarQube configuration:
+- Look for `id("org.sonarqube")` (Kotlin DSL) or `id 'org.sonarqube'` (Groovy DSL) in the `plugins` block
+- Look for a `sonarqube {}` or `sonar {}` configuration block
+- Note the current plugin version if present
 
-## Scanner Overview
+**Step 3:** ⛔ STOP — Fetch the latest plugin version NOW.
 
-The Gradle SonarQube scanner is a Gradle plugin that integrates SonarQube analysis into the Gradle build lifecycle.
+Run: `curl -s https://downloads.sonarsource.com/sonarqube/update/scannergradle.json`
 
-**CRITICAL: Gradle projects do NOT use CI/CD scan actions/tasks (except Azure DevOps).**
-- GitHub Actions: Do NOT use `sonarsource/sonarqube-scan-action` - run `./gradlew sonar` directly
-- GitLab CI: Do NOT use sonar-scanner-cli Docker image - run `./gradlew sonar` directly
-- Azure DevOps: Use SonarQubePrepare task in Gradle mode (special case - wraps Gradle integration)
-- Bitbucket: Do NOT use SonarQube/SonarCloud pipes - run `./gradlew sonar` directly
+Extract the latest version from the JSON response.
 
-### Plugin Version Management
-- **Always check latest version**: Invoke `web/fetch` TOOL to obtain the current plugin version from official documentation
-- **Update existing versions**: If a project already has the plugin configured, compare with latest and update if outdated
-- **Version format**: Plugin follows format `id("org.sonarqube") version "X.Y.Z"` (Kotlin) or `id 'org.sonarqube' version 'X.Y.Z'` (Groovy)
-- **Compatibility**: Verify Gradle version compatibility (requires Gradle 7.3+)
+**Completion condition:** Do not proceed to Step 4 until you have the exact version string from the JSON. If the curl command fails, use the browser-capable fetch tool on the Server documentation URL as fallback to find the version in code examples.
 
-### Key Concepts
-- Scanner runs as Gradle task using `./gradlew sonar`
-- Properties configured in `sonarqube` block in build.gradle/build.gradle.kts
-- Supports both Groovy and Kotlin DSL
-- Automatically detects source and test directories from Gradle structure
-- Works with multi-module Gradle projects
-- Integrates with JaCoCo for code coverage reporting
+**Step 4:** Verify the build file has the correct configuration:
+- Plugin declaration uses the version from Step 3
+- `sonarqube {}` block has `sonar.projectKey` set (required)
+- `sonar.organization` is set (required for Cloud)
+- `sonar.coverage.jacoco.xmlReportPaths` is set if JaCoCo is configured
 
-### Configuration Options
-- **build.gradle**: Add SonarQube plugin and configure properties block
-- **Command line**: Pass properties via `-Dsonar.property=value`
-- **Environment variables**: `SONAR_TOKEN`, `SONAR_HOST_URL`
+**Step 5:** Update or add configuration as needed. Never duplicate existing properties.
 
-### Coverage Integration
-- Use JaCoCo Gradle plugin to generate coverage reports
-- Configure `sonar.coverage.jacoco.xmlReportPaths` to point to JaCoCo XML report
-- Run tests before analysis: `./gradlew test jacocoTestReport sonar`
+**Step 6:** Populate the Output Contract below.
 
-## Environment Variables
+## Build Commands
 
-**Required:**
-- `SONAR_TOKEN`: Authentication token for SonarQube (or use `-Dsonar.token`)
+Primary build command (with tests and coverage):
+```
+./gradlew test jacocoTestReport sonar
+```
 
-**Optional:**
-- `SONAR_HOST_URL`: SonarQube Server URL
-- For SonarQube Cloud, organization must be set in build.gradle or command line
+If no coverage is configured:
+```
+./gradlew sonar
+```
 
-## Code Coverage
+**Always use the Gradle wrapper** (`./gradlew`), never a globally installed `gradle` binary.
 
-### JaCoCo Integration
-- Add JaCoCo Gradle plugin to generate coverage reports
-- JaCoCo generates XML reports that SonarQube can read
-- Configure coverage report path using `sonar.coverage.jacoco.xmlReportPaths`
-- Test task should be finalized by jacocoTestReport task
-- Run build or test task to execute tests and generate coverage before analysis
+**Note for multi-module projects:** Run from the root directory containing the root `build.gradle`.
 
-**Retrieve JaCoCo configuration examples (Groovy and Kotlin DSL) from official documentation.**
+## Plugin Declaration
 
-## Common Configuration Properties
+### Kotlin DSL (`build.gradle.kts`)
+```kotlin
+plugins {
+    id("org.sonarqube") version "X.Y.Z"  // use version from Step 3
+    id("jacoco")
+}
 
-**Fetch current property examples from official documentation.**
+sonarqube {
+    properties {
+        property("sonar.projectKey", "YOUR_PROJECT_KEY")
+        property("sonar.organization", "YOUR_ORG_KEY")  // Cloud only
+        property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml")
+    }
+}
+```
 
-### Key Properties:
-- **Project identification**: `sonar.projectKey`, `sonar.organization`, `sonar.projectName`
-- **Source/test paths**: Auto-detected by Gradle (src/main/java, src/test/java)
-- **Exclusions**: `sonar.exclusions`, `sonar.test.exclusions`, `sonar.cpd.exclusions`
-- **Coverage**: `sonar.coverage.jacoco.xmlReportPaths`
-- **Host/auth**: `sonar.host.url`, `sonar.token` (via env var preferred)
-- **Language specific**: `sonar.java.source`, `sonar.java.target`
+### Groovy DSL (`build.gradle`)
+```groovy
+plugins {
+    id 'org.sonarqube' version 'X.Y.Z'  // use version from Step 3
+    id 'jacoco'
+}
 
-## Multi-Module Projects
+sonarqube {
+    properties {
+        property 'sonar.projectKey', 'YOUR_PROJECT_KEY'
+        property 'sonar.organization', 'YOUR_ORG_KEY'  // Cloud only
+        property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco/test/jacocoTestReport.xml'
+    }
+}
+```
 
-- Add SonarQube plugin to root build.gradle
-- Apply plugin to subprojects if needed
-- Configure properties at root level
-- Run from root: `./gradlew build sonar`
-- Each module analyzed as separate component in SonarQube
+### JaCoCo task finalization (add to test task block)
 
-**Fetch multi-module configuration examples from official documentation.**
+**Kotlin DSL:**
+```kotlin
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport)
+}
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+    }
+}
+```
 
-## Best Practices
+**Groovy DSL:**
+```groovy
+test {
+    finalizedBy jacocoTestReport
+}
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.enabled true
+    }
+}
+```
 
-1. **Use Gradle wrapper**: Always use `./gradlew` for consistency across environments
-2. **Add JaCoCo**: Enable code coverage reporting with JaCoCo plugin
-3. **Build first**: Run `build` task before `sonar` to ensure compilation and tests
-4. **Properties in build.gradle**: Store non-sensitive configuration in build file
-5. **Secrets as env vars**: Pass `SONAR_TOKEN` via environment variables, never hardcode
-6. **ALWAYS update plugin version**: Invoke `web/fetch` TOOL to obtain latest version and update build.gradle even if plugin already exists
-7. **Kotlin DSL**: Use .kts for type-safe configuration in Kotlin projects
-8. **Gradle version compatibility**: Ensure Gradle 7.3+ for latest SonarQube plugin
-9. **Exclude generated code**: Configure exclusions for auto-generated code, build outputs
-10. **Multi-module setup**: Configure plugin at root level for consistent analysis
-11. **Check compatibility**: Verify Gradle and plugin version compatibility in documentation
+## Output Contract
 
-## Platform Integration
+This contract must be fully populated before pipeline-creation runs. No field may contain "TODO", "fetch from docs", or a placeholder.
 
-See platform-specific skills for CI/CD integration:
-- **platform-github-actions**: GitHub Actions with Gradle
-- **platform-gitlab-ci**: GitLab CI with Gradle
-- **platform-azure-devops**: Azure Pipelines with Gradle
-- **platform-bitbucket**: Bitbucket Pipelines with Gradle
-
-## Configuration Workflow
-
-**CRITICAL: Follow this workflow when setting up Gradle projects:**
-
-1. **Read build file completely**: Use `read` to view entire `build.gradle` or `build.gradle.kts` file
-2. **Check for existing plugin**: Look for `id("org.sonarqube")` or `id 'org.sonarqube'` in plugins block
-3. **Verify plugin version**: 
-   - If plugin exists: Invoke `web/fetch` TOOL to obtain latest version, compare and UPDATE if needed
-   - If plugin missing: Invoke `web/fetch` TOOL to obtain latest version before adding
-4. **Check for existing sonarqube configuration block**: Look for `sonarqube {}` or `sonar {}` configuration blocks
-5. **Verify configuration is complete and correct**:
-   - Check if `projectKey` is set (required)
-   - For Cloud: Check if `organization` is set (required)
-   - Verify all parameters match user requirements
-   - **Don't just add plugin and skip configuration verification**
-6. **Update, don't duplicate**: 
-   - If configuration exists but incomplete: Add missing properties
-   - If configuration exists but incorrect: Fix incorrect values
-   - If configuration missing: Add complete configuration block
-7. **Note build file location**: Commands must run from directory containing build.gradle
-   - Example: If build.gradle is in `backend/`, CI/CD must use `working-directory: backend`
+```
+scanner: gradle
+tool_version: [exact version from Step 3, e.g., "5.0.0.4638"]   ← resolved in Step 3
+build_commands: ["./gradlew test jacocoTestReport sonar"]
+build_file: [path to build.gradle or build.gradle.kts]
+dsl_type: [kotlin | groovy]
+working_directory: [directory containing build.gradle]
+sonar_project_key: [value from prerequisites]
+sonar_organization: [value from prerequisites, or "N/A" for Server]
+coverage_report_path: [path to jacocoTestReport.xml, or "N/A" if no coverage configured]
+required_files: [build.gradle or build.gradle.kts — modified]
+```
 
 ## Usage Instructions
 
-**For SonarArchitectGuideWithSkills:**
-- Include documentation link in responses
-- Explain Gradle concepts when needed
-
-**For SonarArchitectLightWithSkills:**
-- **Step 1**: Read complete build.gradle/build.gradle.kts file
-- **Step 2**: Check if `org.sonarqube` plugin exists and note its version
-- **Step 3**: ⛔ STOP - Invoke `web/fetch` TOOL (NOT curl) to obtain latest SonarQube plugin version from official SonarQube documentation
-- **Step 4**: Check if `sonarqube {}` configuration block exists
-- **Step 5**: Update plugin version if outdated, add if missing (use latest version)
-- **Step 6**: Add or update SonarQube configuration properties (don't duplicate existing ones)
-- **Step 7**: In CI/CD workflow, set working-directory to match build.gradle location
-- **IMPORTANT**: Only fetch SonarQube documentation, do NOT fetch Gradle build tool documentation
-- Add or update plugin declaration with latest version in build.gradle or build.gradle.kts
-- Invoke `web/fetch` TOOL to check latest JaCoCo version if adding coverage
-- Configure sonarqube block with project properties
-- Configure CI/CD command: `./gradlew build sonar`
-- Do NOT include links in responses
+**For SonarArchitect:** Execute all Processing Steps silently. Produce the Output Contract. Do not include links or explanations in responses.

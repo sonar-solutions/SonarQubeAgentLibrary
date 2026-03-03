@@ -1,251 +1,157 @@
 ---
 name: scanner-cli
-description: SonarScanner CLI configuration for SonarQube. Use this for JavaScript, TypeScript, Python, Go, PHP, and other languages not using Maven/Gradle/.NET.
+description: SonarScanner CLI configuration for JavaScript, TypeScript, Python, Go, PHP, Ruby, and any language not using Maven, Gradle, or .NET. Produces an Output Contract including sonar-project.properties content.
 ---
 
 # SonarScanner CLI Skill
 
-This skill provides SonarScanner CLI documentation and configuration guidance for languages like JavaScript, TypeScript, Python, Go, PHP, Ruby, and others.
+## Purpose
+
+Configure SonarQube integration for projects using the SonarScanner CLI. This skill applies to JavaScript, TypeScript, Python, Go, PHP, Ruby, and any other language that does not use Maven, Gradle, or .NET as a build system.
+
+For CLI scanner projects, the scanner tool version is resolved by the platform skill (action version, image tag, or pipe version) — not by this skill.
 
 ## Official Documentation
 
-### SonarQube Cloud
-- https://docs.sonarsource.com/sonarqube-cloud/advanced-setup/ci-based-analysis/sonarscanner-cli
+| SonarQube Type | Documentation URL |
+|---|---|
+| Cloud | `https://docs.sonarsource.com/sonarqube-cloud/advanced-setup/ci-based-analysis/sonarscanner-cli` |
+| Server | `https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/scanners/sonarscanner` |
 
-### SonarQube Server
-- https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/scanners/sonarscanner
+## Documentation Fetching Strategy
 
-## Documentation Retrieval Strategy
+| URL pattern | Required tool |
+|---|---|
+| `docs.sonarsource.com` | Use your environment's **browser-capable fetch tool** (e.g., web/fetch, WebFetch, url_context, or equivalent). **NOT curl.** |
+| `downloads.sonarsource.com` JSON files | curl or wget is acceptable |
 
-**CRITICAL: web/fetch is a TOOL, not a bash command:**
-- `web/fetch` is a TOOL you invoke directly (like `read`, `edit`, `search`)
-- **DO NOT** implement web/fetch using bash commands like `curl` or `wget`
-- **DO NOT** use `execute` tool to run curl commands
-- Invoke the `web/fetch` tool directly with the documentation URL
+## Processing Steps
 
-**CRITICAL: ONLY fetch from official SonarQube documentation URLs listed above.**
+Execute these steps in order. Do not skip any step.
 
-**Mandatory Rules:**
-- **ONLY** use the `web/fetch` **TOOL** (not curl) on the official docs.sonarsource.com URLs listed above
-- **DO NOT** fetch from NPM registry, GitHub repositories, or any other websites
-- **DO NOT** search for scanner version information outside official SonarQube documentation
-- **DO NOT** use general web search to find scanner versions or installation methods
+**Step 1:** Check for an existing `sonar-project.properties` file using file search tools.
+- If found: read its complete contents and note what is already configured
+- If not found: the file will be created
 
-**Fallback Approach for Missing Information:**
-- If working with SonarQube Cloud, first fetch from the Cloud documentation URL above
-- If the Cloud documentation lacks complete installation or configuration examples, also fetch from the Server documentation URL as a fallback
-- If working with SonarQube Server, first fetch from the Server documentation URL above
-- If the Server documentation lacks complete installation or configuration examples, also fetch from the Cloud documentation URL as a fallback
-- If NEITHER official documentation URL contains the needed information, STOP and inform the user that the information is not available in official documentation
+**Step 2:** Determine language-specific configuration:
+- Identify the primary language from the project-detection output
+- Determine the correct `sonar.sources` path
+- Determine the coverage report path and property name (see Language-Specific section below)
 
-**What to Extract from Documentation:**
-- Scanner installation methods and versions
-- Configuration file format
-- Property definitions
-- Integration patterns with CI/CD platforms
+**Step 3:** ⛔ STOP — Verify the `sonar-project.properties` content is correct and complete.
 
-## Scanner Overview
+Required properties that MUST be present:
+- `sonar.projectKey` — from prerequisites
+- `sonar.organization` — from prerequisites (Cloud only)
+- `sonar.sources` — path to source files (not test files)
+- `sonar.host.url` — the Cloud instance URL or Server URL
+- Language-specific coverage path property (if coverage is configured)
 
-The SonarScanner CLI is a standalone scanner for JavaScript, TypeScript, Python, Go, PHP, Ruby, and other languages not using Maven, Gradle, or .NET.
+**Completion condition:** Do not proceed to Step 4 until you have confirmed all required properties are present and correct. Do not leave any property with a placeholder value.
 
-**IMPORTANT: CLI Scanner projects REQUIRE CI/CD scan actions/tasks.**
-- GitHub Actions: Use `sonarsource/sonarqube-scan-action`
-- GitLab CI: Use `sonarsource/sonar-scanner-cli` Docker image
-- Azure DevOps: Use SonarQubePrepare and SonarQubeAnalyze tasks
-- Bitbucket: Use SonarQube or SonarCloud pipes
-- These actions/tasks handle scanner installation and execution
+**Step 4:** If the file does not exist, create it. If it exists, add only missing properties — never duplicate existing ones.
 
-### Key Concepts
-- Language-agnostic scanner that works with any programming language
-- Configuration via `sonar-project.properties` file (required)
-- Can override properties via command line parameters
-- Runs as standalone binary or Docker container
-- Available as npm package for JavaScript/TypeScript projects
-- Coverage must be generated before scanning (not during)
+**Step 5:** Populate the Output Contract below.
 
-### Installation Options
-- **Binary download**: Platform-specific executables from official site
-- **Docker image**: `sonarsource/sonar-scanner-cli` for containerized environments
-- **NPM package**: `sonarqube-scanner` for Node.js projects
-- **Package managers**: Some platforms offer apt, brew, chocolatey packages
+## sonar-project.properties Template
 
-## Configuration File: sonar-project.properties
+```properties
+# SonarQube project identification
+sonar.projectKey=YOUR_PROJECT_KEY
+sonar.organization=YOUR_ORG_KEY        # Cloud only — remove for Server
+sonar.projectName=My Project           # optional, defaults to projectKey
 
-**Required for CLI scanner. Fetch current examples from official documentation.**
+# SonarQube host
+sonar.host.url=https://sonarcloud.io   # Cloud EU; use https://sonarqube.us for Cloud US; or your Server URL
 
-### Key Configuration Properties
-- **Project identification**: `sonar.projectKey`, `sonar.projectName`, `sonar.projectVersion`
-- **Organization** (Cloud only): `sonar.organization`
-- **Host URL**: `sonar.host.url` (e.g., https://sonarcloud.io for EU, https://sonarqube.us for US, or your Server URL)
-- **Source paths**: `sonar.sources` (comma-separated directories)
-- **Test paths**: `sonar.tests` (comma-separated test directories)
-- **Exclusions**: `sonar.exclusions`, `sonar.test.exclusions`
-- **Coverage paths**: Language-specific properties
-- **Encoding**: `sonar.sourceEncoding` (usually UTF-8)
+# Source configuration
+sonar.sources=src                      # adjust to match actual source directory
+sonar.sourceEncoding=UTF-8
 
-### File Structure
-- Create in project root directory
-- Standard Java properties format
-- Comments use `#` character
-- Multi-line values use backslash continuation
+# Exclusions (adjust as needed)
+sonar.exclusions=node_modules/**,dist/**,build/**,coverage/**,**/*.test.*,**/*.spec.*
+```
 
-## Language-Specific Configuration
+## Language-Specific Coverage Configuration
 
-**Fetch language-specific examples from official documentation.**
+| Language | Coverage tool | Coverage property | Report format |
+|---|---|---|---|
+| JavaScript / TypeScript | Jest / Istanbul / nyc | `sonar.javascript.lcov.reportPaths` | LCOV (`coverage/lcov.info`) |
+| Python | coverage.py / pytest-cov | `sonar.python.coverage.reportPaths` | XML (`coverage.xml`) |
+| Go | built-in `go test` | `sonar.go.coverage.reportPaths` | Go coverage profile (`coverage.out`) |
+| PHP | PHPUnit | `sonar.php.coverage.reportPaths` | Clover XML |
+| Ruby | SimpleCov | `sonar.ruby.coverage.reportPaths` | JSON resultset |
 
-### JavaScript/TypeScript
-- **Source patterns**: Common paths like `src`, `lib`
-- **Test patterns**: Files matching `*.test.js`, `*.spec.ts`, etc.
-- **Exclusions**: `node_modules`, `dist`, `build`, `coverage`
-- **Coverage format**: LCOV (`sonar.javascript.lcov.reportPaths`)
-- **Test runner**: Jest, Mocha, Jasmine (generate coverage first)
-- **ESLint integration**: Optional external report import
+### Coverage commands by language
 
-### Python
-- **Source patterns**: Typically `src`, package directories
-- **Test patterns**: `tests`, `test`
-- **Exclusions**: `venv`, `__pycache__`, `.pyc` files
-- **Coverage format**: XML from coverage.py or pytest-cov
-- **Coverage property**: `sonar.python.coverage.reportPaths`
-- **Python version**: `sonar.python.version` for compatibility
+**JavaScript / TypeScript (Jest):**
+```bash
+npx jest --coverage --coverageReporters=lcov
+```
+Add to `sonar-project.properties`:
+```properties
+sonar.javascript.lcov.reportPaths=coverage/lcov.info
+```
 
-### Go
-- **Source patterns**: Usually `.` (root) or specific packages
-- **Test patterns**: Files matching `*_test.go`
-- **Exclusions**: `vendor` directory
-- **Coverage format**: Go coverage profile
-- **Coverage property**: `sonar.go.coverage.reportPaths`
-- **Test command**: `go test` with `-coverprofile` flag
+**Python (pytest-cov):**
+```bash
+pytest --cov=. --cov-report=xml:coverage.xml
+```
+Add to `sonar-project.properties`:
+```properties
+sonar.python.coverage.reportPaths=coverage.xml
+```
 
-### PHP
-- **Source patterns**: `src`, application directories
-- **Test patterns**: `tests`, PHPUnit directories
-- **Exclusions**: `vendor`, `cache`
-- **Coverage format**: Clover XML or PHPUnit coverage
-- **Coverage property**: `sonar.php.coverage.reportPaths`
-- **PHP version**: `sonar.php.version` for rule compatibility
-
-### Ruby
-- **Source patterns**: `lib`, `app` for Rails/Sinatra
-- **Test patterns**: `spec`, `test`
-- **Exclusions**: `vendor`, `tmp`
-- **Coverage format**: SimpleCov resultset JSON
-- **Coverage property**: `sonar.ruby.coverage.reportPaths`
-
-## Command Line Usage
-
-**Fetch current command syntax from official documentation.**
-
-### Execution Methods
-
-1. **With properties file**: If `sonar-project.properties` exists, scanner reads configuration automatically
-   - Pass token via command line parameter
-   - Override specific properties if needed
-
-2. **Command line only**: All configuration via `-D` parameters
-   - Must specify project key, sources, host URL
-   - Useful for dynamic configurations
-
-3. **Debug mode**: Enable verbose logging for troubleshooting
-   - Use `-X` flag
-   - Shows detailed analysis steps
-
-## Code Coverage Setup
-
-**Coverage must be generated BEFORE running scanner.**
-
-### Coverage Workflow
-1. Run tests with coverage collection enabled
-2. Generate coverage report in supported format
-3. Configure coverage path in sonar-project.properties
-4. Run sonar-scanner (uploads coverage with analysis)
-
-### Language-Specific Tools
-- **JavaScript/TypeScript**: Jest, Istanbul, nyc (LCOV format)
-- **Python**: coverage.py, pytest-cov (XML format)
-- **Go**: Built-in coverage with `-coverprofile` (coverage.out format)
-- **PHP**: PHPUnit with code coverage (Clover XML)
-- **Ruby**: SimpleCov (JSON resultset format)
-
-**Fetch coverage commands and formats from official documentation.**
-
-## Best Practices
-
-1. **Always create sonar-project.properties**: Required for CLI scanner, defines project structure
-2. **Generate coverage first**: Run tests with coverage before scanning
-3. **Exclude dependencies**: node_modules, vendor, venv should always be excluded
-4. **Use environment variables**: Store SONAR_TOKEN in CI/CD secrets, never commit
-5. **Specify source paths explicitly**: Clear sonar.sources configuration avoids ambiguity
-6. **Define test patterns**: Use sonar.test.inclusions for accurate test detection
-7. **Set encoding**: Explicitly set sonar.sourceEncoding if not UTF-8
-8. **Version the scanner**: Pin scanner version in CI/CD for reproducibility
-9. **Check scanner version**: Invoke `web/fetch` TOOL to verify compatible scanner versions
-10. **Enable debug for troubleshooting**: Use -X flag when investigating issues
-11. **Validate coverage paths**: Ensure coverage files exist before scanning
-12. **Use platform-specific actions**: Prefer official CI/CD integrations when available
+**Go:**
+```bash
+go test ./... -coverprofile=coverage.out
+```
+Add to `sonar-project.properties`:
+```properties
+sonar.go.coverage.reportPaths=coverage.out
+```
 
 ## Platform Integration
 
-Most CI/CD platforms provide official actions/pipes for CLI scanner:
+The CLI scanner runs through the platform's native integration:
 
-- **platform-github-actions**: Use `sonarsource/sonarqube-scan-action`
-- **platform-gitlab-ci**: Use `sonarsource/sonar-scanner-cli` Docker image
-- **platform-azure-devops**: Use SonarQube CLI task
-- **platform-bitbucket**: Use SonarCloud/SonarQube scan pipes
+| Platform | How it runs |
+|---|---|
+| GitHub Actions | `sonarsource/sonarqube-scan-action` (version from platform skill) |
+| GitLab CI | `sonarsource/sonar-scanner-cli` Docker image (pinned version from platform skill) |
+| Azure DevOps | `SonarQubePrepare@N` + `SonarQubeAnalyze@N` tasks (version from platform skill) |
+| Bitbucket | `sonarsource/sonarcloud-scan` or `sonarsource/sonarqube-scan` pipe (version from platform skill) |
 
-See platform-specific skills for integration details.
+The scanner tool version is resolved by the platform skill — not this skill. This skill's `tool_version` field is always `n/a`.
 
-## Environment Variables
+## Output Contract
 
-**Required:**
-- `SONAR_TOKEN`: Authentication token
+This contract must be fully populated before pipeline-creation runs. No field may contain "TODO", "fetch from docs", or a placeholder.
 
-**Optional:**
-- `SONAR_HOST_URL`: Can be in properties file instead
-- `SONAR_ORGANIZATION`: Can be in properties file instead
+```
+scanner: cli
+tool_version: n/a                        ← always n/a; version is resolved by platform skill
+build_commands: ["sonar-scanner"]        ← the platform action/image/pipe handles this
+sonar_properties_file: sonar-project.properties
+sonar_project_key: [value from prerequisites]
+sonar_organization: [value from prerequisites, or "N/A" for Server]
+sonar_host_url: [resolved instance URL or Server URL]
+sources_path: [e.g., "src"]
+coverage_property: [language-specific property name, or "N/A" if not configured]
+coverage_report_path: [e.g., "coverage/lcov.info", or "N/A" if not configured]
+required_files:
+  - sonar-project.properties (create or update)
+  - [list of additional files modified]
+sonar_project_properties_content: |
+  sonar.projectKey=ACTUAL_VALUE
+  sonar.organization=ACTUAL_VALUE    # Cloud only
+  sonar.host.url=ACTUAL_VALUE
+  sonar.sources=ACTUAL_VALUE
+  [other properties]
+```
 
-## Troubleshooting
-
-### Scanner not finding sources
-- Check `sonar.sources` path is correct
-- Verify path is relative to project root
-
-### Coverage not reported
-- Ensure coverage file exists and path matches property
-- Check coverage report format is correct for language
-
-### Encoding issues
-- Set `sonar.sourceEncoding=UTF-8` explicitly
-
-## Configuration Workflow
-
-**CRITICAL: Follow this workflow when setting up CLI scanner projects:**
-
-1. **Check for existing sonar-project.properties**: Use `search` to find if file exists
-2. **Read properties file if exists**: Use `read` to view complete content
-3. **Check existing configuration**: Note what properties are already configured
-4. **Verify scanner version**: 
-   - Invoke `web/fetch` TOOL to obtain latest scanner version recommendation
-   - Note version for CI/CD setup
-5. **Update, don't duplicate**: 
-   - If properties exist: Only add missing properties
-   - If properties missing: Create complete configuration
-6. **Note properties file location**: Scanner must run from directory containing sonar-project.properties
-   - Example: If sonar-project.properties is in `frontend/`, CI/CD must use `working-directory: frontend`
-7. **Verify coverage setup**: Check if test runner and coverage tools are configured
+`sonar_project_properties_content` must contain the actual resolved values — not placeholders.
 
 ## Usage Instructions
 
-**For SonarArchitectGuide:**
-- Include documentation link in responses
-- Explain sonar-project.properties structure
-- Mention coverage setup for specific language
-
-**For SonarArchitectLight:**
-- **Step 1**: Search for existing sonar-project.properties file
-- **Step 2**: If exists, read complete file to check configuration
-- **Step 3**: ⛔ STOP - Invoke `web/fetch` TOOL (NOT curl) to obtain latest scanner version and configuration examples
-- **Step 4**: Note directory containing sonar-project.properties (working directory)
-- **Step 5**: Create or update properties file (don't duplicate existing properties)
-- **Step 6**: Include language-specific coverage configuration
-- **Step 7**: Configure CI/CD to run tests before scan, from correct working directory
+**For SonarArchitect:** Execute all Processing Steps silently. Produce the Output Contract including the complete `sonar-project.properties` content with resolved values. Do not include links or explanations in responses.

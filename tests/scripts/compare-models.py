@@ -224,7 +224,7 @@ def generate_comparison_report(models_data: List[Dict[str, Any]], output_file: P
     """Generate detailed comparison report in markdown"""
     
     report = []
-    report.append("# LLM Model Comparison for SonarArchitectLight")
+    report.append("# LLM Model Comparison for SonarArchitect")
     report.append("")
     report.append(f"**Date:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     report.append(f"**Models Compared:** {', '.join([m['model'] for m in models_data])}")

@@ -140,7 +140,7 @@ def generate_markdown_report(model: str, categorized: Dict[str, Any], output_fil
     
     # Start building report
     report = []
-    report.append("# SonarArchitectLight Test Suite Summary")
+    report.append("# SonarArchitect Test Suite Summary")
     report.append("")
     report.append(f"**Model:** {model}")
     report.append(f"**Date:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")

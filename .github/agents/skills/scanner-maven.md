@@ -1,176 +1,134 @@
 ---
 name: scanner-maven
-description: Maven scanner configuration for SonarQube. Use this for Java projects using Maven build system.
+description: Maven scanner configuration for SonarQube. Use this for Java/Kotlin projects using Maven build system. Fetches current plugin version and produces an Output Contract.
 ---
 
 # Maven Scanner Skill
 
-This skill provides Maven-specific scanner documentation and configuration guidance.
+## Purpose
 
-**IMPORTANT - Scope of This Skill:**
-- This skill is ONLY for SonarQube integration with Maven projects
-- Assumes the project already has a working Maven build configuration
-- DO NOT use this skill to troubleshoot Maven build issues
-- DO NOT fetch Maven documentation for general build problems
-- Focus exclusively on adding/updating SonarQube plugin and properties
+Configure SonarQube integration for Maven projects. This skill reads `pom.xml`, fetches the latest scanner version, verifies or adds required configuration, and produces an Output Contract for the platform skill and pipeline-creation.
 
 ## Official Documentation
 
-### SonarQube Cloud
-- https://docs.sonarsource.com/sonarqube-cloud/advanced-setup/ci-based-analysis/sonarscanner-for-maven
+| SonarQube Type | Documentation URL |
+|---|---|
+| Cloud | `https://docs.sonarsource.com/sonarqube-cloud/advanced-setup/ci-based-analysis/sonarscanner-for-maven` |
+| Server | `https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/scanners/sonarscanner-for-maven` |
 
-### SonarQube Server
-- https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/scanners/sonarscanner-for-maven
+**Version JSON:**
+`https://downloads.sonarsource.com/sonarqube/update/scannermaven.json`
 
-## Documentation Retrieval Strategy
+## Documentation Fetching Strategy
 
-**CRITICAL: web/fetch is a TOOL, not a bash command:**
-- `web/fetch` is a TOOL you invoke directly (like `read`, `edit`, `search`)
-- **DO NOT** implement web/fetch using bash commands like `curl` or `wget`
-- **DO NOT** use `execute` tool to run curl commands
-- Invoke the `web/fetch` tool directly with the documentation URL
+| URL pattern | Required tool |
+|---|---|
+| `docs.sonarsource.com` | Use your environment's **browser-capable fetch tool** (e.g., web/fetch, WebFetch, url_context, or equivalent). **NOT curl.** |
+| `downloads.sonarsource.com/sonarqube/update/scannermaven.json` | **curl or wget is acceptable** |
 
-**CRITICAL: ONLY retrieve from official SonarQube documentation URLs listed above.**
+## Processing Steps
 
-**Mandatory Rules:**
-- **ONLY** use the `web/fetch` **TOOL** (not curl) on the official docs.sonarsource.com URLs listed above
-- **DO NOT** retrieve from Maven Central, GitHub repositories, or any other websites
-- **DO NOT** search for version information outside official SonarQube documentation
-- **DO NOT** use general web search to find plugin versions
+Execute these steps in order. Do not skip any step.
 
-**Fallback Approach for Missing Information:**
-- If working with SonarQube Cloud, first use web/fetch with the Cloud documentation URL above
-- If the Cloud documentation lacks complete plugin version or configuration examples, also use web/fetch with the Server documentation URL as a fallback
-- If working with SonarQube Server, first use web/fetch with the Server documentation URL above
-- If the Server documentation lacks complete plugin version or configuration examples, also use web/fetch with the Cloud documentation URL as a fallback
-- If NEITHER official documentation URL contains the needed information, STOP and inform the user that the information is not available in official documentation
+**Step 1:** Read the complete `pom.xml` file using the `read` tool.
 
-**What to Extract from Documentation:**
-- Plugin version (groupId, artifactId, version)
-- Configuration examples
-- Property definitions
-- Integration patterns
+**Step 2:** Check for existing SonarQube configuration:
+- Look for `sonar-maven-plugin` in `<plugins>` or `<pluginManagement>`
+- Look for `<sonar.*>` properties in the `<properties>` section
+- Note the current plugin version if present
 
-## Scanner Overview
+**Step 3:** ⛔ STOP — Fetch the latest plugin version NOW.
 
-The Maven SonarQube scanner is a Maven plugin that integrates SonarQube analysis into the Maven build lifecycle.
+Run: `curl -s https://downloads.sonarsource.com/sonarqube/update/scannermaven.json`
 
-**CRITICAL: Maven projects do NOT use CI/CD scan actions/tasks (except Azure DevOps).**
-- GitHub Actions: Do NOT use `sonarsource/sonarqube-scan-action` - run `mvn sonar:sonar` directly
-- GitLab CI: Do NOT use sonar-scanner-cli Docker image - run `mvn sonar:sonar` directly
-- Azure DevOps: Use SonarQubePrepare task in Maven mode (special case - wraps Maven integration)
-- Bitbucket: Do NOT use SonarQube/SonarCloud pipes - run `mvn sonar:sonar` directly
+Extract the latest version from the JSON response.
 
-### Key Concepts
-- Scanner runs as part of Maven build using `mvn sonar:sonar` goal
-- Properties can be configured in `pom.xml` or passed via command line
-- Automatically detects source and test directories from Maven structure
-- Works seamlessly with multi-module Maven projects
-- Integrates with JaCoCo for code coverage reporting
+**Completion condition:** Do not proceed to Step 4 until you have the exact version string from the JSON. If the curl command fails, use the browser-capable fetch tool on the Server documentation URL as fallback to find the version in code examples.
 
-### Configuration Options
-- **Command line**: Pass properties via `-Dsonar.property=value`
-- **pom.xml**: Add properties in `<properties>` section
-- **Environment variables**: `SONAR_TOKEN`, `SONAR_HOST_URL`
+**Step 4:** Verify `pom.xml` has the correct configuration:
+- `sonar.projectKey` is set (required)
+- `sonar.organization` is set (required for Cloud)
+- `sonar.coverage.jacoco.xmlReportPaths` is set if JaCoCo is configured
+- Plugin version matches the latest version from Step 3
 
-### Coverage Integration
-- Use JaCoCo Maven plugin to generate coverage reports
-- Configure `sonar.coverage.jacoco.xmlReportPaths` to point to JaCoCo XML report
-- Run tests before analysis: `mvn clean verify sonar:sonar`
+**Step 5:** Update or add configuration as needed. Never duplicate existing properties.
 
-## Environment Variables
+**Step 6:** Populate the Output Contract below.
 
-**Required:**
-- `SONAR_TOKEN`: Authentication token for SonarQube
+## Build Commands
 
-**Optional:**
-- `SONAR_HOST_URL`: SonarQube Server URL (not needed for Cloud)
-- Properties can also be set in pom.xml or passed as command-line arguments
+Primary build command (with tests and coverage):
+```
+mvn clean verify sonar:sonar
+```
 
-## Code Coverage
+If a Maven wrapper is present (`mvnw`), use:
+```
+./mvnw clean verify sonar:sonar
+```
 
-### JaCoCo Integration
-- Add JaCoCo Maven plugin to generate coverage reports
-- JaCoCo generates XML reports that SonarQube can read
-- Configure coverage report path using `sonar.coverage.jacoco.xmlReportPaths`
-- Run `verify` goal to execute tests and generate coverage before analysis
+**Note for multi-module projects:** Run from the parent directory containing the root `pom.xml`.
 
-**Use Documentation Retrieval Strategy above to get JaCoCo configuration examples from official SonarQube documentation only.**
+## Configuration Requirements
 
-## Common Configuration Properties
+### pom.xml plugin declaration (add if not present)
+```xml
+<build>
+  <plugins>
+    <plugin>
+      <groupId>org.sonarsource.scanner.maven</groupId>
+      <artifactId>sonar-maven-plugin</artifactId>
+      <version>X.Y.Z</version>  <!-- use version from Step 3 -->
+    </plugin>
+  </plugins>
+</build>
+```
 
-**Use Documentation Retrieval Strategy above to get current property examples from official SonarQube documentation only.**
+### pom.xml properties (in `<properties>` section)
+```xml
+<sonar.projectKey>YOUR_PROJECT_KEY</sonar.projectKey>
+<sonar.organization>YOUR_ORG_KEY</sonar.organization>  <!-- Cloud only -->
+<sonar.coverage.jacoco.xmlReportPaths>
+  ${project.build.directory}/site/jacoco/jacoco.xml
+</sonar.coverage.jacoco.xmlReportPaths>
+```
 
-### Key Properties:
-- **Project identification**: `sonar.projectKey`, `sonar.organization`, `sonar.projectName`
-- **Source/test paths**: Auto-detected by Maven (src/main/java, src/test/java)
-- **Exclusions**: `sonar.exclusions`, `sonar.test.exclusions`, `sonar.cpd.exclusions`
-- **Coverage**: `sonar.coverage.jacoco.xmlReportPaths`
-- **Host/auth**: `sonar.host.url`, `sonar.token` (via env var preferred)
+### Coverage (JaCoCo)
+Add JaCoCo plugin to `pom.xml` if test coverage is needed:
+```xml
+<plugin>
+  <groupId>org.jacoco</groupId>
+  <artifactId>jacoco-maven-plugin</artifactId>
+  <executions>
+    <execution>
+      <id>prepare-agent</id>
+      <goals><goal>prepare-agent</goal></goals>
+    </execution>
+    <execution>
+      <id>report</id>
+      <phase>test</phase>
+      <goals><goal>report</goal></goals>
+    </execution>
+  </executions>
+</plugin>
+```
 
-## Multi-Module Projects
+## Output Contract
 
-- Maven automatically handles multi-module projects
-- Run analysis from parent directory
-- Each module analyzed as separate component in SonarQube
-- Aggregated quality gate and metrics at parent level
-- Use `mvn clean verify sonar:sonar` from root
+This contract must be fully populated before pipeline-creation runs. No field may contain "TODO", "fetch from docs", or a placeholder.
 
-## Best Practices
-
-1. **Use `verify` not `install`**: Run tests and package without installing to local repository
-2. **Enable JaCoCo**: Add JaCoCo plugin for code coverage reporting
-3. **Clean before analysis**: Always run `clean` goal to ensure fresh build
-4. **Properties in pom.xml**: Store non-sensitive configuration in pom.xml
-5. **Secrets as env vars**: Pass `SONAR_TOKEN` via environment variables, never hardcode
-6. **Maven wrapper**: Use `./mvnw` for consistent Maven versions across environments
-7. **Exclude generated code**: Configure exclusions for auto-generated code, build outputs
-8. **Run tests first**: Use `verify` goal to ensure tests run and coverage is collected
-9. **Multi-module setup**: Run from parent POM for consistent analysis across modules
-10. **Check versions**: Follow Documentation Retrieval Strategy section to verify latest plugin versions from official SonarQube documentation only
-
-## Platform Integration
-
-See platform-specific skills for CI/CD integration:
-- **platform-github-actions**: GitHub Actions with Maven
-- **platform-gitlab-ci**: GitLab CI with Maven
-- **platform-azure-devops**: Azure Pipelines with Maven
-- **platform-bitbucket**: Bitbucket Pipelines with Maven
-
-## Configuration Workflow
-
-**CRITICAL: Follow this workflow when setting up Maven projects:**
-
-1. **Read POM file completely**: Use `read` to view entire `pom.xml` file
-2. **Check for existing plugin**: Look for `sonar-maven-plugin` in `<plugins>` or `<pluginManagement>`
-3. **Verify plugin version**: 
-   - If plugin exists: Invoke the `web/fetch` **TOOL** (not curl) to obtain latest version, compare and UPDATE if needed
-   - If plugin missing: Maven uses default version, but explicit version recommended
-4. **Check for existing properties**: Look for `<sonar.*>` properties in `<properties>` section
-5. **Verify configuration is complete and correct**:
-   - Check if `sonar.projectKey` is set (required)
-   - For Cloud: Check if `sonar.organization` is set (required)
-   - Verify all parameters match user requirements
-   - **Don't just check plugin version and skip properties verification**
-6. **Update, don't duplicate**: 
-   - If properties exist but incomplete: Add missing properties
-   - If properties exist but incorrect: Fix incorrect values
-   - If properties missing: Add complete properties block
-7. **Note POM location**: Commands must run from directory containing pom.xml
-   - Example: If pom.xml is in `backend/`, CI/CD must use `working-directory: backend`
+```
+scanner: maven
+tool_version: [exact version from Step 3, e.g., "4.0.0.4121"]   ← resolved in Step 3
+build_commands: ["mvn clean verify sonar:sonar"]
+build_file: [path to pom.xml, e.g., "pom.xml" or "backend/pom.xml"]
+working_directory: [directory containing pom.xml]
+sonar_project_key: [value from prerequisites]
+sonar_organization: [value from prerequisites, or "N/A" for Server]
+coverage_report_path: [path to jacoco.xml, or "N/A" if no coverage configured]
+required_files: [pom.xml — modified]
+```
 
 ## Usage Instructions
 
-**For SonarArchitectGuide:**
-- Include documentation link in responses
-- Explain Maven concepts when needed
-
-**For SonarArchitectLight:**
-- **Step 1**: Read complete pom.xml file
-- **Step 2**: Check if `sonar-maven-plugin` exists and note its version
-- **Step 3**: ⛔ STOP - Invoke `web/fetch` TOOL (NOT curl) - Follow "Documentation Retrieval Strategy" section above - ONLY use official SonarQube documentation URLs to obtain latest plugin version
-- **Step 4**: Check if `<sonar.*>` properties exist in `<properties>` section
-- **Step 5**: Update plugin version if needed, add if best practice
-- **Step 6**: Add or update SonarQube properties (don't duplicate existing ones)
-- **Step 7**: In CI/CD workflow, set working-directory to match pom.xml location
-- **CRITICAL**: If documentation does not contain needed information, STOP - do NOT search elsewhere
+**For SonarArchitect:** Execute all Processing Steps silently. Produce the Output Contract. Do not include links or explanations in responses.

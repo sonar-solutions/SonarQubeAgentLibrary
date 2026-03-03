@@ -97,7 +97,7 @@ fi
 # Print header
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo -e "${BLUE}SonarArchitectLight Test Suite${NC}"
+echo -e "${BLUE}SonarArchitect Test Suite${NC}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 echo -e "${BLUE}Model:${NC} $MODEL"
