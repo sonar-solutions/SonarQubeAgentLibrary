@@ -25,7 +25,7 @@ expected:
     - project-detection
     - prerequisites-gathering
     - platform-github-actions
-    - scanner-python
+    - scanner-cli
     - pipeline-creation
     - security-practices
     - devops-setup-instructions

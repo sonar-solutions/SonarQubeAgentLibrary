@@ -123,6 +123,9 @@ echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Created test workspace: $TEST_W
 
 # Copy project fixture if it exists
 FIXTURE_DIR="$TESTS_DIR/fixtures/projects/${LANGUAGE}-simple"
+if [[ ! -d "$FIXTURE_DIR" ]]; then
+    FIXTURE_DIR=$(ls -d "$TESTS_DIR/fixtures/projects/${LANGUAGE}"-* 2>/dev/null | head -1)
+fi
 if [[ -d "$FIXTURE_DIR" ]]; then
     cp -r "$FIXTURE_DIR"/* "$TEST_WORKSPACE/"
     echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Copied project fixture for $LANGUAGE"

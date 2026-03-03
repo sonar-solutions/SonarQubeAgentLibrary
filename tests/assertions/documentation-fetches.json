@@ -95,6 +95,16 @@
       "warning_message": "Documentation fetched after file creation - may not have informed decisions"
     },
     {
+      "id": "curl-md-pattern",
+      "name": "Documentation Fetched Using .md URL Pattern",
+      "severity": "low",
+      "description": "Agent should fetch docs.sonarsource.com URLs with .md extension appended for markdown content",
+      "pattern": "docs\\.sonarsource\\.com.*\\.md$",
+      "score_if_met": 1,
+      "score_if_not_met": 0,
+      "warning_message": "Documentation not fetched using .md URL pattern - agent may be using HTML pages instead of markdown"
+    },
+    {
       "id": "no-duplicate-fetches",
       "name": "Minimal Duplicate Fetches",
       "severity": "low",

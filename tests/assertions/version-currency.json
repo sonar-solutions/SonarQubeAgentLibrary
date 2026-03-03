@@ -1,6 +1,7 @@
 {
   "description": "Validation rules for checking if latest versions are used",
   "last_updated": "2026-02-12",
+  "staleness_warning_days": 90,
   "platforms": {
     "github-actions": {
       "actions": [

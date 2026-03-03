@@ -37,8 +37,7 @@
         "scanner-maven",
         "scanner-gradle",
         "scanner-dotnet",
-        "scanner-javascript-typescript",
-        "scanner-python"
+        "scanner-cli"
       ],
       "score": 5
     },

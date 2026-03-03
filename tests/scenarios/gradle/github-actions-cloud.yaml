@@ -1,60 +1,61 @@
-name: maven-github-actions-cloud-eu
-description: Maven project with GitHub Actions targeting SonarQube Cloud EU instance
+name: gradle-github-actions-cloud-eu
+description: Gradle Kotlin project with GitHub Actions targeting SonarQube Cloud EU instance
 category: priority
-language: maven
+language: gradle
 platform: github-actions
 sonarqube: cloud-eu
 
 input:
   project_structure:
-    - pom.xml
+    - build.gradle.kts
+    - settings.gradle.kts
     - .github/workflows/ci.yml
-    - src/main/java/com/example/Main.java
-    - src/test/java/com/example/MainTest.java
-  
+    - src/main/kotlin/com/example/Application.kt
+    - src/test/kotlin/com/example/ApplicationTest.kt
+
   user_responses:
     - question: "CI/CD platform confirmation"
-      answer: "That's correct"
+      answer: "Yes, GitHub Actions"
     - question: "SonarQube information"
-      answer: "Cloud, my-org_my-project, my-org, EU"
+      answer: "Cloud, my-org_my-gradle-project, my-org, EU"
 
 expected:
   skills_invoked:
     - project-detection
     - prerequisites-gathering
     - platform-github-actions
-    - scanner-maven
+    - scanner-gradle
     - pipeline-creation
     - security-practices
     - devops-setup-instructions
-  
+
   decisions:
     - checkpoint: "Scanner selection"
-      expected: "Use mvn sonar:sonar command (NO scan action)"
-      reason: "Maven build tool integration"
-    
+      expected: "Use ./gradlew sonar command (NO scan action)"
+      reason: "Gradle build tool integration"
+
     - checkpoint: "Branch patterns"
       expected: "Include standard patterns: main, master, develop/*, feature/*"
       reason: "Standard branch coverage without detection"
-    
+
     - checkpoint: "SonarQube URL"
       expected: "https://sonarcloud.io"
-      reason: "EU instance specified"
-  
+      reason: "EU Cloud instance"
+
   documentation_fetches:
     expected_domains:
       - "docs.sonarsource.com"
       - "github.com"
     expected_pages:
-      - pattern: "docs.sonarsource.com.*maven"
-        description: "Maven scanner documentation"
+      - pattern: "docs.sonarsource.com.*gradle"
+        description: "Gradle scanner documentation"
       - pattern: "github.com/actions.*checkout"
         description: "GitHub Actions checkout documentation"
       - pattern: "github.com/actions.*setup-java"
         description: "GitHub Actions setup-java documentation"
     min_fetches: 2
     max_fetches: 10
-  
+
   files_created:
     - path: ".github/workflows/sonarqube.yml"
       must_contain:
@@ -62,18 +63,18 @@ expected:
         - "fetch-depth: 0"
         - "actions/setup-java@v4"
         - "${{ secrets.SONAR_TOKEN }}"
-        - "mvn -B verify sonar:sonar"
-        - "-Dsonar.projectKey=my-org_my-project"
+        - "./gradlew sonar"
+        - "-Dsonar.projectKey=my-org_my-gradle-project"
         - "-Dsonar.organization=my-org"
         - "-Dsonar.host.url=https://sonarcloud.io"
-        - "feature/user-auth"
+        - "feature/"
       must_not_contain:
         - "sonarqube-scan-action"
-        - "squ_"  # hardcoded token
-        - "sqp_"  # hardcoded token
-        - "actions/checkout@v3"  # outdated version
-        - "actions/setup-java@v3"  # outdated version
-  
+        - "squ_"
+        - "sqp_"
+        - "actions/checkout@v3"
+        - "actions/setup-java@v3"
+
   validation:
     - type: "yaml_syntax"
       file: ".github/workflows/sonarqube.yml"
@@ -89,14 +90,14 @@ expected:
 assertions:
   - "All prerequisites gathered before file creation"
   - "web/fetch used to get latest versions"
-  - "Correct scanner selection (command vs action)"
+  - "Correct scanner selection (Gradle command, not scan action)"
   - "Security practices applied (secrets, not hardcoded)"
   - "Standard branch patterns in triggers (main, master, develop/*, feature/*)"
   - "Secrets setup instructions provided"
 
 scoring:
-  accuracy: 40  # out of 40
-  security: 20  # out of 20
-  efficiency: 15  # out of 15
-  currency: 15  # out of 15
-  usability: 10  # out of 10
+  accuracy: 40
+  security: 20
+  efficiency: 15
+  currency: 15
+  usability: 10

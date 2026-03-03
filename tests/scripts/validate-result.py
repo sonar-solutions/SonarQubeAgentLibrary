@@ -67,7 +67,10 @@ class TestValidator:
         self.validate_security_compliance()
         self.validate_version_currency()
         self.validate_documentation_fetches()
-        
+        self.validate_usability()
+        self.validate_efficiency_batching()
+        self.validate_output_contracts()
+
         # Calculate total score
         self.scores['total'] = sum(self.scores.values()) - self.scores['total']
         
@@ -234,6 +237,9 @@ class TestValidator:
         for expected_file in expected_files:
             if self._validate_single_file(expected_file, actual_files):
                 self.scores['accuracy'] += 5
+
+        # Cap accuracy at maximum to prevent overflow from many files
+        self.scores['accuracy'] = min(self.scores['accuracy'], self.max_scores['accuracy'])
     
     def _check_security_violations(self, files_created, security_rules):
         """Helper to check for security violations in files"""
@@ -292,7 +298,19 @@ class TestValidator:
         
         with open(assertion_file, 'r') as f:
             version_assertions = json.load(f)
-        
+
+        # Warn if version data may be stale
+        from datetime import datetime, timedelta
+        last_updated = version_assertions.get('last_updated', '')
+        staleness_days = version_assertions.get('staleness_warning_days', 90)
+        if last_updated:
+            try:
+                updated_date = datetime.strptime(last_updated, '%Y-%m-%d')
+                if datetime.now() - updated_date > timedelta(days=staleness_days):
+                    print(f"  {YELLOW}!{NC} Warning: version-currency.json may be stale (last updated: {last_updated})")
+            except ValueError:
+                pass
+
         platform = self.scenario.get('platform')
         files_created = self.result.get('files_created', [])
         
@@ -434,6 +452,24 @@ class TestValidator:
             print(f"  {YELLOW}!{NC} {no_dup_rule.get('warning_message')}")
             return 0
     
+    def _check_curl_md_pattern(self, doc_assertions, fetched_pages):
+        """Check that docs.sonarsource.com URLs use .md extension, warn if not"""
+        curl_md_rule = next((r for r in doc_assertions['rules'] if r['id'] == 'curl-md-pattern'), None)
+        if not curl_md_rule:
+            return 0
+
+        sonar_pages = [p for p in fetched_pages if 'docs.sonarsource.com' in p.get('url', '')]
+        if not sonar_pages:
+            return 0
+
+        md_pages = [p for p in sonar_pages if p.get('url', '').endswith('.md')]
+        if md_pages:
+            print(f"  {GREEN}✓{NC} docs.sonarsource.com fetched with .md extension")
+            return curl_md_rule.get('score_if_met', 1)
+        else:
+            print(f"  {YELLOW}!{NC} {curl_md_rule.get('warning_message', 'Not using .md URL pattern')}")
+            return curl_md_rule.get('score_if_not_met', 0)
+
     def _print_fetched_pages(self, fetched_pages):
         """Print the fetched pages for review"""
         if not fetched_pages:
@@ -483,6 +519,7 @@ class TestValidator:
         doc_score += self._check_official_sources(doc_assertions, fetched_domains, platform)
         doc_score += self._check_relevant_pages(doc_assertions, fetched_pages, language)
         doc_score += self._check_duplicate_fetches(doc_assertions, fetched_pages, total_fetches)
+        doc_score += self._check_curl_md_pattern(doc_assertions, fetched_pages)
         
         actual_doc_score = min(max(doc_score, 0), max_doc_score)
         self.scores['efficiency'] += actual_doc_score
@@ -503,6 +540,112 @@ class TestValidator:
                 'domains': list(set(fetched_domains)),
                 'pages': [p.get('url') for p in fetched_pages]
             }
+        })
+
+
+    def validate_usability(self):
+        """Validate usability - clear setup instructions provided to user"""
+        print(f"{YELLOW}[Checkpoint]{NC} Validating usability...")
+
+        skills_invoked = self.result.get('skills_invoked', [])
+        files_created = self.result.get('files_created', [])
+        usability_score = 0
+
+        # Check 1: Setup instructions skill was invoked
+        if 'devops-setup-instructions' in skills_invoked:
+            usability_score += 5
+            print(f"  {GREEN}✓{NC} Setup instructions skill invoked")
+        else:
+            print(f"  {YELLOW}!{NC} Setup instructions skill not invoked")
+
+        # Check 2: Files contain references to required secrets/variables
+        setup_keywords = ['SONAR_TOKEN', 'secrets.', 'environment variable',
+                          'repository variable', 'CI/CD variable', 'pipeline variable']
+        has_setup_content = False
+        for file_info in files_created:
+            content = file_info.get('content', '')
+            if any(kw in content for kw in setup_keywords):
+                has_setup_content = True
+                break
+
+        if has_setup_content:
+            usability_score += 5
+            print(f"  {GREEN}✓{NC} Setup guidance present in created files")
+        else:
+            print(f"  {YELLOW}!{NC} No setup guidance found in created files")
+
+        self.scores['usability'] = min(usability_score, self.max_scores['usability'])
+        self.checkpoints.append({
+            'name': 'usability',
+            'status': 'passed' if usability_score >= 5 else 'failed',
+            'message': f'Usability score: {usability_score}/{self.max_scores["usability"]}'
+        })
+
+    def validate_efficiency_batching(self):
+        """Validate that prerequisite questions were batched efficiently"""
+        print(f"{YELLOW}[Checkpoint]{NC} Validating question batching efficiency...")
+
+        agent_output_path = self.result.get('execution', {}).get('agent_output', '')
+        if not agent_output_path or not Path(agent_output_path).exists():
+            print(f"  {YELLOW}!{NC} Agent output not available for batching check")
+            return
+
+        with open(agent_output_path, 'r', errors='replace') as f:
+            output = f.read()
+
+        # Heuristic: multiple question marks in close proximity indicates batched questions
+        question_blocks = re.findall(r'[^\n]*\?[^\n]*\n[^\n]*\?', output)
+
+        if question_blocks:
+            batching_score = 5
+            print(f"  {GREEN}✓{NC} Questions appear to be batched efficiently")
+        else:
+            batching_score = 2
+            print(f"  {YELLOW}!{NC} Questions may be sequential (partial credit)")
+
+        self.scores['efficiency'] = min(
+            self.scores['efficiency'] + batching_score,
+            self.max_scores['efficiency']
+        )
+        self.checkpoints.append({
+            'name': 'efficiency_batching',
+            'status': 'passed' if batching_score == 5 else 'warning',
+            'message': f'Batching score: {batching_score}/5'
+        })
+
+    def validate_output_contracts(self):
+        """Validate that Output Contracts were produced by platform and scanner skills"""
+        print(f"{YELLOW}[Checkpoint]{NC} Validating Output Contracts...")
+
+        agent_output_path = self.result.get('execution', {}).get('agent_output', '')
+        agent_output = ''
+        if agent_output_path and Path(agent_output_path).exists():
+            with open(agent_output_path, 'r', errors='replace') as f:
+                agent_output = f.read()
+
+        if not agent_output:
+            print(f"  {YELLOW}!{NC} Agent output not available for Output Contract check")
+            return
+
+        platform_contract = bool(re.search(r'Platform Output Contract', agent_output, re.IGNORECASE))
+        scanner_contract = bool(re.search(r'Scanner Output Contract', agent_output, re.IGNORECASE))
+
+        if platform_contract:
+            self.scores['accuracy'] = min(self.scores['accuracy'] + 5, self.max_scores['accuracy'])
+            print(f"  {GREEN}✓{NC} Platform Output Contract found")
+        else:
+            print(f"  {YELLOW}!{NC} Platform Output Contract not found in agent output")
+
+        if scanner_contract:
+            self.scores['accuracy'] = min(self.scores['accuracy'] + 5, self.max_scores['accuracy'])
+            print(f"  {GREEN}✓{NC} Scanner Output Contract found")
+        else:
+            print(f"  {YELLOW}!{NC} Scanner Output Contract not found in agent output")
+
+        self.checkpoints.append({
+            'name': 'output_contracts',
+            'status': 'passed' if (platform_contract and scanner_contract) else 'warning',
+            'message': f'Platform: {platform_contract}, Scanner: {scanner_contract}'
         })
 
 
