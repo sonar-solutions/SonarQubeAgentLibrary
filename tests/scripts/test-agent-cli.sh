@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # test-agent-cli.sh - Test agent CLI access capabilities
-# This script tests different methods of invoking the SonarArchitectLight agent from command line
+# This script tests different methods of invoking the SonarArchitect agent from command line
 
 set -euo pipefail
 

@@ -1,12 +1,12 @@
 # Quick Start Guide - Running Your First Test
 
-This guide walks you through running your first SonarArchitectLight test scenario.
+This guide walks you through running your first SonarArchitect test scenario.
 
 ## Prerequisites
 
 - Python 3.7+ installed
 - Bash shell (macOS/Linux or Git Bash on Windows)
-- Access to the SonarArchitectLight agent
+- Access to the SonarArchitect agent
 
 ## Step 1: Verify Setup
 
@@ -44,7 +44,7 @@ cd scripts
 Expected output:
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-SonarArchitectLight Test Execution
+SonarArchitect Test Execution
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Scenario: github-actions-cloud
@@ -134,7 +134,7 @@ See [DOCUMENTATION_TRACKING.md](DOCUMENTATION_TRACKING.md) for implementation de
 The framework is ready, but needs agent integration:
 
 1. **Implement Agent Invocation**
-   - Modify `run-scenario.sh` to actually invoke the SonarArchitectLight agent
+   - Modify `run-scenario.sh` to actually invoke the SonarArchitect agent
    - Capture agent responses and created files
    - Extract skill invocation logs
 
@@ -243,7 +243,7 @@ You now have:
 - ✅ Result collection prepared
 - ✅ Summary & comparison reports ready
 
-**Next:** Integrate the actual SonarArchitectLight agent execution into `run-scenario.sh`
+**Next:** Integrate the actual SonarArchitect agent execution into `run-scenario.sh`
 
 ---
 :

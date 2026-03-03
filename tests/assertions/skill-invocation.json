@@ -1,5 +1,5 @@
 {
-  "description": "Expected skill invocation sequence for SonarArchitectLight scenarios",
+  "description": "Expected skill invocation sequence for SonarArchitect scenarios",
   "standard_sequence": [
     {
       "order": 1,

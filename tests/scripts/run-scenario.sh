@@ -89,7 +89,7 @@ LOG_FILE="$RESULTS_DIR/${LANGUAGE}-${SCENARIO_NAME}.log"
 # Print header
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo -e "${BLUE}SonarArchitectLight Test Execution${NC}"
+echo -e "${BLUE}SonarArchitect Test Execution${NC}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 echo -e "${BLUE}Scenario:${NC} $SCENARIO_NAME"
@@ -184,7 +184,7 @@ if [[ "$VERBOSE" == "true" ]]; then
     [[ -n "$REGION" ]] && echo "  Region: $REGION"
 fi
 
-echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Invoking SonarArchitectLight agent..."
+echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Invoking SonarArchitect agent..."
 if [[ "$VERBOSE" == "true" ]]; then
     echo -e "${BLUE}Full prompt:${NC}"
     echo "  $AGENT_PROMPT" | fold -s -w 80 | sed 's/^/  /'
@@ -201,7 +201,7 @@ cd "$TEST_WORKSPACE"
 
 echo -e "${BLUE}Executing command:${NC}"
 echo "  cd $TEST_WORKSPACE"
-echo "  copilot --agent=SonarArchitectLight \\"
+echo "  copilot --agent=SonarArchitect \\"
 echo "          --prompt \"$AGENT_PROMPT\" \\"
 echo "          --allow-all-tools \\"
 echo "          --no-ask-user \\"
@@ -211,14 +211,14 @@ echo "          --add-dir \"$WORKSPACE_ROOT\""
 echo ""
 
 # Use non-interactive mode with auto-approval
-# --agent: Use custom agent (loads from .github/agents/SonarArchitectLight.agent.md in current dir)
+# --agent: Use custom agent (loads from .github/agents/SonarArchitect.agent.md in current dir)
 # --allow-all-tools: Allow tools to run without confirmation
 # --no-ask-user: Don't ask questions, work autonomously
 # --share: Output full session transcript to markdown file (includes prompts, responses, tool calls)
 # --add-dir .: Grant explicit access to current directory (test workspace)
 # --add-dir WORKSPACE_ROOT: Grant access to original workspace (for reading docs, etc.)
 # The agent now has direct access to skills/ directory in its working context
-if copilot --agent=SonarArchitectLight \
+if copilot --agent=SonarArchitect \
           --prompt "$AGENT_PROMPT" \
           --allow-all-tools \
           --no-ask-user \

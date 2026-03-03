@@ -130,7 +130,7 @@ Python           0/ 0   ✓ 0.0%
 ### Generated Markdown Report
 
 ```markdown
-# SonarArchitectLight Test Suite Summary
+# SonarArchitect Test Suite Summary
 
 **Model:** claude-sonnet-4
 **Date:** 2026-02-12 15:45:00
@@ -187,7 +187,7 @@ gemini-pro-2         5          5         100.0%       93.2/100      6.1
 ### Generated Comparison Report
 
 ```markdown
-# LLM Model Comparison for SonarArchitectLight
+# LLM Model Comparison for SonarArchitect
 
 **Date:** 2026-02-12 15:45:00
 **Models Compared:** claude-sonnet-4, gpt-4-turbo, gemini-pro-2

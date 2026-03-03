@@ -133,6 +133,4 @@ required_files: [list of files modified or created]
 
 ## Usage Instructions
 
-**For SonarArchitectGuide:** Include documentation links and explain the three-step .NET scanner process when relevant.
-
-**For SonarArchitectLight:** Execute all Processing Steps silently. Produce the Output Contract. Do not include links or explanations in responses.
+**For SonarArchitect:** Execute all Processing Steps silently. Produce the Output Contract. Do not include links or explanations in responses.

@@ -145,6 +145,4 @@ extension_required: true
 
 ## Usage Instructions
 
-**For SonarArchitectGuide:** Include documentation links and explain Azure DevOps task concepts when relevant. Mention the extension installation requirement.
-
-**For SonarArchitectLight:** Execute all Processing Steps silently. Produce the Output Contract. Remind users to install the extension and configure the service connection. Do not include links in responses.
+**For SonarArchitect:** Execute all Processing Steps silently. Produce the Output Contract. Remind users to install the extension and configure the service connection. Do not include links in responses.

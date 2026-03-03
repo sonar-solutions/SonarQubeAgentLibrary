@@ -67,7 +67,7 @@ Before creating any file, apply these rules (from security-practices skill):
 1. State the files that will be created or modified (no explanations, just the list)
 2. Create or edit each file using the `edit` tool, using verbatim values from Output Contracts
 3. Validate YAML syntax and properties file syntax
-4. Do **not** explain configuration options — explaining is SonarArchitectGuide's role
+4. Do **not** explain configuration options — this skill assembles files, not explanations
 
 ## File Structural Notes
 

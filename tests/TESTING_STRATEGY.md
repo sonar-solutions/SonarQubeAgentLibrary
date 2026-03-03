@@ -1,6 +1,6 @@
-# SonarArchitectLight Testing Strategy
+# SonarArchitect Testing Strategy
 
-This document outlines comprehensive testing approaches for validating the SonarArchitectLight agent across different scenarios, platforms, and LLM models.
+This document outlines comprehensive testing approaches for validating the SonarArchitect agent across different scenarios, platforms, and LLM models.
 
 ## Why Testing Matters
 
@@ -274,7 +274,7 @@ assertions:
 
 **Content Structure**:
 ```markdown
-# LLM Model Comparison for SonarArchitectLight
+# LLM Model Comparison for SonarArchitect
 
 ## Testing Methodology
 
@@ -597,7 +597,7 @@ tests/scenarios/maven/github-actions-cloud.yaml
 
 - [WORKFLOW_EXAMPLE.md](../docs/WORKFLOW_EXAMPLE.md) - Detailed workflow reference
 - [Skills Directory](../.github/agents/skills/) - All skill definitions
-- [Agent Definition](../.github/agents/SonarArchitectLight.agent.md) - Agent behavior spec
+- [Agent Definition](../.github/agents/SonarArchitect.agent.md) - Agent behavior spec
 
 ---
 

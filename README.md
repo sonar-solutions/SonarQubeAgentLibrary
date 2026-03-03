@@ -4,82 +4,52 @@ A **unofficial** and **experimental** collection of specialized agents designed 
 
 ## 📚 Available Agents
 
-This library provides two specialized SonarQube integration agents, each optimized for different workflow preferences:
+### 🏗️ SonarArchitect — SonarQube Integration Expert
 
-### 🏗️ SonarArchitectLight - Action-Oriented SonarQube Expert
+**Persona:** Direct and efficient DevOps automation specialist that creates SonarQube pipeline configurations directly and efficiently.
 
-**Persona:** Direct and efficient action-taker that creates configuration files immediately
+**What it does:**
+1. Detects your project structure and CI/CD platform
+2. Gathers required prerequisites (SonarQube type, project key, organization)
+3. Fetches current tool versions directly from official documentation
+4. Creates all configuration files with correct, up-to-date values
+5. Provides concise next steps for secrets configuration
 
-**Best For:**
-- Users who want quick, automatic setup
-- Teams that prefer implementation over explanation
-- Fast prototyping and getting started quickly
-
-**Workflow:**
-1. Detects your project and CI/CD platform
-2. Asks essential prerequisites (SonarQube type, project key, organization)
-3. Creates all configuration files directly with latest versions
-4. Provides concise next steps for secrets configuration
-
-**Location:** `.github/agents/SonarArchitectLight.agent.md`
+**Location:** `.github/agents/SonarArchitect.agent.md`
 
 **Quick Start:**
 ```
-@SonarArchitectLight Set up SonarQube analysis for my project
-```
-
-### 📖 SonarArchitectGuide - Documentation-Focused SonarQube Expert
-
-**Persona:** Educational guide that prioritizes official documentation and learning
-
-**Best For:**
-- Users who want to understand what they're configuring
-- Teams learning SonarQube for the first time
-- Organizations that need to customize configurations
-
-**Workflow:**
-1. Detects your project and CI/CD platform
-2. Asks essential prerequisites
-3. Provides links to official SonarQube documentation
-4. Creates configuration files when requested
-5. Explains concepts and best practices
-
-**Location:** `.github/agents/SonarArchitectGuide.agent.md`
-
-**Quick Start:**
-```
-@SonarArchitectGuide Help me understand SonarQube analysis setup for GitHub Actions for my project
+@SonarArchitect Set up SonarQube analysis for my project
 ```
 
 ### 🧩 Modular Skill-Based Architecture
 
-Both agents use a shared library of **13 specialized skills** located in `.github/agents/skills/`:
+The agent uses a shared library of **13 specialized skills** located in `.github/agents/skills/`:
 
 **Core Skills:**
 - `project-detection.md` - Detects project type, build system, and CI/CD platform
 - `prerequisites-gathering.md` - Collects required information efficiently
-- `documentation-links.md` - Provides official SonarQube documentation URLs
-- `pipeline-creation.md` - Creates CI/CD workflow files with latest versions
+- `pipeline-creation.md` - Creates CI/CD workflow files from resolved Output Contracts
 - `security-practices.md` - Ensures secure credential management
 - `devops-setup-instructions.md` - Platform-specific secret configuration steps
 
 **Platform Skills:**
-- `platform-github-actions.md` - GitHub Actions specific guidance
-- `platform-gitlab-ci.md` - GitLab CI specific guidance
-- `platform-azure-devops.md` - Azure DevOps specific guidance
-- `platform-bitbucket.md` - Bitbucket Pipelines specific guidance
+- `platform-github-actions.md` - GitHub Actions: determines scanner approach, fetches versions, produces Output Contract
+- `platform-gitlab-ci.md` - GitLab CI: determines scanner approach, fetches versions, produces Output Contract
+- `platform-azure-devops.md` - Azure DevOps: determines scanner approach, fetches versions, produces Output Contract
+- `platform-bitbucket.md` - Bitbucket Pipelines: determines scanner approach, fetches versions, produces Output Contract
 
 **Scanner Skills:**
-- `scanner-gradle.md` - Gradle project configuration
-- `scanner-maven.md` - Maven project configuration
-- `scanner-dotnet.md` - .NET project configuration
-- `scanner-cli.md` - CLI scanner for JS/TS/Python/other languages
+- `scanner-gradle.md` - Gradle: fetches plugin version, verifies build file, produces Output Contract
+- `scanner-maven.md` - Maven: fetches plugin version, verifies pom.xml, produces Output Contract
+- `scanner-dotnet.md` - .NET: fetches scanner version, produces Output Contract
+- `scanner-cli.md` - CLI scanner for JS/TS/Python and other languages, produces Output Contract
 
 **Benefits of Skill-Based Design:**
 - ✅ **Maintainability**: Update once in a skill, applies to all agents
-- ✅ **Consistency**: Same information across different agent personalities
-- ✅ **Accuracy**: Specialized skills contain verified, up-to-date information
-- ✅ **Modularity**: Easy to add new platforms or scanners without duplicating code
+- ✅ **Accuracy**: Skills fetch current versions directly from official documentation
+- ✅ **Modularity**: Easy to add new platforms or scanners without duplicating logic
+- ✅ **Traceability**: Output Contracts provide a clear, auditable handoff between skills
 
 ---
 
@@ -89,7 +59,7 @@ GitHub Copilot Agents can be used in two ways:
 
 ### Option 1: Use Directly from This Repository (Recommended)
 
-If you want to try these agents without adding them to your project:
+If you want to try the agent without adding it to your project:
 
 1. **Clone this repository:**
    ```bash
@@ -102,29 +72,26 @@ If you want to try these agents without adding them to your project:
    code .
    ```
 
-3. **Use the agents:**
+3. **Use the agent:**
    - Open GitHub Copilot Chat (`Cmd+Shift+I` on macOS, `Ctrl+Shift+I` on Windows/Linux)
-   - Reference an agent by typing `@` followed by the agent name
-   - Example: `@SonarArchitectLight help me set up SonarQube for GitHub Actions`
+   - Type `@SonarArchitect` followed by your request
+   - Example: `@SonarArchitect Set up SonarQube for my GitHub Actions project`
 
-### Option 2: Copy Agents to Your Project
+### Option 2: Copy the Agent to Your Project
 
-To add these agents to your own project:
+To add the agent to your own project:
 
 1. **Create the agent directory in your project:**
    ```bash
    mkdir -p .github/agents
    ```
 
-2. **Copy the agent files and skills you need:**
+2. **Copy the agent file and skills:**
    ```bash
-   # Copy both agents (or choose one)
-   cp path/to/SonarQubeAgentLibrary/.github/agents/SonarArchitectLight.agent.md \
+   cp path/to/SonarQubeAgentLibrary/.github/agents/SonarArchitect.agent.md \
       .github/agents/
-   cp path/to/SonarQubeAgentLibrary/.github/agents/SonarArchitectGuide.agent.md \
-      .github/agents/
-   
-   # Copy all skill files (required for agents to work)
+
+   # Copy all skill files (required for the agent to work)
    cp -r path/to/SonarQubeAgentLibrary/.github/agents/skills \
       .github/agents/
    ```
@@ -132,14 +99,14 @@ To add these agents to your own project:
 3. **Commit to your repository:**
    ```bash
    git add .github/agents/
-   git commit -m "Add GitHub Copilot agents"
+   git commit -m "Add SonarArchitect GitHub Copilot agent"
    git push
    ```
 
-4. **Start using the agents:**
+4. **Start using the agent:**
    - Open your project in VS Code with GitHub Copilot enabled
    - Open GitHub Copilot Chat (`Cmd+Shift+I` or `Ctrl+Shift+I`)
-   - Type `@SonarArchitectLight` or `@SonarArchitectGuide` followed by your request
+   - Type `@SonarArchitect` followed by your request
 
 > **Prerequisites:** VS Code 1.85.0+, GitHub Copilot subscription, GitHub Copilot Chat extension
 
@@ -147,8 +114,8 @@ To add these agents to your own project:
 
 ## 🤝 Contributing
 
-Want to improve these agents or create new ones? See [AGENT_DEVELOPMENT.md](docs/AGENT_DEVELOPMENT.md) for:
-- How to customize agents for your organization
+Want to improve this agent or create new ones? See [AGENT_DEVELOPMENT.md](docs/AGENT_DEVELOPMENT.md) for:
+- How to customize the agent for your organization
 - Creating new skill-based agents
 - Development guidelines and best practices
 

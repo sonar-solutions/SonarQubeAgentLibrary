@@ -154,6 +154,4 @@ sonar_project_properties_content: |
 
 ## Usage Instructions
 
-**For SonarArchitectGuide:** Include documentation links and explain `sonar-project.properties` structure and language-specific coverage setup when relevant.
-
-**For SonarArchitectLight:** Execute all Processing Steps silently. Produce the Output Contract including the complete `sonar-project.properties` content with resolved values. Do not include links or explanations in responses.
+**For SonarArchitect:** Execute all Processing Steps silently. Produce the Output Contract including the complete `sonar-project.properties` content with resolved values. Do not include links or explanations in responses.

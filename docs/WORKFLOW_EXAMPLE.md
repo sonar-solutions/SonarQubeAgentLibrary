@@ -1,6 +1,6 @@
-# SonarArchitectLight Workflow Example
+# SonarArchitect Workflow Example
 
-This document demonstrates a complete workflow of the SonarArchitectLight agent setting up SonarQube integration for a Maven project with GitHub Actions and SonarQube Cloud.
+This document demonstrates a complete workflow of the SonarArchitect agent setting up SonarQube integration for a Maven project with GitHub Actions and SonarQube Cloud.
 
 ## Scenario Overview
 

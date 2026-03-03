@@ -131,6 +131,4 @@ required_files: [pom.xml — modified]
 
 ## Usage Instructions
 
-**For SonarArchitectGuide:** Include documentation links and explain Maven concepts when relevant.
-
-**For SonarArchitectLight:** Execute all Processing Steps silently. Produce the Output Contract. Do not include links or explanations in responses.
+**For SonarArchitect:** Execute all Processing Steps silently. Produce the Output Contract. Do not include links or explanations in responses.
