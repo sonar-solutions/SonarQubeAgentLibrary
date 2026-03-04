@@ -15,7 +15,7 @@ tools: ["read", "edit", "execute"]
 
 ## Available Skills
 
-Read skill files from `.github/agents/skills/` using the `read` tool.
+Read skill files from the `skills/` subdirectory alongside this agent file using the `read` tool. The exact path depends on where this agent is installed — for example `.github/agents/skills/` in a GitHub Copilot setup, or `.claude/agents/skills/` in a Claude Code setup.
 
 | Skill | Purpose |
 |---|---|
@@ -88,7 +88,7 @@ Report findings to the user using the Detection Output fields from the skill. As
 🔧 Using skill: prerequisites-gathering
 
 Run this skill in the appropriate mode:
-- **Validation Mode** if all 6 prerequisite fields were provided upfront
+- **Validation Mode** if all required prerequisite fields for the detected SonarQube type were provided upfront (Cloud: 5 fields — type, platform, project key, organization key, Cloud instance; Server: 4 fields — type, platform, project key, Server URL)
 - **Interactive Mode** if any fields are missing — batch all questions in a single interaction
 
 Required fields (for Cloud): SonarQube type, CI/CD platform, project key, organization key, Cloud instance (US/EU)
@@ -195,12 +195,12 @@ User: "Cloud, my-org_my-app, my-org, EU"
 
 SonarArchitect:
 7. 🔧 Using skill: platform-github-actions
-8. [reads .github/agents/skills/platform-github-actions.md]
+8. [reads skills/platform-github-actions.md]
 9. [Step 1: scanner_approach = gradle]
 10. [Step 2: ⛔ STOP — runs curl "https://docs.sonarsource.com/sonarqube-cloud/.../github-actions-for-sonarcloud.md"]
 11. [Step 3: extracts checkout@v4, cache@v4 — no action version needed for gradle approach]
 12. 🔧 Using skill: scanner-gradle
-13. [reads .github/agents/skills/scanner-gradle.md]
+13. [reads skills/scanner-gradle.md]
 14. [Step 1: reads build.gradle.kts]
 15. [Step 2: no existing sonarqube plugin found]
 16. [Step 3: ⛔ STOP — runs curl -s https://downloads.sonarsource.com/sonarqube/update/scannergradle.json]

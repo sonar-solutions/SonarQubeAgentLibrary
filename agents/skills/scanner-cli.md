@@ -133,6 +133,7 @@ scanner: cli
 tool_version: n/a                        ← always n/a; version is resolved by platform skill
 build_commands: ["sonar-scanner"]        ← the platform action/image/pipe handles this
 sonar_properties_file: sonar-project.properties
+working_directory: [path relative to repository root, or "." for root]
 sonar_project_key: [value from prerequisites]
 sonar_organization: [value from prerequisites, or "N/A" for Server]
 sonar_host_url: [resolved instance URL or Server URL]

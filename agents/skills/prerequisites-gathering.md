@@ -56,7 +56,7 @@ Run this skill after project-detection in every scenario, regardless of how much
 
 ## Order of Operations
 
-1. **Check what is already provided** — review the conversation context for any of the 6 fields above
+1. **Check what is already provided** — review the conversation context for any of the required fields above
 2. **Confirm the CI/CD platform** — based on project-detection output, ask the user to confirm (or correct) the detected platform
 3. **Batch all remaining questions in ONE interaction** — do not ask field by field; compose a single message listing all missing values needed
 4. **Validate all confirmed values** — verify formats are correct (e.g., URL starts with `https://`, project key is not empty)

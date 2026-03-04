@@ -15,16 +15,16 @@ A **unofficial** and **experimental** collection of specialized agents designed 
 4. Creates all configuration files with correct, up-to-date values
 5. Provides concise next steps for secrets configuration
 
-**Location:** `.github/agents/SonarArchitect.agent.md`
+**Source location in this repo:** `agents/SonarArchitect.agent.md`
 
-**Quick Start:**
+**Quick Start (after installation):**
 ```
 @SonarArchitect Set up SonarQube analysis for my project
 ```
 
 ### 🧩 Modular Skill-Based Architecture
 
-The agent uses a shared library of **13 specialized skills** located in `.github/agents/skills/`:
+The agent uses a shared library of **13 specialized skills** located in `agents/skills/`:
 
 **Core Skills:**
 - `project-detection.md` - Detects project type, build system, and CI/CD platform
@@ -53,62 +53,56 @@ The agent uses a shared library of **13 specialized skills** located in `.github
 
 ---
 
-## 🚀 Installation & Usage
+## 🚀 Installation
 
-GitHub Copilot Agents can be used in two ways:
+Copy the agent files into your project's agent directory. The destination depends on your AI assistant:
 
-### Option 1: Use Directly from This Repository (Recommended)
+| AI assistant | Agent directory |
+|---|---|
+| GitHub Copilot | `.github/agents/` |
+| Claude Code | `.claude/agents/` |
+| Other | Check your platform's documentation |
 
-If you want to try the agent without adding it to your project:
+### Steps
 
-1. **Clone this repository:**
+1. **Clone or download this repository:**
    ```bash
-   git clone https://github.com/your-org/SonarQubeAgentLibrary.git
-   cd SonarQubeAgentLibrary
+   git clone https://github.com/sonar-solutions/SonarQubeAgentLibrary.git
    ```
 
-2. **Open in VS Code:**
+2. **Copy the agent and skills into your project:**
+
+   **GitHub Copilot:**
    ```bash
-   code .
+   mkdir -p /path/to/your-project/.github/agents
+   cp SonarQubeAgentLibrary/agents/SonarArchitect.agent.md \
+      /path/to/your-project/.github/agents/
+   cp -r SonarQubeAgentLibrary/agents/skills \
+      /path/to/your-project/.github/agents/
    ```
 
-3. **Use the agent:**
-   - Open GitHub Copilot Chat (`Cmd+Shift+I` on macOS, `Ctrl+Shift+I` on Windows/Linux)
-   - Type `@SonarArchitect` followed by your request
-   - Example: `@SonarArchitect Set up SonarQube for my GitHub Actions project`
-
-### Option 2: Copy the Agent to Your Project
-
-To add the agent to your own project:
-
-1. **Create the agent directory in your project:**
+   **Claude Code:**
    ```bash
-   mkdir -p .github/agents
-   ```
-
-2. **Copy the agent file and skills:**
-   ```bash
-   cp path/to/SonarQubeAgentLibrary/.github/agents/SonarArchitect.agent.md \
-      .github/agents/
-
-   # Copy all skill files (required for the agent to work)
-   cp -r path/to/SonarQubeAgentLibrary/.github/agents/skills \
-      .github/agents/
+   mkdir -p /path/to/your-project/.claude/agents
+   cp SonarQubeAgentLibrary/agents/SonarArchitect.agent.md \
+      /path/to/your-project/.claude/agents/
+   cp -r SonarQubeAgentLibrary/agents/skills \
+      /path/to/your-project/.claude/agents/
    ```
 
 3. **Commit to your repository:**
    ```bash
-   git add .github/agents/
-   git commit -m "Add SonarArchitect GitHub Copilot agent"
+   git add .github/agents/   # or .claude/agents/
+   git commit -m "Add SonarArchitect agent"
    git push
    ```
 
-4. **Start using the agent:**
-   - Open your project in VS Code with GitHub Copilot enabled
-   - Open GitHub Copilot Chat (`Cmd+Shift+I` or `Ctrl+Shift+I`)
-   - Type `@SonarArchitect` followed by your request
+4. **Open your project and start the agent:**
+   ```
+   @SonarArchitect Set up SonarQube for my project
+   ```
 
-> **Prerequisites:** VS Code 1.85.0+, GitHub Copilot subscription, GitHub Copilot Chat extension
+> **GitHub Copilot prerequisites:** VS Code 1.85.0+, GitHub Copilot subscription, GitHub Copilot Chat extension
 
 ---
 

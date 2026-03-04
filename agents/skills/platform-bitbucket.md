@@ -21,24 +21,24 @@ This skill does **not** explain concepts or include documentation links in respo
 | Cloud | `https://docs.sonarsource.com/sonarqube-cloud/advanced-setup/ci-based-analysis/bitbucket-pipelines-for-sonarcloud` |
 | Server | `https://docs.sonarsource.com/sonarqube-server/devops-platform-integration/bitbucket-integration/bitbucket-cloud-integration/bitbucket-pipelines` |
 
-**Pipe repositories** (version tags are listed on these pages):
+**Pipe version REST API** (use curl to get the latest version tag):
 
-| Pipe | Repository |
+| Pipe | REST API endpoint |
 |---|---|
-| Cloud scan | `https://bitbucket.org/sonarsource/sonarcloud-scan/src/master/` |
-| Cloud quality gate | `https://bitbucket.org/sonarsource/sonarcloud-quality-gate/src/master/` |
-| Server scan | `https://bitbucket.org/sonarsource/sonarqube-scan/src/master/` |
-| Server quality gate | `https://bitbucket.org/sonarsource/sonarqube-quality-gate/src/master/` |
+| Cloud scan | `https://api.bitbucket.org/2.0/repositories/sonarsource/sonarcloud-scan/refs/tags?sort=-name&pagelen=1` |
+| Cloud quality gate | `https://api.bitbucket.org/2.0/repositories/sonarsource/sonarcloud-quality-gate/refs/tags?sort=-name&pagelen=1` |
+| Server scan | `https://api.bitbucket.org/2.0/repositories/sonarsource/sonarqube-scan/refs/tags?sort=-name&pagelen=1` |
+| Server quality gate | `https://api.bitbucket.org/2.0/repositories/sonarsource/sonarqube-quality-gate/refs/tags?sort=-name&pagelen=1` |
+
+Extract the version from `.values[0].name` in the JSON response.
 
 ## Documentation Fetching Strategy
 
 | URL pattern | Required tool |
 |---|---|
 | `docs.sonarsource.com` | Append `.md` to the URL and fetch with **curl** (e.g., `curl "https://docs.sonarsource.com/...page.md"`) — returns the full page content as Markdown |
-| `bitbucket.org` pages | Use your environment's **browser-capable fetch tool**. **NOT curl.** |
+| Pipe version (REST API) | Use **curl** against the `api.bitbucket.org` endpoint from the table above — returns JSON, no JavaScript rendering required |
 | `downloads.sonarsource.com` JSON files | curl or wget is acceptable |
-
-**Never use curl to access bitbucket.org.** Those pages require JavaScript rendering; only a browser-capable fetch tool can retrieve them correctly.
 
 ## Scanner Approach Determination
 
@@ -63,16 +63,15 @@ Execute these steps in order. Do not skip any step.
 
 **Step 1:** Determine scanner approach from the table above using the project-detection output.
 
-**Step 2:** ⛔ STOP — Fetch the appropriate documentation page and pipe repository page NOW.
+**Step 2:** ⛔ STOP — Fetch the appropriate documentation page NOW.
 - Fetch the documentation URL for the detected SonarQube type (Cloud or Server) using curl with `.md` appended to the URL
-- If scanner approach is `cli`: also fetch the appropriate pipe repository page (bitbucket.org) using your environment's browser-capable fetch tool
-- **Do not proceed until you have fetched at least the documentation page.**
+- **Do not proceed until you have fetched the documentation page.**
 
-**Step 3:** From the fetched pages, extract:
-- For `cli` approach: fetch the appropriate **Scan Pipe Repository** URL (from the table above) and extract the latest pipe version tag — this is the `tool_version`. Use the version tag shown in the repository, not `:latest`.
+**Step 3:** From the fetched documentation and REST API, extract:
+- For `cli` approach: fetch the latest pipe version tag using the Bitbucket REST API via curl (endpoints in the table above). Extract `.values[0].name` from the JSON response — this is the `tool_version`. Do not use `:latest` or guess a version.
 - For `maven`, `gradle`, or `dotnet` approach: extract the corresponding step example from the documentation — use this as the reference template when creating the pipeline. No pipe version applies.
 
-**Completion condition:** Do not proceed to Step 4 until you have extracted a specific pipe version tag for `cli`, or the step template for build-tool approaches. If the page could not be fetched, stop and inform the user.
+**Completion condition:** Do not proceed to Step 4 until you have extracted a specific pipe version tag for `cli`, or the step template for build-tool approaches. If the fetch fails, stop and inform the user.
 
 **Step 4:** Read the corresponding scanner skill file to get scanner-specific configuration details.
 

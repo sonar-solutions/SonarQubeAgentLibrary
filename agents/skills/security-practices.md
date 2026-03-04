@@ -104,12 +104,12 @@ env:
 sonar.projectKey=my-project
 sonar.organization=my-org
 sonar.sources=src
+sonar.host.url=https://sonarcloud.io
 ```
 
 **Unsafe — never do this:**
 ```properties
 sonar.token=squ_1234567890abcdef
-sonar.host.url=https://sonar.mycompany.com
 ```
 
 ## Token Best Practices

@@ -596,8 +596,8 @@ tests/scenarios/maven/github-actions-cloud.yaml
 ## Resources
 
 - [WORKFLOW_EXAMPLE.md](../docs/WORKFLOW_EXAMPLE.md) - Detailed workflow reference
-- [Skills Directory](../.github/agents/skills/) - All skill definitions
-- [Agent Definition](../.github/agents/SonarArchitect.agent.md) - Agent behavior spec
+- [Skills Directory](../agents/skills/) - All skill definitions
+- [Agent Definition](../agents/SonarArchitect.agent.md) - Agent behavior spec
 
 ---
 

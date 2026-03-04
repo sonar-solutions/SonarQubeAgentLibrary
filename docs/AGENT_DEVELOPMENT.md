@@ -76,10 +76,10 @@ You can customize agents to fit your organization's specific needs without modif
 
 **Use Case**: Same underlying logic, but different tone/workflow for your team
 
-1. **Clone an existing agent:**
+1. **Copy an existing agent from this library into your project (then rename):**
    ```bash
-   cp .github/agents/SonarArchitect.agent.md \
-      .github/agents/MyCompanySonarSetup.agent.md
+   cp agents/SonarArchitect.agent.md \
+      /path/to/your-project/.github/agents/MyCompanySonarSetup.agent.md
    ```
 
 2. **Edit the agent file to customize:**

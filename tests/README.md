@@ -374,7 +374,7 @@ WheDOCUMENTATION_TRACKING.md](DOCUMENTATION_TRACKING.md) - Guide to tracking doc
 
 - [TESTING_STRATEGY.md](TESTING_STRATEGY.md) - Full testing strategy document
 - [WORKFLOW_EXAMPLE.md](../docs/WORKFLOW_EXAMPLE.md) - Agent workflow reference
-- Skills Directory: `../.github/agents/skills/` - All skill definitions
+- Skills Directory: `../agents/skills/` - All skill definitions
 
 ---
 
