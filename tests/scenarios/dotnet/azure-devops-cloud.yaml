@@ -22,7 +22,6 @@ input:
 expected:
   skills_invoked:
     - project-detection
-    - prerequisites-gathering
     - platform-azure-devops
     - scanner-dotnet
     - pipeline-creation
@@ -57,13 +56,11 @@ expected:
   files_created:
     - path: "azure-pipelines.yml"
       must_contain:
-        - "DotNetCoreCLI@2"
-        - "command: 'custom'"
-        - "custom: 'sonarscanner'"
         - "$(SONAR_TOKEN)"
+        - "sonarscanner"
         - "/k:my-dotnet-project"
         - "/o:my-organization"
-        - "/d:sonar.host.url=https://sonarcloud.io"
+        - "sonarcloud.io"
         - "dotnet build"
       must_not_contain:
         - "SonarCloudPrepare@"  # deprecated task

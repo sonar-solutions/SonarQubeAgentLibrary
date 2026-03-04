@@ -67,7 +67,8 @@
       "expected_scanner": "sonar-scanner-cli",
       "correct_patterns": [
         "sonar-scanner-cli",
-        "sonar-scanner"
+        "sonar-scanner",
+        "sonarqube-scan-action"
       ],
       "incorrect_patterns": [
         {

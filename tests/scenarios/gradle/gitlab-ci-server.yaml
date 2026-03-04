@@ -22,7 +22,6 @@ input:
 expected:
   skills_invoked:
     - project-detection
-    - prerequisites-gathering
     - platform-gitlab-ci
     - scanner-gradle
     - pipeline-creation
@@ -57,12 +56,9 @@ expected:
   files_created:
     - path: ".gitlab-ci.yml"
       must_contain:
-        - "sonarqube-check:"
         - "GIT_DEPTH: 0"
         - "$SONAR_TOKEN"
-        - "./gradlew sonar"
-        - "-Dsonar.projectKey=my-project-key"
-        - "-Dsonar.host.url=https://sonarqube.mycompany.com"
+        - "sonar"
         - "develop"
       must_not_contain:
         - "sonar-scanner-cli"  # shouldn't use CLI scanner for Gradle

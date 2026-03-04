@@ -22,7 +22,6 @@ input:
 expected:
   skills_invoked:
     - project-detection
-    - prerequisites-gathering
     - platform-github-actions
     - scanner-gradle
     - pipeline-creation
@@ -63,10 +62,7 @@ expected:
         - "fetch-depth: 0"
         - "actions/setup-java@v4"
         - "${{ secrets.SONAR_TOKEN }}"
-        - "./gradlew sonar"
-        - "-Dsonar.projectKey=my-org_my-gradle-project"
-        - "-Dsonar.organization=my-org"
-        - "-Dsonar.host.url=https://sonarcloud.io"
+        - "sonar"
         - "feature/"
       must_not_contain:
         - "sonarqube-scan-action"

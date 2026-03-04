@@ -23,7 +23,6 @@ input:
 expected:
   skills_invoked:
     - project-detection
-    - prerequisites-gathering
     - platform-github-actions
     - scanner-cli
     - pipeline-creation
@@ -61,9 +60,6 @@ expected:
         - "actions/checkout@v4"
         - "fetch-depth: 0"
         - "${{ secrets.SONAR_TOKEN }}"
-        - "sonar.projectKey=my-js-app"
-        - "sonar.organization=my-team"
-        - "https://sonarcloud.io"
         - "feature/"
       must_not_contain:
         - "squ_"

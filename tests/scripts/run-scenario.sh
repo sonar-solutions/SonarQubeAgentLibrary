@@ -119,6 +119,7 @@ fi
 # Create temporary workspace for test
 TEST_WORKSPACE="$RESULTS_DIR/.workspace-${SCENARIO_NAME}-$$"
 mkdir -p "$TEST_WORKSPACE"
+git -C "$TEST_WORKSPACE" init --quiet
 echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Created test workspace: $TEST_WORKSPACE"
 
 # Copy project fixture if it exists
@@ -131,9 +132,10 @@ if [[ -d "$FIXTURE_DIR" ]]; then
     echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Copied project fixture for $LANGUAGE"
 fi
 
-# Copy .github directory with agents and skills for the agent to access
-if [[ -d "$WORKSPACE_ROOT/.github" ]]; then
-    cp -r "$WORKSPACE_ROOT/.github" "$TEST_WORKSPACE/"
+# Copy agents and skills into the expected .github/agents/ location for the copilot CLI
+if [[ -d "$WORKSPACE_ROOT/agents" ]]; then
+    mkdir -p "$TEST_WORKSPACE/.github/agents"
+    cp -r "$WORKSPACE_ROOT/agents/." "$TEST_WORKSPACE/.github/agents/"
     echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Copied agent and skills to workspace"
 fi
 
@@ -199,7 +201,7 @@ fi
 AGENT_OUTPUT="$(cd "$RESULTS_DIR" && pwd)/${LANGUAGE}-${SCENARIO_NAME}.agent-output.txt"
 AGENT_SHARE="$(cd "$RESULTS_DIR" && pwd)/${LANGUAGE}-${SCENARIO_NAME}.session.md"
 
-# Change to test workspace where .github/agents/ and skills are now available
+# Change to test workspace where .github/agents/ (copied from agents/) is now available
 cd "$TEST_WORKSPACE"
 
 echo -e "${BLUE}Executing command:${NC}"
@@ -244,10 +246,9 @@ cd "$WORKSPACE_ROOT"
 
 # Capture created files
 echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Capturing created files..."
-FILES_CREATED=$(find "$TEST_WORKSPACE" -type f -newer "$RESULTS_DIR" 2>/dev/null || find "$TEST_WORKSPACE" -type f 2>/dev/null)
-
-# Exclude .github directory from files_created (it's just copied for agent use)
-FILES_CREATED=$(echo "$FILES_CREATED" | grep -v "\.github/agents")
+# Capture all workspace files (excluding git internals and agent setup files)
+# Note: -newer is unreliable because > "$AGENT_OUTPUT" updates RESULTS_DIR mtime before agent starts
+FILES_CREATED=$(find "$TEST_WORKSPACE" -type f | grep -v "\.github/agents" | grep -v "/\.git/")
 
 # Build files_created array for result JSON
 FILES_JSON="[]"
@@ -278,15 +279,16 @@ fi
 # Extract skill invocations from agent output and session file
 echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Tracking skill invocations..."
 # Try session file first (more complete), fall back to agent-output.txt
-# Look for both file reads AND explicit skill announcements (🔧 Using skill: X or 📖 Consulting X skill)
+# Primary source: explicit skill announcements (🔧 Using skill: <name>)
+# Fallback: bold file paths (**path**) which are actual Read tool calls, not Glob directory listings
 if [[ -f "$AGENT_SHARE" ]]; then
-    SKILLS_FROM_FILES=$(grep -oE "skills/[a-z-]+\.md" "$AGENT_SHARE" | sed 's|.*/||; s|\.md||')
-    SKILLS_FROM_ANNOUNCEMENTS=$(grep -oE "(Using skill:|Consulting) [a-z-]+ (skill|for)" "$AGENT_SHARE" | sed -E 's/.*(Using skill:|Consulting) ([a-z-]+).*/\2/')
-    SKILLS_INVOKED=$(echo -e "$SKILLS_FROM_FILES\n$SKILLS_FROM_ANNOUNCEMENTS" | sort -u | grep -v '^$')
+    SKILLS_FROM_ANNOUNCEMENTS=$(grep -oE "Using skill: [a-z-]+" "$AGENT_SHARE" | sed 's/Using skill: //' || true)
+    SKILLS_FROM_FILES=$(grep -oE '\*\*[^*]*skills/[a-z-]+\.md\*\*' "$AGENT_SHARE" | grep -oE 'skills/[a-z-]+\.md' | sed 's|skills/||; s|\.md||' || true)
+    SKILLS_INVOKED=$(echo -e "$SKILLS_FROM_ANNOUNCEMENTS\n$SKILLS_FROM_FILES" | sort -u | grep -v '^$' || true)
 else
-    SKILLS_FROM_FILES=$(grep -oE "\.github/agents/skills/[a-z-]+\.md" "$AGENT_OUTPUT" | sed 's|.*/||; s|\.md||')
-    SKILLS_FROM_ANNOUNCEMENTS=$(grep -oE "(Using skill:|Consulting) [a-z-]+ (skill|for)" "$AGENT_OUTPUT" | sed -E 's/.*(Using skill:|Consulting) ([a-z-]+).*/\2/')
-    SKILLS_INVOKED=$(echo -e "$SKILLS_FROM_FILES\n$SKILLS_FROM_ANNOUNCEMENTS" | sort -u | grep -v '^$')
+    SKILLS_FROM_ANNOUNCEMENTS=$(grep -oE "Using skill: [a-z-]+" "$AGENT_OUTPUT" | sed 's/Using skill: //' || true)
+    SKILLS_FROM_FILES=$(grep -oE '\*\*[^*]*skills/[a-z-]+\.md\*\*' "$AGENT_OUTPUT" | grep -oE 'skills/[a-z-]+\.md' | sed 's|skills/||; s|\.md||' || true)
+    SKILLS_INVOKED=$(echo -e "$SKILLS_FROM_ANNOUNCEMENTS\n$SKILLS_FROM_FILES" | sort -u | grep -v '^$' || true)
 fi
 SKILLS_COUNT=$(echo "$SKILLS_INVOKED" | grep -c . || echo "0")
 
@@ -401,8 +403,7 @@ else
     echo ""
     echo -e "${RED}✗${NC} Validation failed"
 fi
-Session transcript:${NC} $AGENT_SHARE"
-echo -e "${BLUE}
+echo -e "${BLUE}Session transcript:${NC} $AGENT_SHARE"
 echo ""
 echo "$SEPARATOR"
 echo -e "${BLUE}Test workspace:${NC} $TEST_WORKSPACE"

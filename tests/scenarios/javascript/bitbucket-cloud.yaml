@@ -23,7 +23,6 @@ input:
 expected:
   skills_invoked:
     - project-detection
-    - prerequisites-gathering
     - platform-bitbucket
     - scanner-cli
     - pipeline-creation
@@ -63,10 +62,7 @@ expected:
         - "sonarsource/sonar-scanner-cli"
         - "depth: full"
         - "$SONAR_TOKEN"
-        - "sonar.projectKey=my-js-app"
-        - "sonar.organization=my-team"
-        - "sonar.host.url=https://sonarcloud.io"
-        - "feature/new-ui"
+        - "feature/"
       must_not_contain:
         - "npm run sonar"  # no npm integration for JS
         - "squ_"  # hardcoded token

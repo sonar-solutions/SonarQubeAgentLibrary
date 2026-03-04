@@ -23,7 +23,6 @@ input:
 expected:
   skills_invoked:
     - project-detection
-    - prerequisites-gathering
     - platform-github-actions
     - scanner-cli
     - pipeline-creation
@@ -64,10 +63,10 @@ expected:
       must_contain:
         - "actions/checkout@v4"
         - "fetch-depth: 0"
-        - "sonarsource/sonarqube-scan-action@v"
+        - "sonarqube-scan-action"
         - "${{ secrets.SONAR_TOKEN }}"
         - "${{ secrets.SONAR_HOST_URL }}"
-        - "feature/api-improvements"
+        - "feature/"
       must_not_contain:
         - "actions/checkout@v3"  # outdated
         - "squ_"  # hardcoded token

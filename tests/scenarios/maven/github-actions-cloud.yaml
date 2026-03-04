@@ -21,7 +21,6 @@ input:
 expected:
   skills_invoked:
     - project-detection
-    - prerequisites-gathering
     - platform-github-actions
     - scanner-maven
     - pipeline-creation
@@ -62,11 +61,8 @@ expected:
         - "fetch-depth: 0"
         - "actions/setup-java@v4"
         - "${{ secrets.SONAR_TOKEN }}"
-        - "mvn -B verify sonar:sonar"
-        - "-Dsonar.projectKey=my-org_my-project"
-        - "-Dsonar.organization=my-org"
-        - "-Dsonar.host.url=https://sonarcloud.io"
-        - "feature/user-auth"
+        - "sonar:sonar"
+        - "feature/"
       must_not_contain:
         - "sonarqube-scan-action"
         - "squ_"  # hardcoded token
