@@ -5,6 +5,9 @@ description: Platform-specific instructions for configuring secrets and variable
 
 # DevOps Setup Instructions Skill
 
+Use `security-practices` as the canonical reference for variable syntax in pipeline files.
+This skill focuses on UI navigation, required variable names, and flags.
+
 ## GitHub Actions
 
 **Location:** Repository → Settings → Secrets and variables → Actions → New repository secret
@@ -19,6 +22,7 @@ description: Platform-specific instructions for configuring secrets and variable
 **Notes:**
 - The organization key goes in your configuration files (`sonar.organization`), **not** in secrets
 - Ensure GitHub Actions is enabled: Settings → Actions → General → Allow all actions
+- If you provide YAML examples, read `security-practices.md` first and use that syntax
 
 ---
 
@@ -37,6 +41,7 @@ description: Platform-specific instructions for configuring secrets and variable
 - Mark `SONAR_TOKEN` as **Masked** so it never appears in job logs
 - Mark both variables as **Protected** so they are available on protected branches only
 - For merge request pipelines, ensure variables are available on unprotected branches if needed
+- If you provide `.gitlab-ci.yml` examples, read `security-practices.md` first and use that syntax
 
 ---
 
@@ -58,6 +63,7 @@ Then link the group to your pipeline: Pipeline → Edit → Variables → Variab
 **Option B — Pipeline Variables:**
 
 Pipeline → Edit → Variables → add `SONAR_TOKEN` (mark as secret) and `SONAR_HOST_URL`.
+- If you provide YAML examples, read `security-practices.md` first and use Azure syntax from that skill
 
 **Additional setup for Server:**
 - Project Settings → Service connections → New service connection → SonarQube
@@ -83,6 +89,7 @@ Pipeline → Edit → Variables → add `SONAR_TOKEN` (mark as secret) and `SONA
 **Notes:**
 - Mark all variables as **Secured** so they are masked in logs
 - For workspace-level variables: Workspace settings → Pipelines → Workspace variables
+- If you provide `bitbucket-pipelines.yml` examples, read `security-practices.md` first and use that syntax
 
 ---
 

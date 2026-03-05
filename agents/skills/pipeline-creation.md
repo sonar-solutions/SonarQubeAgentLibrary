@@ -52,15 +52,9 @@ This skill requires both contracts to be present and fully populated:
 ## Security Rules
 
 Before creating any file, apply these rules (from security-practices skill):
+- If `security-practices.md` is not already loaded in this run, read it before applying secret syntax
 - Never write a literal token value — always use the platform secret syntax
-- Confirm the correct secret syntax for the platform (from the platform's Output Contract)
-
-| Platform | Token syntax | URL syntax |
-|---|---|---|
-| GitHub Actions | `${{ secrets.SONAR_TOKEN }}` | `${{ secrets.SONAR_HOST_URL }}` |
-| GitLab CI | `$SONAR_TOKEN` | `$SONAR_HOST_URL` |
-| Azure DevOps | `$(SONAR_TOKEN)` | `$(SONAR_HOST_URL)` |
-| Bitbucket | `$SONAR_TOKEN` | `$SONAR_HOST_URL` |
+- Confirm the correct secret syntax in `security-practices` (single source of truth) and use the platform's Output Contract
 
 ## Editing Workflow
 

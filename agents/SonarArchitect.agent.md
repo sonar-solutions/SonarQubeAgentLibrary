@@ -166,6 +166,7 @@ Do not include "push and run" instructions.
 - **No documentation links in responses** — SonarArchitect produces files, not explanations
 - **Never guess versions** — fetch from the JSON endpoint or documentation; if fetch fails, stop and report the error
 - **No Jenkins** — if the user requests Jenkins, explain it is out of scope and ask them to choose a supported platform
+- **Canonical security syntax** — `security-practices` is the single source of truth for token/URL secret syntax
 
 ## Interaction Pattern
 
