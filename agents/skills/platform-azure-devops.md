@@ -25,12 +25,7 @@ The **SonarQube extension** must be installed from the Azure DevOps Marketplace 
 | Cloud | `https://docs.sonarsource.com/sonarqube-cloud/advanced-setup/ci-based-analysis/azure-pipelines/adding-analysis-to-build-pipeline` |
 | Server | `https://docs.sonarsource.com/sonarqube-server/devops-platform-integration/azure-devops-integration/adding-analysis-to-pipeline` |
 
-## Documentation Fetching Strategy
-
-| URL pattern | Required tool |
-|---|---|
-| `docs.sonarsource.com` | Append `.md` to the URL and fetch with **curl** (e.g., `curl "https://docs.sonarsource.com/...page.md"`) — returns the full page content as Markdown |
-| `downloads.sonarsource.com` JSON files | curl or wget is acceptable |
+Follow the fetch policy defined in `SonarArchitect.agent.md` (Available Tools section).
 
 ## Scanner Approach Determination
 

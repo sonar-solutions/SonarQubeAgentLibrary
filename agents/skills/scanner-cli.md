@@ -18,12 +18,7 @@ For CLI scanner projects, the scanner tool version is resolved by the platform s
 | Cloud | `https://docs.sonarsource.com/sonarqube-cloud/advanced-setup/ci-based-analysis/sonarscanner-cli` |
 | Server | `https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/scanners/sonarscanner` |
 
-## Documentation Fetching Strategy
-
-| URL pattern | Required tool |
-|---|---|
-| `docs.sonarsource.com` | Append `.md` to the URL and fetch with **curl** (e.g., `curl "https://docs.sonarsource.com/...page.md"`) — returns the full page content as Markdown |
-| `downloads.sonarsource.com` JSON files | curl or wget is acceptable |
+Follow the fetch policy defined in `SonarArchitect.agent.md` (Available Tools section).
 
 ## Processing Steps
 

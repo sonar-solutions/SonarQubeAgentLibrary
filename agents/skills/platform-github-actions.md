@@ -22,12 +22,7 @@ This skill does **not** explain concepts or include documentation links in respo
 | Server | `https://docs.sonarsource.com/sonarqube-server/devops-platform-integration/github-integration/adding-analysis-to-github-actions-workflow` |
 | Action repository | `https://github.com/SonarSource/sonarqube-scan-action` |
 
-## Documentation Fetching Strategy
-
-| URL pattern | Required tool |
-|---|---|
-| `docs.sonarsource.com` | Append `.md` to the URL and fetch with **curl** (e.g., `curl "https://docs.sonarsource.com/...page.md"`) — returns the full page content as Markdown |
-| `downloads.sonarsource.com` JSON files | curl or wget is acceptable |
+Follow the fetch policy defined in `SonarArchitect.agent.md` (Available Tools section).
 
 ## Scanner Approach Determination
 

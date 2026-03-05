@@ -19,12 +19,7 @@ Configure SonarQube integration for Gradle projects. This skill reads the `build
 **Version JSON:**
 `https://downloads.sonarsource.com/sonarqube/update/scannergradle.json`
 
-## Documentation Fetching Strategy
-
-| URL pattern | Required tool |
-|---|---|
-| `docs.sonarsource.com` | Append `.md` to the URL and fetch with **curl** (e.g., `curl "https://docs.sonarsource.com/...page.md"`) — returns the full page content as Markdown |
-| `downloads.sonarsource.com/sonarqube/update/scannergradle.json` | **curl or wget is acceptable** |
+Follow the fetch policy defined in `SonarArchitect.agent.md` (Available Tools section).
 
 ## Processing Steps
 

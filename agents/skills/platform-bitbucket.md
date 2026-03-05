@@ -32,13 +32,7 @@ This skill does **not** explain concepts or include documentation links in respo
 
 Extract the version from `.values[0].name` in the JSON response.
 
-## Documentation Fetching Strategy
-
-| URL pattern | Required tool |
-|---|---|
-| `docs.sonarsource.com` | Append `.md` to the URL and fetch with **curl** (e.g., `curl "https://docs.sonarsource.com/...page.md"`) — returns the full page content as Markdown |
-| Pipe version (REST API) | Use **curl** against the `api.bitbucket.org` endpoint from the table above — returns JSON, no JavaScript rendering required |
-| `downloads.sonarsource.com` JSON files | curl or wget is acceptable |
+Follow the fetch policy defined in `SonarArchitect.agent.md` (Available Tools section).
 
 ## Scanner Approach Determination
 
