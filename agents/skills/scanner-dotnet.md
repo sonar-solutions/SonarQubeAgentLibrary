@@ -23,7 +23,7 @@ Configure SonarQube integration for .NET projects. This skill locates the soluti
 
 | URL pattern | Required tool |
 |---|---|
-| `docs.sonarsource.com` | Use your environment's **browser-capable fetch tool** (e.g., web/fetch, WebFetch, url_context, or equivalent). **NOT curl.** |
+| `docs.sonarsource.com` | Append `.md` to the URL and fetch with **curl** (e.g., `curl "https://docs.sonarsource.com/...page.md"`) — returns the full page content as Markdown |
 | `downloads.sonarsource.com/sonarqube/update/scannermsbuild.json` | **curl or wget is acceptable** |
 
 ## Processing Steps
@@ -33,7 +33,7 @@ Execute these steps in order. Do not skip any step.
 **Step 1:** Locate the solution or project file using file search tools.
 - Look for `.sln` files first (preferred for multi-project solutions)
 - If no `.sln`, look for `.csproj`, `.vbproj`, or `.fsproj`
-- Note the directory containing the solution/project file — all three steps (begin/build/end) must run from this directory
+- Note the directory containing the solution/project file — all required commands (begin/build/test/end) must run from this directory
 
 **Step 2:** Check for existing configuration:
 - Look for `.config/dotnet-tools.json` — indicates local tool installation
@@ -45,7 +45,7 @@ Run: `curl -s https://downloads.sonarsource.com/sonarqube/update/scannermsbuild.
 
 Extract the latest version from the JSON response.
 
-**Completion condition:** Do not proceed to Step 4 until you have the exact version string from the JSON. If the curl command fails, use the browser-capable fetch tool on the Server documentation URL as fallback.
+**Completion condition:** Do not proceed to Step 4 until you have the exact version string from the JSON. If the curl command fails, fetch the Server documentation URL with `.md` appended and extract the version from code examples as fallback.
 
 **Step 4:** Detect test projects for coverage configuration:
 - Look for `*Test.csproj`, `*.Tests.csproj`, or `*Spec.csproj` files
@@ -53,9 +53,9 @@ Extract the latest version from the JSON response.
 
 **Step 5:** Populate the Output Contract below.
 
-## Build Commands — Three-Step Pattern
+## Build Commands — Four-Step Pattern
 
-All .NET SonarQube analysis follows this mandatory three-step sequence, all executed from the same working directory:
+All .NET SonarQube analysis follows this mandatory four-step sequence, all executed from the same working directory:
 
 ```bash
 # Step 1: Begin analysis

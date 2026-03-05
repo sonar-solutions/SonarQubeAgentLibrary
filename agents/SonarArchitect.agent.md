@@ -262,5 +262,5 @@ I've configured SonarQube analysis for your [project type] project:
 - ✓ [pipeline file] created with [platform] workflow
 - ✓ Security: secrets referenced via [platform secret syntax]
 
-Configure the secrets listed above, then push your changes.
+Configure the secrets listed above.
 ```

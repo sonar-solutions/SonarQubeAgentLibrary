@@ -83,8 +83,7 @@ LANGUAGE=$(basename "$(dirname "$SCENARIO_FILE")")
 RESULTS_DIR="$TESTS_DIR/results/$MODEL"
 mkdir -p "$RESULTS_DIR"
 
-RESULT_FILE="$RESULTS_DIR/${LANGUAGE}-${SCENARIO_NAME}.json"
-LOG_FILE="$RESULTS_DIR/${LANGUAGE}-${SCENARIO_NAME}.log"
+# Result file paths are defined after workspace creation below
 
 # Print header
 echo ""
@@ -121,6 +120,11 @@ TEST_WORKSPACE="$RESULTS_DIR/.workspace-${SCENARIO_NAME}-$$"
 mkdir -p "$TEST_WORKSPACE"
 git -C "$TEST_WORKSPACE" init --quiet
 echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Created test workspace: $TEST_WORKSPACE"
+
+# All run artifacts live inside the workspace so each run is self-contained
+RESULT_FILE="$TEST_WORKSPACE/result.json"
+AGENT_OUTPUT="$TEST_WORKSPACE/agent-output.txt"
+AGENT_SHARE="$TEST_WORKSPACE/session.md"
 
 # Copy project fixture if it exists
 FIXTURE_DIR="$TESTS_DIR/fixtures/projects/${LANGUAGE}-simple"
@@ -196,11 +200,6 @@ if [[ "$VERBOSE" == "true" ]]; then
     echo -e "${BLUE}Running from:${NC} $TEST_WORKSPACE"
 fi
 
-# Invoke agent and capture output
-# Resolve to absolute path BEFORE changing directories
-AGENT_OUTPUT="$(cd "$RESULTS_DIR" && pwd)/${LANGUAGE}-${SCENARIO_NAME}.agent-output.txt"
-AGENT_SHARE="$(cd "$RESULTS_DIR" && pwd)/${LANGUAGE}-${SCENARIO_NAME}.session.md"
-
 # Change to test workspace where .github/agents/ (copied from agents/) is now available
 cd "$TEST_WORKSPACE"
 
@@ -246,9 +245,13 @@ cd "$WORKSPACE_ROOT"
 
 # Capture created files
 echo -e "${YELLOW}[$(date +"$TIME_FORMAT")]${NC} Capturing created files..."
-# Capture all workspace files (excluding git internals and agent setup files)
-# Note: -newer is unreliable because > "$AGENT_OUTPUT" updates RESULTS_DIR mtime before agent starts
-FILES_CREATED=$(find "$TEST_WORKSPACE" -type f | grep -v "\.github/agents" | grep -v "/\.git/")
+# Capture all workspace files (excluding git internals, agent setup, and test metadata files)
+FILES_CREATED=$(find "$TEST_WORKSPACE" -type f \
+  | grep -v "\.github/agents" \
+  | grep -v "/\.git/" \
+  | grep -v "/result\.json$" \
+  | grep -v "/agent-output\.txt$" \
+  | grep -v "/session\.md$")
 
 # Build files_created array for result JSON
 FILES_JSON="[]"
@@ -258,8 +261,11 @@ if [[ -n "$FILES_CREATED" ]]; then
     while IFS= read -r file; do
         if [[ -f "$file" && ! -z "$file" ]]; then
             REL_PATH="${file#$TEST_WORKSPACE/}"
-            # Skip .github/agents files
-            if [[ "$REL_PATH" =~ ^\.github/agents ]]; then
+            # Skip agent setup and test metadata files
+            if [[ "$REL_PATH" =~ ^\.github/agents ]] || \
+               [[ "$REL_PATH" == "result.json" ]] || \
+               [[ "$REL_PATH" == "agent-output.txt" ]] || \
+               [[ "$REL_PATH" == "session.md" ]]; then
                 continue
             fi
             CONTENT=$(cat "$file" | jq -Rs '.')

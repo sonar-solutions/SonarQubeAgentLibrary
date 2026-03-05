@@ -23,7 +23,7 @@ Configure SonarQube integration for Gradle projects. This skill reads the `build
 
 | URL pattern | Required tool |
 |---|---|
-| `docs.sonarsource.com` | Use your environment's **browser-capable fetch tool** (e.g., web/fetch, WebFetch, url_context, or equivalent). **NOT curl.** |
+| `docs.sonarsource.com` | Append `.md` to the URL and fetch with **curl** (e.g., `curl "https://docs.sonarsource.com/...page.md"`) — returns the full page content as Markdown |
 | `downloads.sonarsource.com/sonarqube/update/scannergradle.json` | **curl or wget is acceptable** |
 
 ## Processing Steps
@@ -45,7 +45,7 @@ Run: `curl -s https://downloads.sonarsource.com/sonarqube/update/scannergradle.j
 
 Extract the latest version from the JSON response.
 
-**Completion condition:** Do not proceed to Step 4 until you have the exact version string from the JSON. If the curl command fails, use the browser-capable fetch tool on the Server documentation URL as fallback to find the version in code examples.
+**Completion condition:** Do not proceed to Step 4 until you have the exact version string from the JSON. If the curl command fails, fetch the Server documentation URL with `.md` appended and extract the version from code examples as fallback.
 
 **Step 4:** Verify the build file has the correct configuration:
 - Plugin declaration uses the version from Step 3

@@ -22,7 +22,7 @@ For CLI scanner projects, the scanner tool version is resolved by the platform s
 
 | URL pattern | Required tool |
 |---|---|
-| `docs.sonarsource.com` | Use your environment's **browser-capable fetch tool** (e.g., web/fetch, WebFetch, url_context, or equivalent). **NOT curl.** |
+| `docs.sonarsource.com` | Append `.md` to the URL and fetch with **curl** (e.g., `curl "https://docs.sonarsource.com/...page.md"`) — returns the full page content as Markdown |
 | `downloads.sonarsource.com` JSON files | curl or wget is acceptable |
 
 ## Processing Steps

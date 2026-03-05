@@ -13,7 +13,7 @@ Before running this skill, verify:
 - Platform skill Output Contract is **complete** (no placeholders, no TODOs)
 - Scanner skill Output Contract is **complete** (no placeholders, no TODOs)
 
-**If `scanner_approach`, `tool_version`, or `build_commands` are missing from the Output Contracts: STOP and invoke the appropriate platform or scanner skill first.**
+**If `scanner_approach`, `build_commands`, or the required platform version field (`tool_version` for GitHub/GitLab/Bitbucket, `task_version` for Azure DevOps) is missing from the Output Contracts: STOP and invoke the appropriate platform or scanner skill first.**
 
 Do not re-derive any values. Do not re-fetch any URLs. Every value in created files comes verbatim from an Output Contract or the prerequisites.
 
