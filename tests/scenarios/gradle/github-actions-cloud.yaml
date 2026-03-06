@@ -58,9 +58,9 @@ expected:
   files_created:
     - path: ".github/workflows/sonarqube.yml"
       must_contain:
-        - "actions/checkout@v4"
+        - "actions/checkout"
         - "fetch-depth: 0"
-        - "actions/setup-java@v4"
+        - "actions/setup-java"
         - "${{ secrets.SONAR_TOKEN }}"
         - "sonar"
         - "feature/"

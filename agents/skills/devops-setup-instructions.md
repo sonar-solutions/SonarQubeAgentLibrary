@@ -68,7 +68,7 @@ Pipeline → Edit → Variables → add `SONAR_TOKEN` (mark as secret) and `SONA
 **Additional setup for Server:**
 - Project Settings → Service connections → New service connection → SonarQube
 - Enter your Server URL and token; name the connection (e.g., `SonarQube-Connection`)
-- Reference this connection name in `SonarQubePrepare@6` task configuration
+- Reference this connection name in the `SonarQubePrepare` task configuration
 
 **Extension required:**
 - Install the **SonarQube** extension from Azure DevOps Marketplace before running the pipeline

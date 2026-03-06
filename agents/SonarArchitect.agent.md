@@ -206,7 +206,7 @@ SonarArchitect:
 8. [reads skills/platform-github-actions.md]
 9. [Step 1: scanner_approach = gradle]
 10. [Step 2: ⛔ STOP — runs curl "https://docs.sonarsource.com/sonarqube-cloud/.../github-actions-for-sonarcloud.md"]
-11. [Step 3: extracts checkout@v4, cache@v4 — no action version needed for gradle approach]
+11. [Step 3: extracts action versions from documentation examples (checkout, cache, etc.) — no SonarQube action version needed for gradle approach]
 12. 🔧 Using skill: scanner-gradle
 13. [reads skills/scanner-gradle.md]
 14. [Step 1: reads build.gradle.kts]
