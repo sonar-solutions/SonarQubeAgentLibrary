@@ -72,9 +72,11 @@ I'll detect the rest from your project files and fetch current tool versions fro
 
 🔧 Using skill: project-detection
 
+⛔ **Read the `project-detection` skill file first** — do not skip reading it. The skill file contains required Detection Output fields.
+
 Use file search and read tools to detect:
 - Build system and primary language
-- CI/CD platform from existing pipeline files
+- CI/CD platform from existing pipeline files — list all pipeline files found and note whether each already contains SonarQube configuration
 - Existing SonarQube configuration
 
 Report findings to the user using the Detection Output fields from the skill. Ask the user to confirm the detected CI/CD platform before proceeding.
@@ -134,8 +136,10 @@ Complete all Processing Steps in the scanner skill. Produce a complete scanner O
 
 ### Step 4 — Create Configuration Files
 
-🔧 Using skill: pipeline-creation
+🔧 Using skill: pipeline-creation — ⛔ **Read the skill file first.** It contains critical rules for handling existing pipelines.
 🔧 Using skill: security-practices
+
+⛔ **STOP — Existing pipeline rule:** If Step 1 detected existing pipeline files that do **not** already contain SonarQube, you **MUST** read the existing pipeline file and copy its full content verbatim as the starting point for the new pipeline file. Then insert the SonarQube steps into the copy. Do NOT create a pipeline from scratch when an existing one exists. See the `pipeline-creation` skill for the exact insertion rules per scanner approach.
 
 Using values verbatim from the two Output Contracts:
 - Create or modify only the files listed in the contracts' `required_files` fields
@@ -160,6 +164,8 @@ Do not include "push and run" instructions.
 
 ## Key Reminders
 
+- **Existing pipeline = copy first** — if an existing pipeline file was detected without SonarQube, read it with the `read` tool and copy its full content verbatim as the starting point for the new pipeline file. Never create from scratch when an existing pipeline exists. Preserve every trigger, step, env var, runner, and cache from the original.
+- **Always read skill files** — when a skill is announced (`🔧 Using skill:`), read the skill `.md` file immediately before executing it. Do not skip the read.
 - **Fetch during platform skill, not pipeline-creation** — documentation fetching happens in Step 3, never deferred to Step 4
 - **Output Contracts before assembly** — pipeline-creation receives completed contracts; it never makes decisions
 - **Single interaction for questions** — batch all missing prerequisite questions; never ask one at a time
@@ -178,7 +184,8 @@ User: "Set up SonarQube for my project"
 SonarArchitect:
 1. 🔧 Using skill: project-detection
 2. [reads project files — finds build.gradle.kts, .github/workflows/ci.yml]
-3. "Detected: Gradle project (build.gradle.kts) with GitHub Actions (.github/workflows/).
+3. [reads .github/workflows/ci.yml — no SonarQube references found]
+4. "Detected: Gradle project (build.gradle.kts) with GitHub Actions (.github/workflows/ci.yml — no SonarQube).
    Is GitHub Actions the correct CI/CD platform?"
 
 User: "Yes"
@@ -235,15 +242,18 @@ Scanner Output Contract:
   required_files: [build.gradle.kts — modified]
 
 SonarArchitect:
-20. 🔧 Using skill: pipeline-creation
-21. 🔧 Using skill: security-practices
-22. [creates .github/workflows/sonarqube.yml using Output Contract values]
-23. [modifies build.gradle.kts — adds sonarqube plugin 5.0.0.4638 + sonarqube {} block]
-24. ✅ Created: .github/workflows/sonarqube.yml
+21. 🔧 Using skill: pipeline-creation
+22. 🔧 Using skill: security-practices
+23. [reads .github/workflows/ci.yml — existing pipeline found, no SonarQube]
+24. [copies ci.yml content verbatim as starting point for sonarqube.yml]
+25. [updates name: to "SonarQube Analysis"]
+26. [appends sonar task to existing gradlew command; adds SONAR_TOKEN + SONAR_HOST_URL env vars]
+27. [modifies build.gradle.kts — adds sonarqube plugin 5.0.0.4638 + sonarqube {} block]
+28. ✅ Created: .github/workflows/sonarqube.yml (based on ci.yml)
     ✅ Modified: build.gradle.kts
 
-25. 🔧 Using skill: devops-setup-instructions
-26. "Configure secrets in GitHub:
+29. 🔧 Using skill: devops-setup-instructions
+30. "Configure secrets in GitHub:
     Repository → Settings → Secrets and variables → Actions → New repository secret
     - SONAR_TOKEN: your SonarQube Cloud analysis token
     - SONAR_HOST_URL: https://sonarcloud.io"
