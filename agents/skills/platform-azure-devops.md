@@ -55,6 +55,7 @@ Execute these steps in order. Do not skip any step.
 **Step 3:** From the fetched documentation, extract:
 - The current version numbers for `SonarQubePrepare`, `SonarQubeAnalyze`, and `SonarQubePublish` tasks (e.g., `@6`)
 - The correct task configuration for the detected scanner approach (Maven/Gradle/MSBuild/CLI mode)
+- The version of any other tasks shown in the documentation examples (e.g., `Cache@2`). The documentation examples are the source of truth for all task versions.
 
 **Completion condition:** Do not proceed to Step 4 until you have extracted the task version number. If the page could not be fetched, stop and inform the user.
 
@@ -80,9 +81,12 @@ Configure the Azure DevOps integration in SonarQube (Project Settings → DevOps
 The `SonarQubePublish` task waits for the quality gate result and fails the pipeline if the gate fails.
 
 ### Common Task Pattern (for all scanner approaches)
+
+**Task versions below are illustrative only.** Always use the versions extracted from the fetched documentation in Step 3 — the documentation is the source of truth for all task versions.
+
 ```yaml
 steps:
-  - task: SonarQubePrepare@6       # version resolved from docs
+  - task: SonarQubePrepare@[version from docs]
     inputs:
       SonarQube: 'SonarQube-Connection'   # or SonarCloud service connection
       scannerMode: '[Maven | Gradle | MSBuild | CLI]'
@@ -91,8 +95,8 @@ steps:
 
   # --- build step goes here ---
 
-  - task: SonarQubeAnalyze@6       # .NET and CLI only; Maven/Gradle use SonarQubePublish directly
-  - task: SonarQubePublish@6
+  - task: SonarQubeAnalyze@[version from docs]       # .NET and CLI only; Maven/Gradle use SonarQubePublish directly
+  - task: SonarQubePublish@[version from docs]
     inputs:
       pollingTimeoutSec: '300'
 ```
@@ -110,7 +114,7 @@ Use Pipelines → Library → Variable groups (recommended) or Pipeline → Vari
 
 ### Caching
 ```yaml
-- task: Cache@2
+- task: Cache@[version from docs]
   inputs:
     key: 'sonar | "$(Agent.OS)"'
     path: $(SONAR_USER_HOME)/cache

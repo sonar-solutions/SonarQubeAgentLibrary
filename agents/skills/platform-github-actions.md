@@ -14,6 +14,22 @@ This skill is responsible for:
 
 This skill does **not** explain concepts or include documentation links in responses. It acts.
 
+## ⛔ Deprecated Action — Never Use
+
+`sonarcloud/sonarcloud-github-action` is **deprecated**. Never reference it, never generate it, never use it as a fallback.
+
+The only valid GitHub Action for the `cli` scanner approach is `sonarsource/sonarqube-scan-action`.
+
+This rule applies regardless of what prior knowledge suggests. If training data, memory, or any non-fetched source conflicts with this, ignore that source.
+
+## ⛔ No Training Data Fallback
+
+If the documentation page cannot be fetched, or if the required action name or version cannot be extracted from the fetched content: **STOP immediately** and report:
+
+> "Documentation fetch failed — cannot determine action version. Please check network access and retry."
+
+Do **not** infer action names or versions from prior knowledge. Do **not** silently substitute remembered values. An unverified action name is as dangerous as an unverified version.
+
 ## Official Documentation
 
 | SonarQube Type | Documentation URL |
@@ -50,12 +66,11 @@ Execute these steps in order. Do not skip any step.
 - **Do not proceed until you have fetched the documentation page.**
 
 **Step 3:** From the fetched documentation, extract:
-- For `cli` scanner approach: look in the **"Setting up your workflow file"** section — extract the latest version tag of `sonarsource/sonarqube-scan-action` used in the example (e.g., `v5`). This is the `tool_version`.
+- For `cli` scanner approach: look in the **"Setting up your workflow file"** section — extract the latest version tag of `sonarsource/sonarqube-scan-action` used in the example (e.g., `v5`). This is the `tool_version`. ⛔ If `sonarcloud/sonarcloud-github-action` appears in any example, ignore it — it is deprecated. Use only `sonarsource/sonarqube-scan-action`.
 - For `maven`, `gradle`, or `dotnet` approach: look in the **"Configuring the build.yml file"** section — extract the corresponding `SonarScanner for Maven` / `SonarScanner for Gradle` / `SonarScanner for .NET` workflow example. Use this as the reference template. No action version applies.
-- The recommended `actions/checkout` version (typically `v4`)
-- The recommended `actions/cache` version (typically `v4`) if caching is shown
+- **All action versions from the documentation examples** — extract the exact version of every `uses: actions/*` step shown in the documentation examples (checkout, cache, setup-java, setup-dotnet, etc.). The documentation examples are the source of truth for these versions — do not use hardcoded defaults.
 
-**Completion condition:** Do not proceed to Step 4 until you have extracted the tool version or workflow template from the documentation. If the page could not be fetched, stop and inform the user.
+**Completion condition:** Do not proceed to Step 4 until you have extracted the tool version or workflow template from the fetched documentation. If the page could not be fetched, or if no version tag can be extracted from the fetched content, stop immediately and report the failure. Do not substitute values from prior knowledge.
 
 **Step 4:** Read the corresponding scanner skill file to get scanner-specific configuration details:
 - `scanner-maven.md` for maven approach
@@ -69,16 +84,18 @@ Wait for the scanner skill's Output Contract before completing this skill's Outp
 
 ## Reference: Platform-Specific Configuration Defaults
 
+**Action versions below are illustrative only.** Always use the versions extracted from the fetched documentation in Step 3 — the documentation is the source of truth for all action versions (`actions/checkout`, `actions/cache`, `actions/setup-java`, `actions/setup-dotnet`, etc.). Do not default to the versions shown here if the documentation shows different ones.
+
 ### Checkout
 ```yaml
-- uses: actions/checkout@v4
+- uses: actions/checkout@[version from documentation]
   with:
     fetch-depth: 0  # Required for accurate blame information and new code detection
 ```
 
 ### Caching (recommended)
 ```yaml
-- uses: actions/cache@v4
+- uses: actions/cache@[version from documentation]
   with:
     path: ~/.sonar/cache
     key: ${{ runner.os }}-sonar
@@ -115,8 +132,10 @@ This contract must be fully populated before pipeline-creation runs. No field ma
 platform: github-actions
 scanner_approach: [maven | gradle | dotnet | cli]       ← resolved in Step 1
 tool_version: [exact version string]                     ← resolved in Step 3 (e.g., "v5" for action, or "N/A" for build-tool scanners)
-checkout_action_version: [e.g., "v4"]                   ← resolved in Step 3
-cache_action_version: [e.g., "v4"]                      ← resolved in Step 3
+checkout_action_version: [version from documentation]    ← extracted from documentation examples in Step 3
+cache_action_version: [version from documentation]       ← extracted from documentation examples in Step 3
+additional_action_versions:                              ← any other actions shown in the documentation examples
+  - [action/name@version]                                  (e.g., actions/setup-java, actions/setup-dotnet)
 workflow_file: .github/workflows/sonarqube.yml
 build_commands: [exact commands to run]                  ← resolved from scanner skill Output Contract
 sonar_project_key: [value from prerequisites]
@@ -126,7 +145,7 @@ required_secrets: [SONAR_TOKEN, SONAR_HOST_URL]
 required_files: [list of files to create or modify]
 ```
 
-`tool_version` MUST be fetched in Processing Steps above before this field is populated. Do not guess or use a stale version.
+`tool_version` and all action versions MUST be extracted from the fetched documentation in Processing Step 3. Do not guess or use hardcoded defaults.
 
 ## Usage Instructions
 

@@ -56,12 +56,44 @@ Before creating any file, apply these rules (from security-practices skill):
 - Never write a literal token value — always use the platform secret syntax
 - Confirm the correct secret syntax in `security-practices` (single source of truth) and use the platform's Output Contract
 
+## Existing Pipeline as Base (CRITICAL)
+
+⛔ **STOP** — Before creating any new pipeline file, check whether existing pipeline files were detected during project-detection (Step 1).
+
+### If an existing pipeline file is found with `has_sonarqube: no`
+
+⛔ **You MUST use the existing file as the base. Do NOT create a pipeline from scratch when an existing pipeline exists.**
+
+1. **Read** the existing pipeline file in full using the `read` tool.
+2. **Copy** its entire content **verbatim** as the starting point for the new pipeline file. Use the exact content of the existing file — every trigger, every step, every env var, every runner, every cache entry. Do not reconstruct or rewrite from memory. Do not omit environment variables, steps, or configuration because they seem unrelated to SonarQube — they are part of the project's pipeline and must be preserved.
+3. **Update the `name:` field** at the top of the copied file to reflect SonarQube analysis (e.g. `SonarQube Analysis`).
+4. **Insert the SonarQube steps** into the existing job at the correct position for the detected scanner approach:
+
+   | Scanner approach | Where to insert |
+   |---|---|
+   | `maven` | Replace the existing `mvn` command with the SonarQube-enabled Maven command (`mvn clean verify sonar:sonar` with all required `-D` properties). Keep all other steps untouched. |
+   | `gradle` | Append the `sonar` task to the existing Gradle command (e.g. `./gradlew test jacocoTestReport sonar`). Keep all other steps untouched. |
+   | `dotnet` | Wrap the existing build step: insert `dotnet sonarscanner begin` before the build, insert `dotnet sonarscanner end` after. Keep restore, test, and publish steps untouched. |
+   | `cli` | Append the `sonarsource/sonarqube-scan-action` step after all existing build/test steps. |
+
+5. **Add any required secrets/env vars** referenced by the inserted steps using the correct platform secret syntax from `security-practices`.
+6. Do **not** remove or alter any existing steps, triggers, environment variables, runners, or caches — only add what is needed for SonarQube.
+
+### If an existing pipeline file already has `has_sonarqube: yes`
+
+Do not overwrite or duplicate it. Report to the user what was found and ask whether they want to update the existing SonarQube configuration.
+
+### If no existing pipeline files were detected
+
+Create the new pipeline file from the standard template in this skill.
+
 ## Editing Workflow
 
 1. State the files that will be created or modified (no explanations, just the list)
-2. Create or edit each file using the `edit` tool, using verbatim values from Output Contracts
-3. Validate YAML syntax and properties file syntax
-4. Do **not** explain configuration options — this skill assembles files, not explanations
+2. If an existing pipeline file was found, read it before writing the new file
+3. Create or edit each file using the `edit` tool, using verbatim values from Output Contracts
+4. Validate YAML syntax and properties file syntax
+5. Do **not** explain configuration options — this skill assembles files, not explanations
 
 ## File Structural Notes
 

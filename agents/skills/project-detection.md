@@ -49,6 +49,13 @@ Check for these files to identify the CI/CD platform:
 
 **Note:** Jenkins is not supported. If a `Jenkinsfile` is detected, report it but do not select Jenkins as the target platform — ask the user to choose a supported platform.
 
+## Existing Pipeline File Analysis
+
+When CI/CD platform files are detected, read each file and record:
+- Whether any SonarQube-related steps or references already exist in it (look for `sonarqube-scan-action`, `SonarQubePrepare`, `sonar-scanner`, `SONAR_TOKEN`, `sonar:sonar`, `sonarqube`)
+
+This information is used by `pipeline-creation` to decide whether to use the file as the base for the new SonarQube pipeline.
+
 ## Existing SonarQube Configuration Detection
 
 Check for existing SonarQube configuration:
@@ -68,6 +75,10 @@ build_system_file: [path to detected build descriptor, e.g., pom.xml, build.grad
 scanner_approach: [maven | gradle | dotnet | cli]
 ci_platform: [github-actions | gitlab-ci | azure-devops | bitbucket | none-detected]
 ci_platform_file: [path to detected CI/CD file, or "none"]
+existing_pipeline_files:
+  - file: [path]
+    has_sonarqube: [yes | no]
+  # one entry per detected CI/CD file; omit this block if ci_platform_file is "none"
 existing_sonar_config: [yes | no]
 existing_sonar_config_file: [path to detected sonar config, or "none"]
 ```
