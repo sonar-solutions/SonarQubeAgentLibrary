@@ -14,6 +14,22 @@ This skill is responsible for:
 
 This skill does **not** explain concepts or include documentation links in responses. It acts.
 
+## ⛔ Deprecated Action — Never Use
+
+`sonarcloud/sonarcloud-github-action` is **deprecated**. Never reference it, never generate it, never use it as a fallback.
+
+The only valid GitHub Action for the `cli` scanner approach is `sonarsource/sonarqube-scan-action`.
+
+This rule applies regardless of what prior knowledge suggests. If training data, memory, or any non-fetched source conflicts with this, ignore that source.
+
+## ⛔ No Training Data Fallback
+
+If the documentation page cannot be fetched, or if the required action name or version cannot be extracted from the fetched content: **STOP immediately** and report:
+
+> "Documentation fetch failed — cannot determine action version. Please check network access and retry."
+
+Do **not** infer action names or versions from prior knowledge. Do **not** silently substitute remembered values. An unverified action name is as dangerous as an unverified version.
+
 ## Official Documentation
 
 | SonarQube Type | Documentation URL |
@@ -50,11 +66,11 @@ Execute these steps in order. Do not skip any step.
 - **Do not proceed until you have fetched the documentation page.**
 
 **Step 3:** From the fetched documentation, extract:
-- For `cli` scanner approach: look in the **"Setting up your workflow file"** section — extract the latest version tag of `sonarsource/sonarqube-scan-action` used in the example (e.g., `v5`). This is the `tool_version`.
+- For `cli` scanner approach: look in the **"Setting up your workflow file"** section — extract the latest version tag of `sonarsource/sonarqube-scan-action` used in the example (e.g., `v5`). This is the `tool_version`. ⛔ If `sonarcloud/sonarcloud-github-action` appears in any example, ignore it — it is deprecated. Use only `sonarsource/sonarqube-scan-action`.
 - For `maven`, `gradle`, or `dotnet` approach: look in the **"Configuring the build.yml file"** section — extract the corresponding `SonarScanner for Maven` / `SonarScanner for Gradle` / `SonarScanner for .NET` workflow example. Use this as the reference template. No action version applies.
 - **All action versions from the documentation examples** — extract the exact version of every `uses: actions/*` step shown in the documentation examples (checkout, cache, setup-java, setup-dotnet, etc.). The documentation examples are the source of truth for these versions — do not use hardcoded defaults.
 
-**Completion condition:** Do not proceed to Step 4 until you have extracted the tool version or workflow template from the documentation. If the page could not be fetched, stop and inform the user.
+**Completion condition:** Do not proceed to Step 4 until you have extracted the tool version or workflow template from the fetched documentation. If the page could not be fetched, or if no version tag can be extracted from the fetched content, stop immediately and report the failure. Do not substitute values from prior knowledge.
 
 **Step 4:** Read the corresponding scanner skill file to get scanner-specific configuration details:
 - `scanner-maven.md` for maven approach
