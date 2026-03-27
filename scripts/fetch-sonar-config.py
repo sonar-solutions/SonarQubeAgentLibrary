@@ -137,17 +137,16 @@ def classify_yaml_block(block):
 
 
 def _parse_version_key(version_str):
-    """Parse a version string into a tuple for numeric-aware comparison.
+    """Parse a version string into a tuple of ints for numeric-aware comparison.
 
     Handles formats like 'v7', 'v4.1', '5.0.0.4638'.
+    Non-numeric parts are treated as 0 to avoid TypeError on mixed-type comparison.
     """
     stripped = version_str.lstrip("v")
     parts = []
     for part in re.split(r"[.\-]", stripped):
-        try:
-            parts.append(int(part))
-        except ValueError:
-            parts.append(part)
+        match = re.match(r"(\d+)", part)
+        parts.append(int(match.group(1)) if match else 0)
     return tuple(parts)
 
 

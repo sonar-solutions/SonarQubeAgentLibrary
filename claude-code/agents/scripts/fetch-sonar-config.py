@@ -1,1 +1,0 @@
-../../../scripts/fetch-sonar-config.py

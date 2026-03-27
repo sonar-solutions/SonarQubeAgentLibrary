@@ -87,17 +87,21 @@ Copy the agent files into your project's agent directory. The destination depend
    **Claude Code (recommended — optimized with version fetching script):**
    ```bash
    # Project-level install
-   mkdir -p /path/to/your-project/.claude/agents
+   mkdir -p /path/to/your-project/.claude/agents/scripts
    cp -r SonarQubeAgentLibrary/claude-code/agents/* \
       /path/to/your-project/.claude/agents/
+   cp SonarQubeAgentLibrary/scripts/fetch-sonar-config.py \
+      /path/to/your-project/.claude/agents/scripts/
 
    # Or global install (available in all projects)
-   mkdir -p ~/.claude/agents
+   mkdir -p ~/.claude/agents/scripts
    cp -r SonarQubeAgentLibrary/claude-code/agents/* \
       ~/.claude/agents/
+   cp SonarQubeAgentLibrary/scripts/fetch-sonar-config.py \
+      ~/.claude/agents/scripts/
    ```
 
-   The Claude Code variant includes a Python script (`scripts/fetch-sonar-config.py`) that consolidates all documentation fetching into a single call, reducing token usage by ~95%.
+   The Claude Code variant uses a Python script (`scripts/fetch-sonar-config.py`) that consolidates all documentation fetching into a single call, reducing token usage by ~95%.
 
    **Claude Code (generic — without script):**
    ```bash
