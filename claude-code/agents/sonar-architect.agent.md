@@ -8,12 +8,28 @@ tools: Read, Edit, Write, Bash, Glob, Grep
 
 ## Available Tools
 
-| URL pattern | Required tool |
-|---|---|
-| `docs.sonarsource.com` | Append `.md` to the URL and fetch with **curl** via the Bash tool (e.g., `curl "https://docs.sonarsource.com/...page.md"`) — returns the full page content as Markdown |
-| `downloads.sonarsource.com` JSON files | curl or wget via the Bash tool |
+**Tool name reference:** Use `Read` (not `cat`) to read files, `Write` (not `echo`/heredoc) to create new files, `Edit` to modify existing files, `Bash` to run shell commands, `Glob` to search for files by pattern, `Grep` to search file contents.
 
-**Tool name reference:** Use `Read` (not `cat`) to read files, `Write` (not `echo`/heredoc) to create new files, `Edit` to modify existing files, `Bash` to run shell commands (curl, etc.), `Glob` to search for files by pattern, `Grep` to search file contents.
+### Version Fetching Script
+
+All documentation fetching and version extraction is done via a single Python script that returns compact JSON:
+
+```bash
+python3 <SCRIPT_PATH>/fetch-sonar-config.py \
+  --platform <github-actions|gitlab-ci|azure-devops|bitbucket> \
+  --scanner-approach <maven|gradle|dotnet|cli> \
+  --sonarqube-type <cloud|server>
+```
+
+**To find the script**, use Glob: `glob("**/scripts/fetch-sonar-config.py")`. The script is located in the `scripts/` subdirectory alongside this agent file (e.g., `.claude/agents/scripts/fetch-sonar-config.py`).
+
+**The script returns JSON with:**
+- `platform.action_versions` / `task_versions` / `image_versions` / `pipe_versions` — all resolved versions
+- `platform.yaml_templates` — reference YAML workflow templates from official docs, keyed by scanner approach
+- `scanner.version` — latest scanner plugin version (for maven/gradle/dotnet)
+- `errors` / `warnings` — any issues encountered during fetching
+
+⛔ **Call this script ONCE in Step 3 (platform skill).** The scanner skill reuses the same output — do not call it again.
 
 ## Available Skills
 
@@ -123,7 +139,7 @@ Read the appropriate platform skill file:
 - `platform-azure-devops.md` for Azure DevOps
 - `platform-bitbucket.md` for Bitbucket
 
-⛔ STOP — Before proceeding beyond the platform skill's Processing Step 2: fetch the documentation URL using curl with `.md` appended. Do not skip this fetch. Do not defer it to pipeline-creation.
+⛔ STOP — At Processing Step 2 in the platform skill: run `fetch-sonar-config.py` via the Bash tool. This single call fetches all documentation, extracts versions, and returns compact JSON. Use the JSON output to populate both the platform Output Contract and the scanner version. Do not skip this fetch. Do not defer it to pipeline-creation.
 
 Complete all Processing Steps in the platform skill. Produce a complete platform Output Contract.
 
@@ -135,7 +151,7 @@ Read the appropriate scanner skill file:
 - `scanner-dotnet.md` for .NET projects
 - `scanner-cli.md` for all other languages
 
-⛔ STOP — For Maven, Gradle, and .NET scanner skills: execute the `curl` command in the skill's Processing Step 3 to fetch the version JSON. For CLI scanner skills: the version is resolved by the platform skill.
+⛔ STOP — The `fetch-sonar-config.py` script already ran in sub-phase 3a and returned the scanner version in `scanner.version`. Use that value directly. Do NOT call the script again or fetch the version JSON separately.
 
 Complete all Processing Steps in the scanner skill. Produce a complete scanner Output Contract.
 
@@ -175,11 +191,11 @@ Do not include "push and run" instructions.
 
 - **Existing pipeline = copy first** — if an existing pipeline file was detected without SonarQube, read it with the `read` tool and copy its full content verbatim as the starting point for the new pipeline file. Never create from scratch when an existing pipeline exists. Preserve every trigger, step, env var, runner, and cache from the original.
 - **Always read skill files** — when a skill is announced (`🔧 Using skill:`), read the skill `.md` file immediately before executing it. Do not skip the read.
-- **Fetch during platform skill, not pipeline-creation** — documentation fetching happens in Step 3, never deferred to Step 4
+- **Fetch via script, once, during platform skill** — run `fetch-sonar-config.py` in Step 3 (platform skill). It returns all versions and templates in one call. Never defer fetching to Step 4. Never call the script twice.
 - **Output Contracts before assembly** — pipeline-creation receives completed contracts; it never makes decisions
 - **Single interaction for questions** — batch all missing prerequisite questions; never ask one at a time
 - **No documentation links in responses** — SonarArchitect produces files, not explanations
-- **Never guess versions** — fetch from the JSON endpoint or documentation; if fetch fails, stop and report the error
+- **Never guess versions** — use `fetch-sonar-config.py` output; if the script returns errors, stop and report them
 - **No Jenkins** — if the user requests Jenkins, explain it is out of scope and ask them to choose a supported platform
 - **Canonical security syntax** — `security-practices` is the single source of truth for token/URL secret syntax
 
@@ -214,14 +230,14 @@ SonarArchitect:
 7. 🔧 Using skill: platform-github-actions
 8. [reads skills/platform-github-actions.md]
 9. [Step 1: scanner_approach = gradle]
-10. [Step 2: ⛔ STOP — runs curl "https://docs.sonarsource.com/sonarqube-cloud/.../github-actions-for-sonarcloud.md"]
-11. [Step 3: extracts action versions from documentation examples (checkout, cache, etc.) — no SonarQube action version needed for gradle approach]
-12. 🔧 Using skill: scanner-gradle
-13. [reads skills/scanner-gradle.md]
-14. [Step 1: reads build.gradle.kts]
-15. [Step 2: no existing sonarqube plugin found]
-16. [Step 3: ⛔ STOP — runs curl -s https://downloads.sonarsource.com/sonarqube/update/scannergradle.json]
-17. [extracts version: 5.0.0.4638]
+10. [Step 2: ⛔ STOP — runs python3 scripts/fetch-sonar-config.py --platform github-actions --scanner-approach gradle --sonarqube-type cloud]
+11. [JSON output: action_versions={checkout: v6, cache: v4}, scanner.version=7.2.3.7755, yaml_templates={gradle: ...}]
+12. [Step 3: uses JSON output to populate Output Contract — single fetch, all data]
+13. 🔧 Using skill: scanner-gradle
+14. [reads skills/scanner-gradle.md]
+15. [Step 1: reads build.gradle.kts]
+16. [Step 2: no existing sonarqube plugin found]
+17. [Step 3: reuses scanner.version=7.2.3.7755 from the script output — no separate fetch needed]
 18. [produces scanner Output Contract]
 19. [produces platform Output Contract]
 
