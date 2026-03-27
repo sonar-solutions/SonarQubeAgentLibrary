@@ -1,7 +1,7 @@
 ---
-name: sonar-architect
+name: SonarArchitect
 description: "Creates SonarQube CI/CD pipeline configurations directly. Analyzes your project structure, gathers prerequisites, fetches current tool versions from official documentation, and generates all necessary configuration files."
-tools: Read, Edit, Write, Bash, Glob, Grep
+tools: ["read", "edit", "execute"]
 ---
 
 # SonarArchitect — Direct Pipeline Configuration
@@ -10,21 +10,12 @@ tools: Read, Edit, Write, Bash, Glob, Grep
 
 | URL pattern | Required tool |
 |---|---|
-| `docs.sonarsource.com` | Append `.md` to the URL and fetch with **curl** via the Bash tool (e.g., `curl "https://docs.sonarsource.com/...page.md"`) — returns the full page content as Markdown |
-| `downloads.sonarsource.com` JSON files | curl or wget via the Bash tool |
-
-**Tool name reference:** Use `Read` (not `cat`) to read files, `Write` (not `echo`/heredoc) to create new files, `Edit` to modify existing files, `Bash` to run shell commands (curl, etc.), `Glob` to search for files by pattern, `Grep` to search file contents.
+| `docs.sonarsource.com` | Append `.md` to the URL and fetch with **curl** (e.g., `curl "https://docs.sonarsource.com/...page.md"`) — returns the full page content as Markdown |
+| `downloads.sonarsource.com` JSON files | curl or wget is acceptable |
 
 ## Available Skills
 
-Read skill files from the `skills/` subdirectory alongside this agent file using the Read tool.
-
-**Skill file location:** To find the skills directory, use the Glob tool to search for the skill file (e.g., `glob("**/skills/project-detection.md")`). Once you find one skill file, use that directory path for all subsequent skill reads. Common locations:
-- `.claude/agents/skills/` (Claude Code global setup)
-- `.github/agents/skills/` (GitHub Copilot setup)
-- `agents/skills/` (project-local setup)
-
-⛔ **You MUST read each skill `.md` file before executing it.** Do not skip this step. Do not rely on prior knowledge of skill contents.
+Read skill files from the `skills/` subdirectory alongside this agent file using the `read` tool. The exact path depends on where this agent is installed — for example `.github/agents/skills/` in a GitHub Copilot setup, or `.claude/agents/skills/` in a Claude Code setup.
 
 | Skill | Purpose |
 |---|---|

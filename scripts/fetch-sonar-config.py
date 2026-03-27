@@ -136,13 +136,28 @@ def classify_yaml_block(block):
     return max(scores, key=scores.get)
 
 
+def _parse_version_key(version_str):
+    """Parse a version string into a tuple for numeric-aware comparison.
+
+    Handles formats like 'v7', 'v4.1', '5.0.0.4638'.
+    """
+    stripped = version_str.lstrip("v")
+    parts = []
+    for part in re.split(r"[.\-]", stripped):
+        try:
+            parts.append(int(part))
+        except ValueError:
+            parts.append(part)
+    return tuple(parts)
+
+
 def extract_github_action_versions(markdown):
     """Extract action versions from GitHub Actions workflow examples."""
     versions = {}
     for match in re.finditer(r"uses:\s+([\w.-]+/[\w.-]+)@(v?\d[\w.]*)", markdown):
         action, version = match.group(1), match.group(2)
-        # Keep the latest version found for each action
-        if action not in versions or version > versions[action]:
+        # Keep the latest version found for each action (numeric-aware comparison)
+        if action not in versions or _parse_version_key(version) > _parse_version_key(versions[action]):
             versions[action] = version
     return versions
 
@@ -314,7 +329,11 @@ def fetch_scanner_version(scanner_approach, timeout=15):
             # All archived — use the first one anyway
             result["version"] = versions[0]["version"]
         result["version_source"] = url
-        result["fetch_status"] = "ok"
+        if result["version"] is not None:
+            result["fetch_status"] = "ok"
+        else:
+            result["fetch_status"] = "error"
+            errors.append(f"No versions found in JSON response from {url}")
     except (json.JSONDecodeError, KeyError, IndexError) as e:
         result["fetch_status"] = "error"
         errors.append(f"Scanner version parse error: {e}")

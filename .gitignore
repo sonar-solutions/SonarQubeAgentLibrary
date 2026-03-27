@@ -69,3 +69,6 @@ Thumbs.db
 
 # Tests Results
 tests/results/**
+
+# Development planning
+PLAN.md
