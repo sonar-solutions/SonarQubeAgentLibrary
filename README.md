@@ -15,11 +15,14 @@ A **unofficial** and **experimental** collection of specialized agents designed 
 4. Creates all configuration files with correct, up-to-date values
 5. Provides concise next steps for secrets configuration
 
-**Source location in this repo:** `agents/SonarArchitect.agent.md`
+**Source locations in this repo:**
+- `agents/SonarArchitect.agent.md` — Generic agent (GitHub Copilot compatible)
+- `claude-code/agents/sonar-architect.agent.md` — Claude Code optimized (includes version fetching script)
 
 **Quick Start (after installation):**
 ```
-@SonarArchitect Set up SonarQube analysis for my project
+@SonarArchitect Set up SonarQube analysis for my project     # GitHub Copilot
+@sonar-architect Set up SonarQube analysis for my project     # Claude Code
 ```
 
 ### 🧩 Modular Skill-Based Architecture
@@ -81,7 +84,26 @@ Copy the agent files into your project's agent directory. The destination depend
       /path/to/your-project/.github/agents/
    ```
 
-   **Claude Code:**
+   **Claude Code (recommended — optimized with version fetching script):**
+   ```bash
+   # Project-level install
+   mkdir -p /path/to/your-project/.claude/agents/scripts
+   cp -r SonarQubeAgentLibrary/claude-code/agents/* \
+      /path/to/your-project/.claude/agents/
+   cp SonarQubeAgentLibrary/scripts/fetch-sonar-config.py \
+      /path/to/your-project/.claude/agents/scripts/
+
+   # Or global install (available in all projects)
+   mkdir -p ~/.claude/agents/scripts
+   cp -r SonarQubeAgentLibrary/claude-code/agents/* \
+      ~/.claude/agents/
+   cp SonarQubeAgentLibrary/scripts/fetch-sonar-config.py \
+      ~/.claude/agents/scripts/
+   ```
+
+   The Claude Code variant uses a Python script (`scripts/fetch-sonar-config.py`) that consolidates all documentation fetching into a single call, reducing token usage by ~95%.
+
+   **Claude Code (generic — without script):**
    ```bash
    mkdir -p /path/to/your-project/.claude/agents
    cp SonarQubeAgentLibrary/agents/SonarArchitect.agent.md \
@@ -99,10 +121,12 @@ Copy the agent files into your project's agent directory. The destination depend
 
 4. **Open your project and start the agent:**
    ```
-   @SonarArchitect Set up SonarQube for my project
+   @SonarArchitect Set up SonarQube for my project     # GitHub Copilot
+   @sonar-architect Set up SonarQube for my project     # Claude Code
    ```
 
 > **GitHub Copilot prerequisites:** VS Code 1.85.0+, GitHub Copilot subscription, GitHub Copilot Chat extension
+> **Claude Code prerequisites:** Python 3.6+ (for the version fetching script)
 
 ---
 
