@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-03-30 — Claude Code Marketplace
+
+### Added
+- **`.claude-plugin/marketplace.json`** — registers this repo as a self-hosted Claude Code marketplace; customers install via `/plugin marketplace add sonar-solutions/SonarQubeAgentLibrary` then `/plugin install sonar-architect@sonar-solutions`
+
+### Updated
+- **`README.md`** — two-command install flow now leads the Claude Code section
+
+---
+
 ## 2026-03-30 — Claude Code Plugin Packaging
 
 ### Added

@@ -1,0 +1,16 @@
+{
+  "name": "sonar-solutions",
+  "owner": {
+    "name": "Sonar Solutions"
+  },
+  "plugins": [
+    {
+      "name": "sonar-architect",
+      "source": ".",
+      "description": "SonarQube CI/CD pipeline setup for any project and platform. Detects your stack, fetches current tool versions, and generates all configuration files.",
+      "homepage": "https://github.com/sonar-solutions/SonarQubeAgentLibrary",
+      "license": "MIT",
+      "keywords": ["sonarqube", "ci-cd", "pipeline", "devops", "code-quality"]
+    }
+  ]
+}

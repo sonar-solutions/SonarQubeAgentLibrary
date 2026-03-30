@@ -60,9 +60,10 @@ The agent uses a shared library of **13 specialized skills** located in `agents/
 
 ### Claude Code (plugin install — recommended)
 
-This repository is a Claude Code plugin. Install it directly from Claude Code with:
+This repository is a Claude Code plugin with a built-in marketplace. Two commands and you're done:
 
 ```
+/plugin marketplace add sonar-solutions/SonarQubeAgentLibrary
 /plugin install sonar-architect@sonar-solutions
 ```
 
