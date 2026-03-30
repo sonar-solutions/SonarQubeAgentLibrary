@@ -59,18 +59,23 @@ Execute these steps in order. Do not skip any step.
 
 **Step 1:** Determine scanner approach from the table above using the project-detection Output.
 
-**Step 2:** ⛔ STOP — Fetch the appropriate documentation page NOW using curl with `.md` appended to the URL.
-- For Cloud: fetch the Cloud documentation URL above with `.md` appended
-- For Server: fetch the Server documentation URL above with `.md` appended
-- If the primary URL lacks complete examples, fetch the other URL as fallback and adapt
-- **Do not proceed until you have fetched the documentation page.**
+**Step 2:** ⛔ STOP — Fetch versions and templates NOW using the `fetch-sonar-config.py` script via Bash:
 
-**Step 3:** From the fetched documentation, extract:
-- For `cli` scanner approach: look in the **"Setting up your workflow file"** section — extract the latest version tag of `sonarsource/sonarqube-scan-action` used in the example (e.g., `v5`). This is the `tool_version`. ⛔ If `sonarcloud/sonarcloud-github-action` appears in any example, ignore it — it is deprecated. Use only `sonarsource/sonarqube-scan-action`.
-- For `maven`, `gradle`, or `dotnet` approach: look in the **"Configuring the build.yml file"** section — extract the corresponding `SonarScanner for Maven` / `SonarScanner for Gradle` / `SonarScanner for .NET` workflow example. Use this as the reference template. No action version applies.
-- **All action versions from the documentation examples** — extract the exact version of every `uses: actions/*` step shown in the documentation examples (checkout, cache, setup-java, setup-dotnet, etc.). The documentation examples are the source of truth for these versions — do not use hardcoded defaults.
+```bash
+python3 <SCRIPT_PATH>/fetch-sonar-config.py --platform github-actions --scanner-approach <from Step 1> --sonarqube-type <cloud|server>
+```
 
-**Completion condition:** Do not proceed to Step 4 until you have extracted the tool version or workflow template from the fetched documentation. If the page could not be fetched, or if no version tag can be extracted from the fetched content, stop immediately and report the failure. Do not substitute values from prior knowledge.
+To find the script, use Glob: `glob("**/scripts/fetch-sonar-config.py")`.
+
+**Do not proceed until the script has returned its JSON output.**
+
+**Step 3:** From the script's JSON output, extract:
+- `platform.action_versions` — contains all action versions (e.g., `actions/checkout`, `actions/cache`, `SonarSource/sonarqube-scan-action`). Use these for all `uses:` version values in the Output Contract.
+- `platform.yaml_templates.<scanner_approach>` — reference YAML workflow template from official docs. Use as the structural reference when creating the pipeline.
+- `scanner.version` — latest scanner plugin version (for maven/gradle/dotnet). Pass this to the scanner skill.
+- For `cli` approach: the `tool_version` is the version of `SonarSource/sonarqube-scan-action` found in `platform.action_versions`. ⛔ If `sonarcloud/sonarcloud-github-action` appears anywhere, ignore it — it is deprecated.
+
+**Completion condition:** If `platform.fetch_status` is not `"ok"`, or if `errors` is non-empty, stop immediately and report the failure. Do not substitute values from prior knowledge.
 
 **Step 4:** Read the corresponding scanner skill file to get scanner-specific configuration details:
 - `scanner-maven.md` for maven approach
@@ -145,7 +150,7 @@ required_secrets: [SONAR_TOKEN, SONAR_HOST_URL]
 required_files: [list of files to create or modify]
 ```
 
-`tool_version` and all action versions MUST be extracted from the fetched documentation in Processing Step 3. Do not guess or use hardcoded defaults.
+`tool_version` and all action versions MUST come from the `fetch-sonar-config.py` script output. Do not guess or use hardcoded defaults.
 
 ## Usage Instructions
 

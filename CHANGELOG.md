@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-03-30 — Claude Code Plugin Packaging
+
+### Added
+- **`.claude-plugin/plugin.json`** — registers the repo as an installable Claude Code plugin (`/plugin install sonar-architect@sonar-solutions`)
+
+### Restructured
+- **`agents/`** — Claude Code-optimized agent and skills (previously `claude-code/agents/`) are now the primary content in `agents/`, replacing the generic versions
+- **`agents/SonarArchitect.agent.md`** — kept as-is for GitHub Copilot manual installs
+- **`claude-code/` removed** — no longer needed; its contents are now in `agents/`
+
+### Updated
+- **`README.md`** — plugin install (`/plugin install`) is now the primary Claude Code install path; Copilot manual install moved to secondary section
+
+### Files Added
+- `.claude-plugin/plugin.json`
+
+### Files Removed
+- `claude-code/` directory (contents merged into `agents/`)
+
+---
+
 ## 2026-03-27 — Claude Code Agent Optimization
 
 ### LLM-Specific Agent Structure

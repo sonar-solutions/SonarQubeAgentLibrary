@@ -46,18 +46,24 @@ Execute these steps in order. Do not skip any step.
 
 **Step 1:** Determine scanner approach from the table above using the project-detection output.
 
-**Step 2:** ⛔ STOP — Fetch the appropriate documentation page NOW using curl with `.md` appended to the URL.
-- For Cloud: fetch the Cloud documentation URL above with `.md` appended
-- For Server: fetch the Server documentation URL above with `.md` appended
-- If the primary URL lacks complete examples, fetch the other URL as fallback and adapt
-- **Do not proceed until you have fetched the documentation page.**
+**Step 2:** ⛔ STOP — Fetch versions and templates NOW using the `fetch-sonar-config.py` script via Bash:
 
-**Step 3:** From the fetched documentation, extract:
-- The current version numbers for `SonarQubePrepare`, `SonarQubeAnalyze`, and `SonarQubePublish` tasks (e.g., `@6`)
-- The correct task configuration for the detected scanner approach (Maven/Gradle/MSBuild/CLI mode)
-- The version of any other tasks shown in the documentation examples (e.g., `Cache@2`). The documentation examples are the source of truth for all task versions.
+```bash
+python3 <SCRIPT_PATH>/fetch-sonar-config.py --platform azure-devops --scanner-approach <from Step 1> --sonarqube-type <cloud|server>
+```
 
-**Completion condition:** Do not proceed to Step 4 until you have extracted the task version number. If the page could not be fetched, stop and inform the user.
+To find the script, use Glob: `glob("**/scripts/fetch-sonar-config.py")`.
+
+**Do not proceed until the script has returned its JSON output.**
+
+**Step 3:** From the script's JSON output, extract:
+- `platform.task_versions` — contains task version numbers (e.g., `SonarQubePrepare`, `SonarQubeAnalyze`, `SonarQubePublish`, `Cache`). Use the version numbers for the `@N` suffix in task references.
+- `platform.yaml_templates.<scanner_approach>` — reference pipeline template from official docs (if available). Use as the structural reference when creating the pipeline.
+- `scanner.version` — latest scanner plugin version (for maven/gradle/dotnet). Pass this to the scanner skill.
+
+**Note:** Azure DevOps documentation may not contain YAML code blocks. If `platform.yaml_templates` is empty, use the Reference section below for the pipeline structure. If `platform.task_versions` is also empty, use the task version reference from the Reference section as a starting point but note this in the Output Contract.
+
+**Completion condition:** If `platform.fetch_status` is not `"ok"`, or if `errors` is non-empty, stop and inform the user.
 
 **Step 4:** Read the corresponding scanner skill file to get scanner-specific configuration details.
 

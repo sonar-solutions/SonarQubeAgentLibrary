@@ -34,13 +34,16 @@ Execute these steps in order. Do not skip any step.
 - Look for `.config/dotnet-tools.json` — indicates local tool installation
 - If tool manifest exists, note the current scanner version
 
-**Step 3:** ⛔ STOP — Fetch the latest scanner version NOW.
+**Step 3:** ⛔ STOP — Get the latest scanner version.
 
-Run: `curl -s https://downloads.sonarsource.com/sonarqube/update/scannermsbuild.json`
+The `fetch-sonar-config.py` script already ran during the platform skill (Step 3a) and returned the scanner version in `scanner.version`. Use that value directly. **Do not call the script again or fetch the version JSON separately.**
 
-Extract the latest version from the JSON response.
+If the platform skill has not yet run, or if `scanner.version` is missing from the script output, run the script via Bash:
+```bash
+python3 <SCRIPT_PATH>/fetch-sonar-config.py --platform <platform> --scanner-approach dotnet --sonarqube-type <cloud|server>
+```
 
-**Completion condition:** Do not proceed to Step 4 until you have the exact version string from the JSON. If the curl command fails, fetch the Server documentation URL with `.md` appended and extract the version from code examples as fallback.
+**Completion condition:** Do not proceed to Step 4 until you have the exact version string.
 
 **Step 4:** Detect test projects for coverage configuration:
 - Look for `*Test.csproj`, `*.Tests.csproj`, or `*Spec.csproj` files

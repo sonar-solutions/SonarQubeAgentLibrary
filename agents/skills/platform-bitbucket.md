@@ -57,15 +57,24 @@ Execute these steps in order. Do not skip any step.
 
 **Step 1:** Determine scanner approach from the table above using the project-detection output.
 
-**Step 2:** ⛔ STOP — Fetch the appropriate documentation page NOW.
-- Fetch the documentation URL for the detected SonarQube type (Cloud or Server) using curl with `.md` appended to the URL
-- **Do not proceed until you have fetched the documentation page.**
+**Step 2:** ⛔ STOP — Fetch versions and templates NOW using the `fetch-sonar-config.py` script via Bash:
 
-**Step 3:** From the fetched documentation and REST API, extract:
-- For `cli` approach: fetch the latest pipe version tag using the Bitbucket REST API via curl (endpoints in the table above). Extract `.values[0].name` from the JSON response — this is the `tool_version`. Do not use `:latest` or guess a version.
-- For `maven`, `gradle`, or `dotnet` approach: extract the corresponding step example from the documentation — use this as the reference template when creating the pipeline. No pipe version applies.
+```bash
+python3 <SCRIPT_PATH>/fetch-sonar-config.py --platform bitbucket --scanner-approach <from Step 1> --sonarqube-type <cloud|server>
+```
 
-**Completion condition:** Do not proceed to Step 4 until you have extracted a specific pipe version tag for `cli`, or the step template for build-tool approaches. If the fetch fails, stop and inform the user.
+To find the script, use Glob: `glob("**/scripts/fetch-sonar-config.py")`.
+
+The script fetches both the documentation page and the Bitbucket pipe version REST API in a single call.
+
+**Do not proceed until the script has returned its JSON output.**
+
+**Step 3:** From the script's JSON output, extract:
+- `platform.pipe_versions` — contains pipe version tags (e.g., `scan: "4.1.0"`, `quality_gate: "0.2.1"`). For `cli` approach, the `tool_version` is the `scan` pipe version. Do not use `:latest` or guess a version.
+- `platform.yaml_templates.<scanner_approach>` — reference pipeline template from official docs. Use as the structural reference when creating the pipeline.
+- `scanner.version` — latest scanner plugin version (for maven/gradle/dotnet). Pass this to the scanner skill.
+
+**Completion condition:** If `platform.fetch_status` is not `"ok"`, or if `errors` is non-empty, stop and inform the user.
 
 **Step 4:** Read the corresponding scanner skill file to get scanner-specific configuration details.
 

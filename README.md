@@ -58,75 +58,54 @@ The agent uses a shared library of **13 specialized skills** located in `agents/
 
 ## 🚀 Installation
 
-Copy the agent files into your project's agent directory. The destination depends on your AI assistant:
+### Claude Code (plugin install — recommended)
 
-| AI assistant | Agent directory |
-|---|---|
-| GitHub Copilot | `.github/agents/` |
-| Claude Code | `.claude/agents/` |
-| Other | Check your platform's documentation |
+This repository is a Claude Code plugin. Install it directly from Claude Code with:
 
-### Steps
+```
+/plugin install sonar-architect@sonar-solutions
+```
 
-1. **Clone or download this repository:**
-   ```bash
-   git clone https://github.com/sonar-solutions/SonarQubeAgentLibrary.git
-   ```
+Or install manually for project-level or global use:
 
-2. **Copy the agent and skills into your project:**
+```bash
+# Project-level (committed to your repo, shared with your team)
+mkdir -p /path/to/your-project/.claude/agents/scripts
+cp -r agents/* /path/to/your-project/.claude/agents/
+cp scripts/fetch-sonar-config.py /path/to/your-project/.claude/agents/scripts/
 
-   **GitHub Copilot:**
-   ```bash
-   mkdir -p /path/to/your-project/.github/agents
-   cp SonarQubeAgentLibrary/agents/SonarArchitect.agent.md \
-      /path/to/your-project/.github/agents/
-   cp -r SonarQubeAgentLibrary/agents/skills \
-      /path/to/your-project/.github/agents/
-   ```
+# Global (available in all your projects)
+mkdir -p ~/.claude/agents/scripts
+cp -r agents/* ~/.claude/agents/
+cp scripts/fetch-sonar-config.py ~/.claude/agents/scripts/
+```
 
-   **Claude Code (recommended — optimized with version fetching script):**
-   ```bash
-   # Project-level install
-   mkdir -p /path/to/your-project/.claude/agents/scripts
-   cp -r SonarQubeAgentLibrary/claude-code/agents/* \
-      /path/to/your-project/.claude/agents/
-   cp SonarQubeAgentLibrary/scripts/fetch-sonar-config.py \
-      /path/to/your-project/.claude/agents/scripts/
+Then invoke:
+```
+@sonar-architect Set up SonarQube for my project
+```
 
-   # Or global install (available in all projects)
-   mkdir -p ~/.claude/agents/scripts
-   cp -r SonarQubeAgentLibrary/claude-code/agents/* \
-      ~/.claude/agents/
-   cp SonarQubeAgentLibrary/scripts/fetch-sonar-config.py \
-      ~/.claude/agents/scripts/
-   ```
+> **Prerequisites:** Python 3.6+ (for the version fetching script)
 
-   The Claude Code variant uses a Python script (`scripts/fetch-sonar-config.py`) that consolidates all documentation fetching into a single call, reducing token usage by ~95%.
+---
 
-   **Claude Code (generic — without script):**
-   ```bash
-   mkdir -p /path/to/your-project/.claude/agents
-   cp SonarQubeAgentLibrary/agents/SonarArchitect.agent.md \
-      /path/to/your-project/.claude/agents/
-   cp -r SonarQubeAgentLibrary/agents/skills \
-      /path/to/your-project/.claude/agents/
-   ```
+### GitHub Copilot (manual install)
 
-3. **Commit to your repository:**
-   ```bash
-   git add .github/agents/   # or .claude/agents/
-   git commit -m "Add SonarArchitect agent"
-   git push
-   ```
+```bash
+git clone https://github.com/sonar-solutions/SonarQubeAgentLibrary.git
+mkdir -p /path/to/your-project/.github/agents
+cp SonarQubeAgentLibrary/agents/SonarArchitect.agent.md \
+   /path/to/your-project/.github/agents/
+cp -r SonarQubeAgentLibrary/agents/skills \
+   /path/to/your-project/.github/agents/
+```
 
-4. **Open your project and start the agent:**
-   ```
-   @SonarArchitect Set up SonarQube for my project     # GitHub Copilot
-   @sonar-architect Set up SonarQube for my project     # Claude Code
-   ```
+Commit and invoke:
+```
+@SonarArchitect Set up SonarQube for my project
+```
 
-> **GitHub Copilot prerequisites:** VS Code 1.85.0+, GitHub Copilot subscription, GitHub Copilot Chat extension
-> **Claude Code prerequisites:** Python 3.6+ (for the version fetching script)
+> **Prerequisites:** VS Code 1.85.0+, GitHub Copilot subscription, GitHub Copilot Chat extension
 
 ---
 

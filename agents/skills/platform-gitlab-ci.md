@@ -44,17 +44,22 @@ Execute these steps in order. Do not skip any step.
 
 **Step 1:** Determine scanner approach from the table above using the project-detection output.
 
-**Step 2:** ⛔ STOP — Fetch the appropriate documentation page NOW using curl with `.md` appended to the URL.
-- For Cloud: fetch the Cloud documentation URL above with `.md` appended
-- For Server: fetch the Server documentation URL above with `.md` appended
-- If the primary URL lacks complete examples, fetch the other URL as fallback and adapt
-- **Do not proceed until you have fetched the documentation page.**
+**Step 2:** ⛔ STOP — Fetch versions and templates NOW using the `fetch-sonar-config.py` script via Bash:
 
-**Step 3:** From the fetched documentation, extract:
-- For `cli` approach: extract the latest `sonarsource/sonar-scanner-cli` image tag from the examples in the documentation — this is the `tool_version`. Do not use `:latest`; use the pinned version shown in the example (e.g., `5.0`).
-- For `maven`, `gradle`, or `dotnet` approach: extract the corresponding job example from the documentation — use this as the reference template when creating the pipeline. No image version applies.
+```bash
+python3 <SCRIPT_PATH>/fetch-sonar-config.py --platform gitlab-ci --scanner-approach <from Step 1> --sonarqube-type <cloud|server>
+```
 
-**Completion condition:** Do not proceed to Step 4 until you have extracted a specific, pinned image version for `cli`, or the job template for build-tool approaches. If the page could not be fetched, stop and inform the user.
+To find the script, use Glob: `glob("**/scripts/fetch-sonar-config.py")`.
+
+**Do not proceed until the script has returned its JSON output.**
+
+**Step 3:** From the script's JSON output, extract:
+- `platform.image_versions` — contains Docker image versions (e.g., `sonarsource/sonar-scanner-cli`, `gradle`, `maven`). For `cli` approach, the `tool_version` is the version of `sonarsource/sonar-scanner-cli`. Do not use `:latest`.
+- `platform.yaml_templates.<scanner_approach>` — reference job template from official docs. Use as the structural reference when creating the pipeline.
+- `scanner.version` — latest scanner plugin version (for maven/gradle/dotnet). Pass this to the scanner skill.
+
+**Completion condition:** If `platform.fetch_status` is not `"ok"`, or if `errors` is non-empty, stop and inform the user.
 
 **Step 4:** Read the corresponding scanner skill file to get scanner-specific configuration details.
 
