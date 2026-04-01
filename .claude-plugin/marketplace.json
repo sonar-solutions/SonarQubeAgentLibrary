@@ -7,7 +7,10 @@
     {
       "name": "sonar-architect",
       "version": "1.0.0",
-      "source": ".",
+      "source": {
+        "source": "github",
+        "repo": "sonar-solutions/SonarQubeAgentLibrary"
+      },
       "description": "SonarQube CI/CD pipeline setup for any project and platform. Detects your stack, fetches current tool versions, and generates all configuration files.",
       "homepage": "https://github.com/sonar-solutions/SonarQubeAgentLibrary",
       "license": "MIT",
