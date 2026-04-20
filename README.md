@@ -67,6 +67,13 @@ This repository is a Claude Code plugin with a built-in marketplace. Two command
 /plugin install sonar-architect@sonar-solutions
 ```
 
+**To update to the latest version:**
+```
+/plugin update sonar-architect@sonar-solutions
+```
+
+Or enable auto-update in the `/plugin` UI — Claude Code will check for new versions at startup.
+
 Or install manually for project-level or global use:
 
 ```bash
