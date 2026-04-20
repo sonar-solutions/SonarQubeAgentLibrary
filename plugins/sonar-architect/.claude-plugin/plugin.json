@@ -1,5 +1,5 @@
 {
   "name": "sonar-architect",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "SonarQube CI/CD pipeline setup for any project and platform. Detects your stack, fetches current tool versions, and generates all configuration files."
 }
