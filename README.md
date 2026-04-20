@@ -67,6 +67,8 @@ This repository is a Claude Code plugin with a built-in marketplace. Two command
 /plugin install sonar-architect@sonar-solutions
 ```
 
+> **Note:** After installing, restart Claude Code fully for the agent to appear. `/reload-plugins` alone is not sufficient for new installs.
+
 **To update to the latest version:**
 ```
 /plugin update sonar-architect@sonar-solutions
