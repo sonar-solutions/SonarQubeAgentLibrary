@@ -16,8 +16,8 @@ A **unofficial** and **experimental** collection of specialized agents designed 
 5. Provides concise next steps for secrets configuration
 
 **Source locations in this repo:**
-- `agents/SonarArchitect.agent.md` — Generic agent (GitHub Copilot compatible)
-- `claude-code/agents/sonar-architect.agent.md` — Claude Code optimized (includes version fetching script)
+- `agents/SonarArchitect.copilot_version.md` — Generic agent (GitHub Copilot compatible)
+- `agents/sonar-architect.md` — Claude Code optimized (includes version fetching script)
 
 **Quick Start (after installation):**
 ```
@@ -95,7 +95,7 @@ Then invoke:
 ```bash
 git clone https://github.com/sonar-solutions/SonarQubeAgentLibrary.git
 mkdir -p /path/to/your-project/.github/agents
-cp SonarQubeAgentLibrary/agents/SonarArchitect.agent.md \
+cp SonarQubeAgentLibrary/agents/SonarArchitect.copilot_version.md \
    /path/to/your-project/.github/agents/
 cp -r SonarQubeAgentLibrary/agents/skills \
    /path/to/your-project/.github/agents/
