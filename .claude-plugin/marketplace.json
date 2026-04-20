@@ -8,8 +8,9 @@
       "name": "sonar-architect",
       "version": "1.0.0",
       "source": {
-        "source": "url",
-        "url": "https://github.com/sonar-solutions/SonarQubeAgentLibrary.git"
+        "source": "git-subdir",
+        "url": "https://github.com/sonar-solutions/SonarQubeAgentLibrary.git",
+        "path": "plugins/sonar-architect"
       },
       "description": "SonarQube CI/CD pipeline setup for any project and platform. Detects your stack, fetches current tool versions, and generates all configuration files.",
       "homepage": "https://github.com/sonar-solutions/SonarQubeAgentLibrary",

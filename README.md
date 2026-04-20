@@ -17,7 +17,7 @@ A **unofficial** and **experimental** collection of specialized agents designed 
 
 **Source locations in this repo:**
 - `copilot/agents/SonarArchitect.md` — Generic agent (GitHub Copilot compatible)
-- `agents/sonar-architect.md` — Claude Code optimized (includes version fetching script)
+- `plugins/sonar-architect/agents/sonar-architect.md` — Claude Code plugin (includes version fetching script)
 
 **Quick Start (after installation):**
 ```
@@ -27,7 +27,7 @@ A **unofficial** and **experimental** collection of specialized agents designed 
 
 ### 🧩 Modular Skill-Based Architecture
 
-The agent uses a shared library of **13 specialized skills** located in `agents/skills/`:
+The agent uses a shared library of **13 specialized skills** located in `plugins/sonar-architect/agents/skills/`:
 
 **Core Skills:**
 - `project-detection.md` - Detects project type, build system, and CI/CD platform
@@ -79,13 +79,13 @@ Or install manually for project-level or global use:
 ```bash
 # Project-level (committed to your repo, shared with your team)
 mkdir -p /path/to/your-project/.claude/agents/scripts
-cp -r agents/* /path/to/your-project/.claude/agents/
-cp scripts/fetch-sonar-config.py /path/to/your-project/.claude/agents/scripts/
+cp -r plugins/sonar-architect/agents/* /path/to/your-project/.claude/agents/
+cp plugins/sonar-architect/scripts/fetch-sonar-config.py /path/to/your-project/.claude/agents/scripts/
 
 # Global (available in all your projects)
 mkdir -p ~/.claude/agents/scripts
-cp -r agents/* ~/.claude/agents/
-cp scripts/fetch-sonar-config.py ~/.claude/agents/scripts/
+cp -r plugins/sonar-architect/agents/* ~/.claude/agents/
+cp plugins/sonar-architect/scripts/fetch-sonar-config.py ~/.claude/agents/scripts/
 ```
 
 Then invoke:
@@ -104,7 +104,7 @@ git clone https://github.com/sonar-solutions/SonarQubeAgentLibrary.git
 mkdir -p /path/to/your-project/.github/agents
 cp SonarQubeAgentLibrary/copilot/agents/SonarArchitect.md \
    /path/to/your-project/.github/agents/
-cp -r SonarQubeAgentLibrary/agents/skills \
+cp -r SonarQubeAgentLibrary/plugins/sonar-architect/agents/skills \
    /path/to/your-project/.github/agents/
 ```
 
