@@ -25,7 +25,7 @@ The **SonarQube extension** must be installed from the Azure DevOps Marketplace 
 | Cloud | `https://docs.sonarsource.com/sonarqube-cloud/advanced-setup/ci-based-analysis/azure-pipelines/adding-analysis-to-build-pipeline` |
 | Server | `https://docs.sonarsource.com/sonarqube-server/devops-platform-integration/azure-devops-integration/adding-analysis-to-pipeline` |
 
-Follow the fetch policy defined in `SonarArchitect.agent.md` (Available Tools section).
+Follow the fetch policy defined in `sonar-architect.md` (Available Tools section).
 
 ## Scanner Approach Determination
 

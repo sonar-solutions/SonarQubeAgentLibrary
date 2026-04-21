@@ -90,3 +90,18 @@ To set up your SonarQube analysis, I need a few details:
 ```
 
 Adjust which questions appear based on what is already known. Never ask a question that has already been answered.
+
+## Prerequisites Confirmed Output Contract
+
+Once all required fields are confirmed, record the following block in the conversation before proceeding to Step 3. No field may be blank or contain a placeholder.
+
+```
+prerequisites_confirmed: true
+sonarqube_type: [cloud | server]
+ci_platform: [github-actions | gitlab-ci | azure-devops | bitbucket]
+project_key: [value provided by user]
+organization_key: [value provided by user, or "N/A" for Server]
+sonar_host_url: [https://sonarcloud.io | https://sonarqube.us | https://your-server-url]
+```
+
+All subsequent skills (platform, scanner, pipeline-creation) consume these fields by name from this contract.

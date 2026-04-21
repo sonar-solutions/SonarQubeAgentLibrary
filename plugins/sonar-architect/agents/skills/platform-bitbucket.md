@@ -32,7 +32,7 @@ This skill does **not** explain concepts or include documentation links in respo
 
 Extract the version from `.values[0].name` in the JSON response.
 
-Follow the fetch policy defined in `SonarArchitect.agent.md` (Available Tools section).
+Follow the fetch policy defined in `sonar-architect.md` (Available Tools section).
 
 ## Scanner Approach Determination
 

@@ -38,7 +38,7 @@ Do **not** infer action names or versions from prior knowledge. Do **not** silen
 | Server | `https://docs.sonarsource.com/sonarqube-server/devops-platform-integration/github-integration/adding-analysis-to-github-actions-workflow` |
 | Action repository | `https://github.com/SonarSource/sonarqube-scan-action` |
 
-Follow the fetch policy defined in `SonarArchitect.agent.md` (Available Tools section).
+Follow the fetch policy defined in `sonar-architect.md` (Available Tools section).
 
 ## Scanner Approach Determination
 

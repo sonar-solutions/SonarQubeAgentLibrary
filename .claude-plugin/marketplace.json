@@ -6,7 +6,7 @@
   "plugins": [
     {
       "name": "sonar-architect",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "source": {
         "source": "git-subdir",
         "url": "https://github.com/sonar-solutions/SonarQubeAgentLibrary.git",

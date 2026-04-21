@@ -21,7 +21,7 @@ This skill does **not** explain concepts or include documentation links in respo
 | Cloud | `https://docs.sonarsource.com/sonarqube-cloud/advanced-setup/ci-based-analysis/gitlab-ci` |
 | Server | `https://docs.sonarsource.com/sonarqube-server/devops-platform-integration/gitlab-integration/adding-analysis-to-gitlab-ci-cd` |
 
-Follow the fetch policy defined in `SonarArchitect.agent.md` (Available Tools section).
+Follow the fetch policy defined in `sonar-architect.md` (Available Tools section).
 
 ## Scanner Approach Determination
 
